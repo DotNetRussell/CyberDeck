@@ -1,0 +1,28 @@
+{
+  "Categories": [
+    {
+      "id":0,
+      "Name":"Dir Busting"
+    },
+    {
+      "id":1,
+      "Name":"Web Scanning"
+    }
+  ],
+  "commands": [
+    {
+      "Name":"dirb",
+      "Category": 0,
+      "Description":"Runs the clie dirbuster tool against a url with the provided wordlist",
+      "Command":"dirb http://yourtarget.com /usr/share/wordlists/yourwordlist"
+    },
+    {
+      "Name":"Nikto",
+      "Category": 1,
+      "Description":"Runs the clie nikto tool against a url",
+      "Command":"nikto -h http://yourtarget.com"
+    }
+
+  ]
+
+}
