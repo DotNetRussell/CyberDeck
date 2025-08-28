@@ -1,0 +1,691 @@
+#!/usr/bin/python3
+import argparse
+import sys
+import os
+import time
+import json
+import requests
+from collections import defaultdict
+try:
+    import curses
+except ImportError:
+    curses = None
+try:
+    import pyperclip
+except ImportError:
+    pyperclip = None
+
+# Default settings
+default_settings = {
+    'text_color': 'green',
+    'animation_enabled': True
+}
+
+# Cyberdeck directory in user's home
+CYBERDECK_DIR = os.path.join(os.path.expanduser("~"), ".cyberdeck")
+SETTINGS_FILE = os.path.join(CYBERDECK_DIR, "settings.json")
+COMMANDS_FILE = os.path.join(CYBERDECK_DIR, "commands.json")
+ERROR_LOG = os.path.join(CYBERDECK_DIR, "error.log")
+
+def log_error(message):
+    """Log errors to ~/.cyberdeck/error.log."""
+    try:
+        os.makedirs(CYBERDECK_DIR, exist_ok=True)
+        with open(ERROR_LOG, 'a') as f:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            f.write(f"[{timestamp}] {message}\n")
+    except Exception:
+        pass  # Silent fail to avoid disrupting application
+
+def load_settings():
+    """Load settings from ~/.cyberdeck/settings.json or return defaults."""
+    try:
+        os.makedirs(CYBERDECK_DIR, exist_ok=True)
+        with open(SETTINGS_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default_settings.copy()
+
+def save_settings(settings):
+    """Save settings to ~/.cyberdeck/settings.json."""
+    try:
+        os.makedirs(CYBERDECK_DIR, exist_ok=True)
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+    except Exception as e:
+        log_error(f"Failed to save settings: {str(e)}")
+
+# Global settings (loaded from file or defaults)
+settings = load_settings()
+
+def version_tuple(v):
+    """Convert version string to tuple for comparison."""
+    return tuple(map(int, v.split('.')))
+
+def update_commands():
+    """Fetch and update commands.json if remote version is higher."""
+    url = "https://raw.githubusercontent.com/DotNetRussell/CyberDeck/refs/heads/main/commands.json"
+    local_file = COMMANDS_FILE
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        remote_data = response.json()
+        remote_version = remote_data.get("Version", "0.0.0.0")
+        local_version = "0.0.0.0"
+        if os.path.exists(local_file):
+            with open(local_file, 'r') as f:
+                local_data = json.load(f)
+                local_version = local_data.get("Version", "0.0.0.0")
+        if version_tuple(remote_version) > version_tuple(local_version):
+            with open(local_file, 'w') as f:
+                json.dump(remote_data, f, indent=4)
+    except Exception as e:
+        log_error(f"Failed to update commands.json: {str(e)}")
+
+def convert_line_endings(input_file, output_file, format_type):
+    """Convert line endings of a file to the specified format."""
+    try:
+        # Check if input file exists in CYBERDECK_DIR or as provided
+        if not os.path.isabs(input_file):
+            cyberdeck_input = os.path.join(CYBERDECK_DIR, input_file)
+            if os.path.exists(cyberdeck_input):
+                input_file = cyberdeck_input
+        if not os.path.exists(input_file):
+            raise FileNotFoundError(f"Input file '{input_file}' not found.")
+        
+        with open(input_file, 'r', newline='') as infile:
+            content = infile.read()
+        
+        if format_type.lower() == 'unix':
+            new_line_ending = '\n'
+        elif format_type.lower() == 'windows':
+            new_line_ending = '\r\n'
+        elif format_type.lower() == 'mac':
+            new_line_ending = '\r'
+        else:
+            raise ValueError(f"UNSUPPORTED FORMAT: {format_type}. USE 'UNIX', 'WINDOWS', OR 'MAC'.")
+
+        lines = content.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+        
+        # Save output file to CYBERDECK_DIR unless a full path is provided
+        if not os.path.isabs(output_file):
+            output_file = os.path.join(CYBERDECK_DIR, output_file)
+        os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+        
+        with open(output_file, 'w', newline=new_line_ending) as outfile:
+            outfile.write(new_line_ending.join(lines))
+        
+        return f"SUCCESSFULLY CONVERTED {input_file} TO {format_type.upper()} LINE ENDINGS AND SAVED TO {output_file}"
+    
+    except FileNotFoundError as e:
+        return f"ERROR: {str(e).upper()}"
+    except PermissionError:
+        return f"ERROR: PERMISSION DENIED WHEN ACCESSING FILES."
+    except Exception as e:
+        return f"ERROR: {str(e).upper()}"
+
+def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None):
+    """Display text with wrapping and safe character handling, centered or at x_offset."""
+    # Replace non-printable characters with '?'
+    safe_text = ''.join(c if 32 <= ord(c) <= 126 else '?' for c in text)
+    
+    # Get terminal dimensions
+    max_y, max_x = stdscr.getmaxyx()
+    max_width = max_x - 4  # Margin for safety
+    
+    # Split text into wrapped lines
+    lines = []
+    current_line = ""
+    for word in safe_text.split():
+        if len(current_line) + len(word) + 1 <= max_width:
+            current_line += (word + " ") if current_line else word
+        else:
+            if current_line:
+                lines.append(current_line.rstrip())
+            current_line = word + " "
+    if current_line:
+        lines.append(current_line.rstrip())
+    
+    # Render each line
+    current_y = y
+    for line in lines:
+        if current_y >= max_y:  # Prevent writing beyond terminal height
+            log_error(f"Text wrapping exceeded terminal height at y={current_y}: {line}")
+            break
+        x = x_offset if x_offset is not None else (max_x - len(line)) // 2  # Use x_offset or center
+        if x < 0:
+            x = 0
+        if not settings['animation_enabled']:
+            try:
+                stdscr.addstr(current_y, x, line, color_pair)
+            except Exception as e:
+                log_error(f"Failed to display text (non-animated) at y={current_y}, x={x}: {str(e)}")
+            current_y += 1
+            continue
+        
+        # Try rendering character by character
+        try:
+            for char in line:
+                if current_y >= max_y:
+                    log_error(f"Text wrapping exceeded terminal height at y={current_y}, x={x}: {line}")
+                    break
+                stdscr.addch(current_y, x, char, color_pair)
+                stdscr.refresh()
+                x += 1
+                time.sleep(delay)
+            current_y += 1
+        except Exception as e:
+            # Fallback to addstr for problematic text
+            try:
+                stdscr.addstr(current_y, x_offset if x_offset is not None else (max_x - len(line)) // 2, line, color_pair)
+                current_y += 1
+            except Exception as e2:
+                log_error(f"Failed to display text at y={current_y}, x={x_offset if x_offset is not None else (max_x - len(line)) // 2}: {str(e)} / {str(e2)}")
+                current_y += 1
+    
+    return current_y
+
+def boot_sequence(stdscr):
+    """Display a Nostromo-inspired boot sequence."""
+    stdscr.clear()
+    max_y, _ = stdscr.getmaxyx()
+    lines = [
+        "WEYLAND-YUTANI CORP SYSTEM INITIALIZATION",
+        "MEMORY CHECK: 16MB OK",
+        "CPU: 8086 PROCESSOR DETECTED",
+        "STORAGE: 512KB AVAILABLE",
+        "INTERFACE: CRT TERMINAL v1.0",
+        "BOOTING MOTHER OS v2.1.7",
+        "INITIALIZATION COMPLETE"
+    ]
+    color_pair = get_color_pair()
+    current_y = 0
+    for line in lines:
+        if current_y >= max_y - 1:  # Reserve bottom row for instructions
+            log_error(f"Boot sequence exceeded terminal height at y={current_y}: {line}")
+            break
+        current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
+    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO CONTINUE", color_pair)
+    stdscr.refresh()
+    stdscr.getch()
+
+def shutdown_sequence(stdscr):
+    """Display a hacker-inspired shutdown animation."""
+    stdscr.clear()
+    max_y, _ = stdscr.getmaxyx()
+    lines = [
+        "SYSTEM TERMINATION INITIATED",
+        "DEACTIVATING CORE MODULES...",
+        "1010101010101010101010101010",
+        "FLUSHING MEMORY BUFFERS...",
+        "0101010101010101010101010101",
+        "DISCONNECTING NETWORK LINKS",
+        "WEYLAND-YUTANI CORP: OFFLINE",
+        "SHUTDOWN COMPLETE"
+    ]
+    color_pair = get_color_pair()
+    current_y = 0
+    for line in lines:
+        if current_y >= max_y - 1:  # Reserve bottom row for instructions
+            log_error(f"Shutdown sequence exceeded terminal height at y={current_y}: {line}")
+            break
+        current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
+        time.sleep(0.2)  # Brief pause between lines for effect
+    type_text(stdscr, max_y - 1, "SHUTDOWN COMPLETE", color_pair)
+    stdscr.refresh()
+    time.sleep(1)  # Final pause before exit
+
+def get_color_pair():
+    """Return the color pair based on settings."""
+    color_map = {
+        'green': curses.color_pair(1),
+        'white': curses.color_pair(2),
+        'cyan': curses.color_pair(3),
+        'red': curses.color_pair(4),
+        'yellow': curses.color_pair(5),
+        'purple': curses.color_pair(6) | curses.A_BOLD,  # Use bold magenta for purple
+        'pink': curses.color_pair(6),  # Magenta for pink
+        'toxic green': curses.color_pair(1) | curses.A_BOLD  # Brighter green
+    }
+    return color_map.get(settings['text_color'], curses.color_pair(1))
+
+def list_menu(stdscr, title, items, get_text, is_first=True):
+    """General navigable list menu with fixed-width, left-aligned items in a centered block."""
+    current_row = 0
+    max_row = len(items) - 1
+    first_draw = is_first
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Calculate maximum item width (including cursor and padding)
+    max_item_width = max(len(get_text(item)) for item in items) + 2  # 2 for cursor and space
+    x_offset = (max_x - max_item_width) // 2  # Center the menu block
+    if x_offset < 0:
+        x_offset = 0
+    
+    # Pad items to max width
+    padded_items = [get_text(item).ljust(max_item_width - 2) for item in items]
+    
+    while True:
+        stdscr.clear()
+        color_pair = get_color_pair()
+        if first_draw:
+            type_text(stdscr, 0, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            type_text(stdscr, 1, f"== {title.upper()} ==", color_pair)
+            current_y = 3
+            for idx, item in enumerate(padded_items):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
+                    break
+                text = f"█ {item}" if idx == current_row else f"  {item}"
+                type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if idx == current_row else 0), x_offset=x_offset)
+                current_y += 1
+            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
+            first_draw = False
+        else:
+            stdscr.addstr(0, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(1, (max_x - len(f"== {title.upper()} ==")) // 2, f"== {title.upper()} ==", color_pair)
+            current_y = 3
+            for idx, item in enumerate(padded_items):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
+                    break
+                text = f"█ {item}" if idx == current_row else f"  {item}"
+                stdscr.addstr(current_y, x_offset, text, color_pair | (curses.A_REVERSE if idx == current_row else 0))
+                current_y += 1
+            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK")) // 2, 
+                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key == curses.KEY_UP and current_row > 0:
+            current_row -= 1
+        elif key == curses.KEY_DOWN and current_row < max_row:
+            current_row += 1
+        elif key == 10:  # Enter
+            return items[current_row], first_draw
+        elif key == 27:  # Escape
+            return None, first_draw
+
+def show_details(stdscr, cmd):
+    """Show command details screen with copy to clipboard option."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    while True:
+        stdscr.clear()
+        current_y = 0
+        current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+        current_y = type_text(stdscr, current_y, f"NAME: {cmd['Name']}", color_pair)
+        current_y += 1  # Add spacing
+        current_y = type_text(stdscr, current_y, f"DESCRIPTION: {cmd['Description']}", color_pair)
+        current_y += 1  # Add spacing
+        current_y = type_text(stdscr, current_y, f"COMMAND: {cmd['Command']}", color_pair)
+        type_text(stdscr, max_y - 1, "PRESS C TO COPY, ANY OTHER KEY TO RETURN.", color_pair)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key == ord('c') or key == ord('C'):
+            if pyperclip:
+                try:
+                    pyperclip.copy(cmd['Command'])
+                    stdscr.clear()
+                    current_y = 0
+                    current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                    current_y = type_text(stdscr, current_y, "COMMAND COPIED TO CLIPBOARD.", color_pair)
+                    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                    stdscr.refresh()
+                    stdscr.getch()
+                except Exception as e:
+                    stdscr.clear()
+                    current_y = 0
+                    current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                    current_y = type_text(stdscr, current_y, f"ERROR: FAILED TO COPY: {str(e).upper()}", color_pair)
+                    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                    stdscr.refresh()
+                    stdscr.getch()
+            else:
+                stdscr.clear()
+                current_y = 0
+                current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                current_y = type_text(stdscr, current_y, "ERROR: PYPERCLIP NOT INSTALLED.", color_pair)
+                type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                stdscr.refresh()
+                stdscr.getch()
+        else:
+            break
+
+def run_commands(stdscr):
+    """Handle the Commands menu with categories and commands."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    if not os.path.exists(COMMANDS_FILE):
+        stdscr.clear()
+        current_y = 0
+        current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+        current_y = type_text(stdscr, current_y, "NO COMMANDS AVAILABLE. PRESS ANY KEY TO RETURN.", color_pair)
+        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        stdscr.refresh()
+        stdscr.getch()
+        return
+
+    with open(COMMANDS_FILE, 'r') as f:
+        data = json.load(f)
+
+    categories = {cat['id']: cat['Name'] for cat in data['Categories']}
+    commands = data['commands']
+    groups = defaultdict(list)
+    for cmd in commands:
+        groups[cmd['Category']].append(cmd)
+
+    category_ids = sorted(groups.keys())
+    first_draw = True
+
+    while True:
+        selected_cat, first_draw = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids, lambda cid: categories[cid], is_first=first_draw)
+        if selected_cat is None:
+            return
+        category_commands = sorted(groups[selected_cat], key=lambda c: c['Name'])
+        selected_cmd, _ = list_menu(
+            stdscr,
+            categories[selected_cat],
+            category_commands,
+            lambda cmd: f"{cmd['Name']}: {cmd['Description'][:30]}{'...' if len(cmd['Description']) > 30 else ''}",
+            is_first=False
+        )
+        if selected_cmd is None:
+            first_draw = False  # Static redraw on return to categories
+            continue  # Back to categories
+        show_details(stdscr, selected_cmd)
+        first_draw = False  # Static redraw on return to categories
+
+def run_search(stdscr):
+    """Handle the Search menu with query and results."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    stdscr.clear()
+    prompt = "ENTER SEARCH QUERY: "
+    current_y = 0
+    current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+    type_text(stdscr, max_y - 1, prompt + "__________", color_pair)
+    stdscr.move(max_y - 1, (max_x - len(prompt + "__________")) // 2 + len(prompt))
+    stdscr.refresh()
+    curses.echo()
+    try:
+        query = stdscr.getstr().decode('utf-8').strip().lower()
+    except Exception as e:
+        log_error(f"Failed to get search query: {str(e)}")
+        query = ""
+    curses.noecho()
+    if not query:
+        stdscr.clear()
+        current_y = 0
+        current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+        current_y = type_text(stdscr, current_y, "NO QUERY ENTERED. PRESS ANY KEY TO RETURN.", color_pair)
+        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        stdscr.refresh()
+        stdscr.getch()
+        return
+
+    if not os.path.exists(COMMANDS_FILE):
+        stdscr.clear()
+        current_y = 0
+        current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+        current_y = type_text(stdscr, current_y, "NO COMMANDS AVAILABLE FOR SEARCH. PRESS ANY KEY TO RETURN.", color_pair)
+        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        stdscr.refresh()
+        stdscr.getch()
+        return
+
+    with open(COMMANDS_FILE, 'r') as f:
+        data = json.load(f)
+
+    commands = data['commands']
+    filtered = [cmd for cmd in commands if query in cmd['Name'].lower() or query in cmd['Description'].lower()]
+    if not filtered:
+        stdscr.clear()
+        current_y = 0
+        current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+        current_y = type_text(stdscr, current_y, "NO RESULTS FOUND. PRESS ANY KEY TO RETURN.", color_pair)
+        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        stdscr.refresh()
+        stdscr.getch()
+        return
+
+    sorted_filtered = sorted(filtered, key=lambda c: c['Name'])
+    selected_cmd, _ = list_menu(
+        stdscr,
+        "SEARCH RESULTS",
+        sorted_filtered,
+        lambda cmd: f"{cmd['Name']}: {cmd['Description'][:30]}{'...' if len(cmd['Description']) > 30 else ''}",
+        is_first=True
+    )
+    if selected_cmd is not None:
+        show_details(stdscr, selected_cmd)
+
+def run_settings(stdscr):
+    """Handle the Settings menu with efficient redraws during navigation."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    color_options = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
+    animation_options = ["ENABLED", "DISABLED"]
+    current_color_row = color_options.index(settings['text_color'].upper())
+    current_anim_row = 0 if settings['animation_enabled'] else 1
+    selected_section = 0  # 0 for color, 1 for animation
+    max_color_row = len(color_options) - 1
+    max_anim_row = len(animation_options) - 1
+    first_draw = True  # Track if this is the first draw of the settings menu
+
+    # Calculate maximum item width for settings menu
+    max_item_width = max(len(option) for option in color_options + animation_options) + 2  # 2 for cursor and space
+    x_offset = (max_x - max_item_width) // 2  # Center the menu block
+    if x_offset < 0:
+        x_offset = 0
+    padded_color_options = [option.ljust(max_item_width - 2) for option in color_options]
+    padded_animation_options = [option.ljust(max_item_width - 2) for option in animation_options]
+
+    while True:
+        stdscr.clear()
+        if first_draw:
+            # Full draw with typing effect on first entry
+            current_y = 0
+            current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            current_y = type_text(stdscr, current_y, "== SETTINGS ==", color_pair)
+            current_y += 1
+            current_y = type_text(stdscr, current_y, "TEXT COLOR:", color_pair)
+            for idx, option in enumerate(padded_color_options):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
+                    break
+                if idx == current_color_row and selected_section == 0:
+                    current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
+                else:
+                    current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
+            current_y += 1
+            current_y = type_text(stdscr, current_y, "ANIMATION:", color_pair)
+            for idx, option in enumerate(padded_animation_options):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
+                    break
+                if idx == current_anim_row and selected_section == 1:
+                    current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
+                else:
+                    current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
+            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair)
+            first_draw = False
+        else:
+            # Partial redraw for navigation: only update changed option lines
+            stdscr.addstr(0, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(1, (max_x - len("== SETTINGS ==")) // 2, "== SETTINGS ==", color_pair)
+            current_y = 2
+            stdscr.addstr(current_y, (max_x - len("TEXT COLOR:")) // 2, "TEXT COLOR:", color_pair)
+            current_y += 1
+            for idx, option in enumerate(padded_color_options):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
+                    break
+                stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_color_row and selected_section == 0 else f"  {option}", 
+                             color_pair | (curses.A_REVERSE if idx == current_color_row and selected_section == 0 else 0))
+                current_y += 1
+            current_y += 1
+            stdscr.addstr(current_y, (max_x - len("ANIMATION:")) // 2, "ANIMATION:", color_pair)
+            current_y += 1
+            for idx, option in enumerate(padded_animation_options):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
+                    break
+                stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_anim_row and selected_section == 1 else f"  {option}", 
+                             color_pair | (curses.A_REVERSE if idx == current_anim_row and selected_section == 1 else 0))
+                current_y += 1
+            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN")) // 2, 
+                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair)
+        stdscr.refresh()
+
+        key = stdscr.getch()
+        if key == curses.KEY_UP:
+            if selected_section == 0 and current_color_row > 0:
+                current_color_row -= 1
+            elif selected_section == 1 and current_anim_row > 0:
+                current_anim_row -= 1
+        elif key == curses.KEY_DOWN:
+            if selected_section == 0 and current_color_row < max_color_row:
+                current_color_row += 1
+            elif selected_section == 1 and current_anim_row < max_anim_row:
+                current_anim_row += 1
+        elif key == curses.KEY_LEFT or key == curses.KEY_RIGHT:
+            selected_section = 1 - selected_section  # Toggle between color and animation
+            # Redraw only the changed section to reflect new highlight
+            if selected_section == 0:
+                for idx, option in enumerate(padded_color_options):
+                    if idx + 4 >= max_y - 1:
+                        log_error(f"Settings color option exceeded terminal height at y={idx + 4}: {option}")
+                        break
+                    stdscr.addstr(idx + 4, x_offset, f"█ {option}" if idx == current_color_row else f"  {option}", 
+                                 color_pair | (curses.A_REVERSE if idx == current_color_row and selected_section == 0 else 0))
+            else:
+                for idx, option in enumerate(padded_animation_options):
+                    if idx + max_color_row + 6 >= max_y - 1:
+                        log_error(f"Settings animation option exceeded terminal height at y={idx + max_color_row + 6}: {option}")
+                        break
+                    stdscr.addstr(idx + max_color_row + 6, x_offset, f"█ {option}" if idx == current_anim_row else f"  {option}", 
+                                 color_pair | (curses.A_REVERSE if idx == current_anim_row and selected_section == 1 else 0))
+        elif key == 10:  # Enter key
+            if selected_section == 0:
+                settings['text_color'] = color_options[current_color_row].lower()
+                first_draw = True
+            else:
+                settings['animation_enabled'] = current_anim_row == 0
+            save_settings(settings)  # Save settings after any change
+        elif key == 27:  # Escape key to return
+            break
+
+def menu(stdscr):
+    """Display and handle the interactive menu with typing effect only on first draw."""
+    curses.curs_set(0)  # Hide cursor
+    # Initialize color pairs
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)   # Green on black
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)   # White on black
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)    # Cyan on black
+    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)     # Red on black
+    curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Yellow on black
+    curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK) # Magenta for purple/pink
+    menu_items = ["COMMANDS", "SEARCH", "SETTINGS", "SHUTDOWN"]
+    current_row = 0
+    max_row = len(menu_items) - 1
+    first_draw = True  # Track if this is the first time drawing the menu
+    max_y, max_x = stdscr.getmaxyx()
+
+    # Calculate maximum item width for main menu
+    max_item_width = max(len(item) for item in menu_items) + 2  # 2 for cursor and space
+    x_offset = (max_x - max_item_width) // 2  # Center the menu block
+    if x_offset < 0:
+        x_offset = 0
+    padded_items = [item.ljust(max_item_width - 2) for item in menu_items]
+
+    while True:
+        stdscr.clear()
+        color_pair = get_color_pair()
+        if first_draw:
+            # Use typing effect for the first draw
+            current_y = 0
+            current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            current_y = type_text(stdscr, current_y, "== WEYLAND-YUTANI CORP ==", color_pair)
+            current_y += 1
+            for idx, item in enumerate(padded_items):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
+                    break
+                text = f"█ {item}" if idx == current_row else f"  {item}"
+                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if idx == current_row else 0), x_offset=x_offset)
+            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)
+            first_draw = False
+        else:
+            # Use static text for subsequent redraws
+            stdscr.addstr(0, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(1, (max_x - len("== WEYLAND-YUTANI CORP ==")) // 2, "== WEYLAND-YUTANI CORP ==", color_pair)
+            current_y = 3
+            for idx, item in enumerate(padded_items):
+                if current_y >= max_y - 1:  # Reserve bottom row for instructions
+                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
+                    break
+                stdscr.addstr(current_y, x_offset, f"█ {item}" if idx == current_row else f"  {item}", 
+                             color_pair | (curses.A_REVERSE if idx == current_row else 0))
+                current_y += 1
+            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY")) // 2, 
+                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)
+        stdscr.refresh()
+
+        key = stdscr.getch()
+        if key == curses.KEY_UP and current_row > 0:
+            current_row -= 1
+        elif key == curses.KEY_DOWN and current_row < max_row:
+            current_row += 1
+        elif key == 10:  # Enter key
+            if current_row == 0:
+                run_commands(stdscr)
+                first_draw = False  # Static redraw on return
+            elif current_row == 1:
+                run_search(stdscr)
+                first_draw = False  # Static redraw on return
+            elif current_row == 2:
+                run_settings(stdscr)
+                first_draw = False  # Static redraw on return
+            elif current_row == 3:  # SHUTDOWN
+                shutdown_sequence(stdscr)
+                return  # Exit after shutdown animation
+        elif key == 27:  # Escape key does nothing in main menu
+            pass
+
+def main():
+    """Main function to check for curses and run the appropriate interface."""
+    update_commands()  # Update commands.json at startup
+    if curses is None:
+        print("ERROR: 'CURSES' LIBRARY NOT AVAILABLE. FALLING BACK TO COMMAND-LINE MODE.")
+        parser = argparse.ArgumentParser(
+            description="CONVERT LINE ENDINGS OF A TEXT FILE FOR CROSS-PLATFORM COMPATIBILITY."
+        )
+        parser.add_argument('input_file', help="PATH TO THE INPUT FILE")
+        parser.add_argument('output_file', help="PATH TO THE OUTPUT FILE")
+        parser.add_argument(
+            '-f', '--format',
+            choices=['unix', 'windows', 'mac'],
+            required=True,
+            help="TARGET LINE ENDING FORMAT: 'UNIX' (LF), 'WINDOWS' (CRLF), OR 'MAC' (CR)"
+        )
+        args = parser.parse_args()
+        # Use CYBERDECK_DIR for input/output in fallback mode
+        input_file = args.input_file
+        if not os.path.isabs(input_file):
+            cyberdeck_input = os.path.join(CYBERDECK_DIR, input_file)
+            if os.path.exists(cyberdeck_input):
+                input_file = cyberdeck_input
+        if not os.path.exists(input_file):
+            print(f"ERROR: INPUT FILE '{input_file}' DOES NOT EXIST.")
+            sys.exit(1)
+        output_file = args.output_file
+        if not os.path.isabs(output_file):
+            output_file = os.path.join(CYBERDECK_DIR, output_file)
+        result = convert_line_endings(input_file, output_file, args.format)
+        print(result)
+    else:
+        curses.wrapper(boot_sequence)
+        curses.wrapper(menu)
+
+if __name__ == '__main__':
+    main()
