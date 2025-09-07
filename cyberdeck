@@ -192,7 +192,7 @@ def boot_sequence(stdscr):
         "CPU: 8086 PROCESSOR DETECTED",
         "STORAGE: 512KB AVAILABLE",
         "INTERFACE: CRT TERMINAL v1.0",
-        "BOOTING MOTHER OS v2.1.7",
+        "BOOTING MU/TH/UR OS v2.1.7",
         "INITIALIZATION COMPLETE"
     ]
     color_pair = get_color_pair()
@@ -253,11 +253,12 @@ def get_color_pair():
     return color_map.get(settings['text_color'], curses.color_pair(1))
 
 def list_menu(stdscr, title, items, get_text, is_first=True):
-    """General navigable list menu with fixed positioning."""
+    """General navigable list menu with scrolling support."""
     current_row = 0
     max_row = len(items) - 1
     first_draw = is_first
     max_y, max_x = stdscr.getmaxyx()
+    scroll_offset = 0
     
     max_item_width = max(len(get_text(item)) for item in items) + 2
     x_offset = (max_x - max_item_width) // 2
@@ -265,39 +266,56 @@ def list_menu(stdscr, title, items, get_text, is_first=True):
         x_offset = 0
     padded_items = [get_text(item).ljust(max_item_width - 2) for item in items]
     
-    # Calculate total lines for vertical centering
-    total_lines = len(padded_items) + 4  # Header, title, items, instruction
-    start_y = (max_y - total_lines) // 2
-    if start_y < 0:
-        start_y = 0
+    # Calculate max visible items (reserve lines for header, title, instruction)
+    max_visible_items = max_y - 4  # Header, title, spacing, instruction
+    if max_visible_items < 1:
+        max_visible_items = 1
     
     while True:
         stdscr.clear()
         color_pair = get_color_pair()
+        
+        # Adjust scroll_offset to keep current_row visible
+        if current_row < scroll_offset:
+            scroll_offset = current_row
+        elif current_row >= scroll_offset + max_visible_items:
+            scroll_offset = current_row - max_visible_items + 1
+        
+        # Calculate visible items
+        visible_items = padded_items[scroll_offset:scroll_offset + max_visible_items]
+        
+        # Calculate total lines for vertical centering
+        total_lines = len(visible_items) + 4
+        start_y = (max_y - total_lines) // 2
+        if start_y < 0:
+            start_y = 0
+        
         current_y = start_y
         if first_draw:
-            current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y = type_text(stdscr, current_y, f"== {title.upper()} ==", color_pair)
             current_y += 1
-            for idx, item in enumerate(padded_items):
+            for idx, item in enumerate(visible_items):
+                global_idx = idx + scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
                     break
-                text = f"█ {item}" if idx == current_row else f"  {item}"
-                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if idx == current_row else 0), x_offset=x_offset)
+                text = f"█ {item}" if global_idx == current_row else f"  {item}"
+                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if global_idx == current_row else 0), x_offset=x_offset)
             type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
             first_draw = False
         else:
-            stdscr.addstr(current_y, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y += 1
             stdscr.addstr(current_y, (max_x - len(f"== {title.upper()} ==")) // 2, f"== {title.upper()} ==", color_pair)
             current_y += 1
-            for idx, item in enumerate(padded_items):
+            for idx, item in enumerate(visible_items):
+                global_idx = idx + scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
                     break
-                stdscr.addstr(current_y, x_offset, f"█ {item}" if idx == current_row else f"  {item}", 
-                             color_pair | (curses.A_REVERSE if idx == current_row else 0))
+                stdscr.addstr(current_y, x_offset, f"█ {item}" if global_idx == current_row else f"  {item}", 
+                             color_pair | (curses.A_REVERSE if global_idx == current_row else 0))
                 current_y += 1
             stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK")) // 2, 
                          "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
@@ -317,7 +335,7 @@ def show_details(stdscr, cmd):
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     lines = [
-        "=== MOTHER INTERFACE ===",
+        "=== MU/TH/UR INTERFACE ===",
         f"NAME: {cmd['Name']}",
         "",
         f"DESCRIPTION: {cmd['Description']}",
@@ -344,7 +362,7 @@ def show_details(stdscr, cmd):
                     pyperclip.copy(cmd['Command'])
                     stdscr.clear()
                     current_y = start_y
-                    current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                    current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
                     current_y = type_text(stdscr, current_y, "COMMAND COPIED TO CLIPBOARD.", color_pair)
                     type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
                     stdscr.refresh()
@@ -352,7 +370,7 @@ def show_details(stdscr, cmd):
                 except Exception as e:
                     stdscr.clear()
                     current_y = start_y
-                    current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                    current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
                     current_y = type_text(stdscr, current_y, f"ERROR: FAILED TO COPY: {str(e).upper()}", color_pair)
                     type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
                     stdscr.refresh()
@@ -360,7 +378,7 @@ def show_details(stdscr, cmd):
             else:
                 stdscr.clear()
                 current_y = start_y
-                current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+                current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
                 current_y = type_text(stdscr, current_y, "ERROR: PYPERCLIP NOT INSTALLED.", color_pair)
                 type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
                 stdscr.refresh()
@@ -375,7 +393,7 @@ def run_commands(stdscr):
     if not os.path.exists(COMMANDS_FILE):
         stdscr.clear()
         lines = [
-            "=== MOTHER INTERFACE ===",
+            "=== MU/TH/UR INTERFACE ===",
             "NO COMMANDS AVAILABLE. PRESS ANY KEY TO RETURN."
         ]
         start_y = (max_y - len(lines) - 1) // 2
@@ -425,7 +443,7 @@ def run_search(stdscr):
     max_y, max_x = stdscr.getmaxyx()
     stdscr.clear()
     prompt = "ENTER SEARCH QUERY: "
-    lines = ["=== MOTHER INTERFACE ===", prompt + "__________"]
+    lines = ["=== MU/TH/UR INTERFACE ===", prompt + "__________"]
     start_y = (max_y - len(lines) - 1) // 2
     if start_y < 0:
         start_y = 0
@@ -444,7 +462,7 @@ def run_search(stdscr):
     if not query:
         stdscr.clear()
         lines = [
-            "=== MOTHER INTERFACE ===",
+            "=== MU/TH/UR INTERFACE ===",
             "NO QUERY ENTERED. PRESS ANY KEY TO RETURN."
         ]
         start_y = (max_y - len(lines) - 1) // 2
@@ -461,7 +479,7 @@ def run_search(stdscr):
     if not os.path.exists(COMMANDS_FILE):
         stdscr.clear()
         lines = [
-            "=== MOTHER INTERFACE ===",
+            "=== MU/TH/UR INTERFACE ===",
             "NO COMMANDS AVAILABLE FOR SEARCH. PRESS ANY KEY TO RETURN."
         ]
         start_y = (max_y - len(lines) - 1) // 2
@@ -483,7 +501,7 @@ def run_search(stdscr):
     if not filtered:
         stdscr.clear()
         lines = [
-            "=== MOTHER INTERFACE ===",
+            "=== MU/TH/UR INTERFACE ===",
             "NO RESULTS FOUND. PRESS ANY KEY TO RETURN."
         ]
         start_y = (max_y - len(lines) - 1) // 2
@@ -509,7 +527,7 @@ def run_search(stdscr):
         show_details(stdscr, selected_cmd)
 
 def run_settings(stdscr, color_pair):
-    """Handle the Settings menu with consistent positioning."""
+    """Handle the Settings menu with scrolling support."""
     global settings
     max_y, max_x = stdscr.getmaxyx()
     color_options = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
@@ -520,6 +538,8 @@ def run_settings(stdscr, color_pair):
     max_color_row = len(color_options) - 1
     max_anim_row = len(animation_options) - 1
     first_draw = True
+    color_scroll_offset = 0
+    anim_scroll_offset = 0
 
     max_item_width = max(len(option) for option in color_options + animation_options) + 2
     x_offset = (max_x - max_item_width) // 2
@@ -528,34 +548,56 @@ def run_settings(stdscr, color_pair):
     padded_color_options = [option.ljust(max_item_width - 2) for option in color_options]
     padded_animation_options = [option.ljust(max_item_width - 2) for option in animation_options]
 
-    total_lines = len(color_options) + len(animation_options) + 5  # Header, title, color label, animation label, instruction
-    start_y = (max_y - total_lines) // 2
-    if start_y < 0:
-        start_y = 0
+    # Calculate max visible items per section (split available space)
+    max_visible_items = (max_y - 6) // 2  # Header, title, color label, animation label, instruction, spacing
+    if max_visible_items < 1:
+        max_visible_items = 1
 
     while True:
         stdscr.clear()
+        # Adjust scroll offsets
+        if selected_section == 0:
+            if current_color_row < color_scroll_offset:
+                color_scroll_offset = current_color_row
+            elif current_color_row >= color_scroll_offset + max_visible_items:
+                color_scroll_offset = current_color_row - max_visible_items + 1
+        else:
+            if current_anim_row < anim_scroll_offset:
+                anim_scroll_offset = current_anim_row
+            elif current_anim_row >= anim_scroll_offset + max_visible_items:
+                anim_scroll_offset = current_anim_row - max_visible_items + 1
+
+        visible_color_items = padded_color_options[color_scroll_offset:color_scroll_offset + max_visible_items]
+        visible_anim_items = padded_animation_options[anim_scroll_offset:anim_scroll_offset + max_visible_items]
+
+        total_lines = len(visible_color_items) + len(visible_anim_items) + 5
+        start_y = (max_y - total_lines) // 2
+        if start_y < 0:
+            start_y = 0
+
         if first_draw:
             current_y = start_y
-            current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y = type_text(stdscr, current_y, "== SETTINGS ==", color_pair)
             current_y += 1
             current_y = type_text(stdscr, current_y, "TEXT COLOR:", color_pair)
-            for idx, option in enumerate(padded_color_options):
+            for idx, option in enumerate(visible_color_items):
+                global_idx = idx + color_scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
                     break
-                if idx == current_color_row and selected_section == 0:
+                if global_idx == current_color_row and selected_section == 0:
                     current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
                 else:
                     current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
             current_y += 1
             current_y = type_text(stdscr, current_y, "ANIMATION:", color_pair)
-            for idx, option in enumerate(padded_animation_options):
+            for idx, option in enumerate(visible_anim_items):
+                global_idx = idx + anim_scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
                     break
-                if idx == current_anim_row and selected_section == 1:
+                if global_idx == current_anim_row and selected_section == 1:
                     current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
                 else:
                     current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
@@ -563,28 +605,30 @@ def run_settings(stdscr, color_pair):
             first_draw = False
         else:
             current_y = start_y
-            stdscr.addstr(current_y, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y += 1
             stdscr.addstr(current_y, (max_x - len("== SETTINGS ==")) // 2, "== SETTINGS ==", color_pair)
             current_y += 1
             stdscr.addstr(current_y, (max_x - len("TEXT COLOR:")) // 2, "TEXT COLOR:", color_pair)
             current_y += 1
-            for idx, option in enumerate(padded_color_options):
+            for idx, option in enumerate(visible_color_items):
+                global_idx = idx + color_scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
                     break
-                stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_color_row and selected_section == 0 else f"  {option}", 
-                             color_pair | (curses.A_REVERSE if idx == current_color_row and selected_section == 0 else 0))
+                stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_color_row and selected_section == 0 else f"  {option}", 
+                             color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0))
                 current_y += 1
             current_y += 1
             stdscr.addstr(current_y, (max_x - len("ANIMATION:")) // 2, "ANIMATION:", color_pair)
             current_y += 1
-            for idx, option in enumerate(padded_animation_options):
+            for idx, option in enumerate(visible_anim_items):
+                global_idx = idx + anim_scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
                     break
-                stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_anim_row and selected_section == 1 else f"  {option}", 
-                             color_pair | (curses.A_REVERSE if idx == current_anim_row and selected_section == 1 else 0))
+                stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_anim_row and selected_section == 1 else f"  {option}", 
+                             color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0))
                 current_y += 1
             stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN")) // 2, 
                          "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair)
@@ -605,21 +649,23 @@ def run_settings(stdscr, color_pair):
             selected_section = 1 - selected_section
             current_y = start_y + 3
             if selected_section == 0:
-                for idx, option in enumerate(padded_color_options):
+                for idx, option in enumerate(visible_color_items):
+                    global_idx = idx + color_scroll_offset
                     if current_y >= max_y - 1:
                         log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
                         break
-                    stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_color_row else f"  {option}", 
-                                 color_pair | (curses.A_REVERSE if idx == current_color_row and selected_section == 0 else 0))
+                    stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_color_row else f"  {option}", 
+                                 color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0))
                     current_y += 1
             else:
-                current_y += len(padded_color_options) + 1
-                for idx, option in enumerate(padded_animation_options):
+                current_y += len(visible_color_items) + 1
+                for idx, option in enumerate(visible_anim_items):
+                    global_idx = idx + anim_scroll_offset
                     if current_y >= max_y - 1:
                         log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
                         break
-                    stdscr.addstr(current_y, x_offset, f"█ {option}" if idx == current_anim_row else f"  {option}", 
-                                 color_pair | (curses.A_REVERSE if idx == current_anim_row and selected_section == 1 else 0))
+                    stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_anim_row else f"  {option}", 
+                                 color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0))
                     current_y += 1
         elif key == 10:
             if selected_section == 0:
@@ -633,7 +679,7 @@ def run_settings(stdscr, color_pair):
             return color_pair
 
 def menu(stdscr):
-    """Display and handle the interactive menu with consistent positioning."""
+    """Display and handle the interactive menu with scrolling support."""
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -647,6 +693,7 @@ def menu(stdscr):
     first_draw = True
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
+    scroll_offset = 0
 
     max_item_width = max(len(item) for item in menu_items) + 2
     x_offset = (max_x - max_item_width) // 2
@@ -654,38 +701,50 @@ def menu(stdscr):
         x_offset = 0
     padded_items = [item.ljust(max_item_width - 2) for item in menu_items]
 
-    total_lines = len(menu_items) + 4
-    start_y = (max_y - total_lines) // 2
-    if start_y < 0:
-        start_y = 0
+    max_visible_items = max_y - 4  # Header, subtitle, spacing, instruction
+    if max_visible_items < 1:
+        max_visible_items = 1
 
     while True:
         stdscr.clear()
+        if current_row < scroll_offset:
+            scroll_offset = current_row
+        elif current_row >= scroll_offset + max_visible_items:
+            scroll_offset = current_row - max_visible_items + 1
+
+        visible_items = padded_items[scroll_offset:scroll_offset + max_visible_items]
+        total_lines = len(visible_items) + 4
+        start_y = (max_y - total_lines) // 2
+        if start_y < 0:
+            start_y = 0
+
         if first_draw:
             current_y = start_y
-            current_y = type_text(stdscr, current_y, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y = type_text(stdscr, current_y, "== WEYLAND-YUTANI CORP ==", color_pair)
             current_y += 1
-            for idx, item in enumerate(padded_items):
+            for idx, item in enumerate(visible_items):
+                global_idx = idx + scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
                     break
-                text = f"█ {item}" if idx == current_row else f"  {item}"
-                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if idx == current_row else 0), x_offset=x_offset)
+                text = f"█ {item}" if global_idx == current_row else f"  {item}"
+                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if global_idx == current_row else 0), x_offset=x_offset)
             type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)
             first_draw = False
         else:
             current_y = start_y
-            stdscr.addstr(current_y, (max_x - len("=== MOTHER INTERFACE ===")) // 2, "=== MOTHER INTERFACE ===", color_pair | curses.A_BOLD)
+            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
             current_y += 1
             stdscr.addstr(current_y, (max_x - len("== WEYLAND-YUTANI CORP ==")) // 2, "== WEYLAND-YUTANI CORP ==", color_pair)
             current_y += 1
-            for idx, item in enumerate(padded_items):
+            for idx, item in enumerate(visible_items):
+                global_idx = idx + scroll_offset
                 if current_y >= max_y - 1:
                     log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
                     break
-                stdscr.addstr(current_y, x_offset, f"█ {item}" if idx == current_row else f"  {item}", 
-                             color_pair | (curses.A_REVERSE if idx == current_row else 0))
+                stdscr.addstr(current_y, x_offset, f"█ {item}" if global_idx == current_row else f"  {item}", 
+                             color_pair | (curses.A_REVERSE if global_idx == current_row else 0))
                 current_y += 1
             stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY")) // 2, 
                          "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)

