@@ -428,7 +428,7 @@ def run_commands(stdscr):
             stdscr,
             categories[selected_cat],
             category_commands,
-            lambda cmd: f"{cmd['Name']}: {cmd['Description'][:30]}{'...' if len(cmd['Description']) > 30 else ''}",
+            lambda cmd: f"{cmd['Name']}: {cmd['Description']}",
             is_first=False
         )
         if selected_cmd is None:
@@ -520,7 +520,7 @@ def run_search(stdscr):
         stdscr,
         "SEARCH RESULTS",
         sorted_filtered,
-        lambda cmd: f"{cmd['Name']}: {cmd['Description'][:30]}{'...' if len(cmd['Description']) > 30 else ''}",
+        lambda cmd: f"{cmd['Name']}: {cmd['Description']}",
         is_first=True
     )
     if selected_cmd is not None:

