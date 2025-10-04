@@ -124,7 +124,7 @@ def convert_line_endings(input_file, output_file, format_type):
 
 def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_vertically=False):
     """Display text with wrapping, safe character handling, centered horizontally and optionally vertically."""
-    safe_text = ''.join(c if 32 <= ord(c) <= 126 else '?' for c in text)
+    safe_text = ''.join(c if 32 <= ord(c) <= 126 else '' for c in text)
     max_y, max_x = stdscr.getmaxyx()
     max_width = max_x - 4
     
