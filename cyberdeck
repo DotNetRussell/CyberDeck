@@ -27,6 +27,10 @@ SETTINGS_FILE = os.path.join(CYBERDECK_DIR, "settings.json")
 COMMANDS_FILE = os.path.join(CYBERDECK_DIR, "commands.json")
 ERROR_LOG = os.path.join(CYBERDECK_DIR, "error.log")
 
+# Margin settings for borders
+BORDER_MARGIN_X = 4  # Horizontal margin on each side
+BORDER_MARGIN_Y = 2  # Vertical margin on top/bottom
+
 def log_error(message):
     """Log errors to ~/.cyberdeck/error.log."""
     try:
@@ -122,23 +126,47 @@ def convert_line_endings(input_file, output_file, format_type):
     except Exception as e:
         return f"ERROR: {str(e).upper()}"
 
-def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_vertically=False):
+def get_wrapped_line_count(text, max_width):
+    """Compute the number of lines after wrapping the text."""
+    safe_text = ''.join(c if 32 <= ord(c) <= 126 else '' for c in text)
+    lines = []
+    current_line = ""
+    for word in safe_text.split():
+        test_line = current_line + (" " if current_line else "") + word
+        if len(test_line) <= max_width:
+            current_line = test_line
+        else:
+            if current_line:
+                lines.append(current_line)
+            current_line = word
+    if current_line:
+        lines.append(current_line)
+    return len(lines)
+
+def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_vertically=False, animate=None):
     """Display text with wrapping, safe character handling, centered horizontally and optionally vertically."""
+    if animate is None:
+        do_animate = settings['animation_enabled']
+    else:
+        do_animate = animate
     safe_text = ''.join(c if 32 <= ord(c) <= 126 else '' for c in text)
     max_y, max_x = stdscr.getmaxyx()
-    max_width = max_x - 4
+    # Apply horizontal margins to effective width
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_width = effective_max_x - 4  # Additional padding inside margins
     
     lines = []
     current_line = ""
     for word in safe_text.split():
-        if len(current_line) + len(word) + 1 <= max_width:
-            current_line += (word + " ") if current_line else word
+        test_line = current_line + (" " if current_line else "") + word
+        if len(test_line) <= max_width:
+            current_line = test_line
         else:
             if current_line:
-                lines.append(current_line.rstrip())
-            current_line = word + " "
+                lines.append(current_line)
+            current_line = word
     if current_line:
-        lines.append(current_line.rstrip())
+        lines.append(current_line)
     
     if center_vertically:
         total_lines = len(lines)
@@ -151,10 +179,11 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
         if current_y >= max_y:
             log_error(f"Text wrapping exceeded terminal height at y={current_y}: {line}")
             break
-        x = x_offset if x_offset is not None else (max_x - len(line)) // 2
-        if x < 0:
-            x = 0
-        if not settings['animation_enabled']:
+        # Apply horizontal centering with margins
+        x = x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X
+        if x < BORDER_MARGIN_X:
+            x = BORDER_MARGIN_X
+        if not do_animate:
             try:
                 stdscr.addstr(current_y, x, line, color_pair)
             except Exception as e:
@@ -174,16 +203,16 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
             current_y += 1
         except Exception as e:
             try:
-                stdscr.addstr(current_y, x_offset if x_offset is not None else (max_x - len(line)) // 2, line, color_pair)
+                stdscr.addstr(current_y, x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X, line, color_pair)
                 current_y += 1
             except Exception as e2:
-                log_error(f"Failed to display text at y={current_y}, x={x_offset if x_offset is not None else (max_x - len(line)) // 2}: {str(e)} / {str(e2)}")
+                log_error(f"Failed to display text at y={current_y}, x={x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X}: {str(e)} / {str(e2)}")
                 current_y += 1
     
     return current_y
 
 def boot_sequence(stdscr):
-    """Display a Nostromo-inspired boot sequence with vertical centering."""
+    """Display a Nostromo-inspired boot sequence with vertical centering and margins."""
     stdscr.clear()
     max_y, _ = stdscr.getmaxyx()
     lines = [
@@ -196,21 +225,23 @@ def boot_sequence(stdscr):
         "INITIALIZATION COMPLETE"
     ]
     color_pair = get_color_pair()
-    start_y = (max_y - len(lines) - 1) // 2
-    if start_y < 0:
-        start_y = 0
+    # Vertical centering with top/bottom margins
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    start_y = BORDER_MARGIN_Y + (effective_max_y - len(lines) - 1) // 2
+    if start_y < BORDER_MARGIN_Y:
+        start_y = BORDER_MARGIN_Y
     current_y = start_y
     for line in lines:
-        if current_y >= max_y - 1:
+        if current_y >= max_y - BORDER_MARGIN_Y:
             log_error(f"Boot sequence exceeded terminal height at y={current_y}: {line}")
             break
         current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
-    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO CONTINUE", color_pair)
+    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO CONTINUE", color_pair)
     stdscr.refresh()
     stdscr.getch()
 
 def shutdown_sequence(stdscr):
-    """Display a hacker-inspired shutdown animation with vertical centering."""
+    """Display a hacker-inspired shutdown animation with vertical centering and margins."""
     stdscr.clear()
     max_y, _ = stdscr.getmaxyx()
     lines = [
@@ -224,17 +255,19 @@ def shutdown_sequence(stdscr):
         "SHUTDOWN COMPLETE"
     ]
     color_pair = get_color_pair()
-    start_y = (max_y - len(lines) - 1) // 2
-    if start_y < 0:
-        start_y = 0
+    # Vertical centering with margins
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    start_y = BORDER_MARGIN_Y + (effective_max_y - len(lines) - 1) // 2
+    if start_y < BORDER_MARGIN_Y:
+        start_y = BORDER_MARGIN_Y
     current_y = start_y
     for line in lines:
-        if current_y >= max_y - 1:
+        if current_y >= max_y - BORDER_MARGIN_Y:
             log_error(f"Shutdown sequence exceeded terminal height at y={current_y}: {line}")
             break
         current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
         time.sleep(0.2)
-    type_text(stdscr, max_y - 1, "SHUTDOWN COMPLETE", color_pair)
+    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "SHUTDOWN COMPLETE", color_pair)
     stdscr.refresh()
     time.sleep(1)
 
@@ -252,26 +285,48 @@ def get_color_pair():
     }
     return color_map.get(settings['text_color'], curses.color_pair(1))
 
-def list_menu(stdscr, title, items, get_text, is_first=True):
-    """General navigable list menu with scrolling support."""
+def list_menu(stdscr, title, items, get_text):
+    """General navigable list menu with scrolling support and margins."""
     current_row = 0
     max_row = len(items) - 1
-    first_draw = is_first
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
     
-    max_item_width = max(len(get_text(item)) for item in items) + 2
-    x_offset = (max_x - max_item_width) // 2
-    if x_offset < 0:
-        x_offset = 0
-    padded_items = [get_text(item).ljust(max_item_width - 2) for item in items]
+    # Apply horizontal margins to effective width
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_item_width = max(len(get_text(item)) + 2 for item in items)
+    if max_item_width > effective_max_x:
+        max_item_width = effective_max_x
+    x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
+    if x_offset < BORDER_MARGIN_X:
+        x_offset = BORDER_MARGIN_X
     
-    # Calculate max visible items (reserve lines for header, title, instruction)
-    max_visible_items = max_y - 4  # Header, title, spacing, instruction
+    # Calculate max visible items (reserve lines for header, title, instruction + margins)
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    max_visible_items = effective_max_y - 4  # Header, title, spacing, instruction
     if max_visible_items < 1:
         max_visible_items = 1
     
+    max_width = effective_max_x - 4
+    
     while True:
+        # Precompute total content lines for accurate centering
+        header_text = "=== MU/TH/UR INTERFACE ==="
+        title_text = f"== {title.upper()} =="
+        item_texts = []
+        for idx in range(scroll_offset, min(scroll_offset + max_visible_items, len(items))):
+            text = "  " + get_text(items[idx])
+            item_texts.append(text)
+        
+        header_lines = get_wrapped_line_count(header_text, max_width)
+        title_lines = get_wrapped_line_count(title_text, max_width)
+        item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
+        total_content_lines = header_lines + title_lines + 1 + sum(item_line_counts)  # +1 for spacing after title
+        
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
+        
         stdscr.clear()
         color_pair = get_color_pair()
         
@@ -281,44 +336,21 @@ def list_menu(stdscr, title, items, get_text, is_first=True):
         elif current_row >= scroll_offset + max_visible_items:
             scroll_offset = current_row - max_visible_items + 1
         
-        # Calculate visible items
-        visible_items = padded_items[scroll_offset:scroll_offset + max_visible_items]
-        
-        # Calculate total lines for vertical centering
-        total_lines = len(visible_items) + 4
-        start_y = (max_y - total_lines) // 2
-        if start_y < 0:
-            start_y = 0
-        
         current_y = start_y
-        if first_draw:
-            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y = type_text(stdscr, current_y, f"== {title.upper()} ==", color_pair)
-            current_y += 1
-            for idx, item in enumerate(visible_items):
-                global_idx = idx + scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
-                    break
-                text = f"█ {item}" if global_idx == current_row else f"  {item}"
-                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if global_idx == current_row else 0), x_offset=x_offset)
-            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
-            first_draw = False
-        else:
-            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y += 1
-            stdscr.addstr(current_y, (max_x - len(f"== {title.upper()} ==")) // 2, f"== {title.upper()} ==", color_pair)
-            current_y += 1
-            for idx, item in enumerate(visible_items):
-                global_idx = idx + scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
-                    break
-                stdscr.addstr(current_y, x_offset, f"█ {item}" if global_idx == current_row else f"  {item}", 
-                             color_pair | (curses.A_REVERSE if global_idx == current_row else 0))
-                current_y += 1
-            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK")) // 2, 
-                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair)
+        current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
+        current_y = type_text(stdscr, current_y, title_text, color_pair, x_offset=None, animate=False)
+        current_y += 1
+        for idx in range(max_visible_items):
+            if scroll_offset + idx >= len(items):
+                break
+            global_idx = scroll_offset + idx
+            if current_y >= max_y - BORDER_MARGIN_Y - 1:
+                log_error(f"Menu item exceeded terminal height at y={current_y}")
+                break
+            attr = color_pair | (curses.A_REVERSE if global_idx == current_row else 0)
+            text = "  " + get_text(items[global_idx])
+            current_y = type_text(stdscr, current_y, text, attr, x_offset=x_offset, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair, x_offset=None, animate=False)
         stdscr.refresh()
         key = stdscr.getch()
         if key == curses.KEY_UP and current_row > 0:
@@ -326,34 +358,44 @@ def list_menu(stdscr, title, items, get_text, is_first=True):
         elif key == curses.KEY_DOWN and current_row < max_row:
             current_row += 1
         elif key == 10:
-            return items[current_row], first_draw
+            return items[current_row]
         elif key == 27:
-            return None, first_draw
+            return None
 
 def show_details(stdscr, cmd):
-    """Show command details screen with copy to clipboard option."""
+    """Show command details screen with copy to clipboard option, updated format."""
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
+    # Build lines with new format: Name:\nDescription (wrapped by type_text)\n\nCOMMAND: ...
     lines = [
-        "=== MU/TH/UR INTERFACE ===",
-        f"NAME: {cmd['Name']}",
-        "",
-        f"DESCRIPTION: {cmd['Description']}",
-        "",
-        f"COMMAND: {cmd['Command']}"
+        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+        (f"{cmd['Name']}:", curses.A_BOLD),
+        (cmd['Description'], 0),
+        (f"OS: {cmd['OS']}", 0),
+        ("", 0),
+        (f"COMMAND: {cmd['Command']}", curses.A_BOLD)
     ]
-    start_y = (max_y - len(lines) - 1) // 2
-    if start_y < 0:
-        start_y = 0
+    # Vertical centering with margins
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_width = effective_max_x - 4
+    
     while True:
+        # Precompute total content lines
+        total_content_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in lines)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
+        
         stdscr.clear()
         current_y = start_y
-        for line in lines:
-            if current_y >= max_y - 1:
-                log_error(f"Details screen exceeded terminal height at y={current_y}: {line}")
+        for text, bold in lines:
+            if current_y >= max_y - BORDER_MARGIN_Y - 1:
+                log_error(f"Details screen exceeded terminal height at y={current_y}: {text}")
                 break
-            current_y = type_text(stdscr, current_y, line, color_pair | (curses.A_BOLD if line.startswith("===") else 0))
-        type_text(stdscr, max_y - 1, "PRESS C TO COPY, ANY OTHER KEY TO RETURN.", color_pair)
+            attr = color_pair | (curses.A_BOLD if bold else 0)
+            current_y = type_text(stdscr, current_y, text, attr, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS C TO COPY, ANY OTHER KEY TO RETURN.", color_pair, animate=False)
         stdscr.refresh()
         key = stdscr.getch()
         if key == ord('c') or key == ord('C'):
@@ -361,26 +403,53 @@ def show_details(stdscr, cmd):
                 try:
                     pyperclip.copy(cmd['Command'])
                     stdscr.clear()
+                    message_lines = [
+                        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+                        ("COMMAND COPIED TO CLIPBOARD.", 0)
+                    ]
+                    total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+                    start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+                    if start_y < BORDER_MARGIN_Y:
+                        start_y = BORDER_MARGIN_Y
                     current_y = start_y
-                    current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-                    current_y = type_text(stdscr, current_y, "COMMAND COPIED TO CLIPBOARD.", color_pair)
-                    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                    for text, bold in message_lines:
+                        attr = color_pair | (curses.A_BOLD if bold else 0)
+                        current_y = type_text(stdscr, current_y, text, attr, animate=False)
+                    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
                     stdscr.refresh()
                     stdscr.getch()
                 except Exception as e:
                     stdscr.clear()
+                    message_lines = [
+                        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+                        (f"ERROR: FAILED TO COPY: {str(e).upper()}", 0)
+                    ]
+                    total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+                    start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+                    if start_y < BORDER_MARGIN_Y:
+                        start_y = BORDER_MARGIN_Y
                     current_y = start_y
-                    current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-                    current_y = type_text(stdscr, current_y, f"ERROR: FAILED TO COPY: {str(e).upper()}", color_pair)
-                    type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                    for text, bold in message_lines:
+                        attr = color_pair | (curses.A_BOLD if bold else 0)
+                        current_y = type_text(stdscr, current_y, text, attr, animate=False)
+                    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
                     stdscr.refresh()
                     stdscr.getch()
             else:
                 stdscr.clear()
+                message_lines = [
+                    ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+                    ("ERROR: PYPERCLIP NOT INSTALLED.", 0)
+                ]
+                total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+                start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+                if start_y < BORDER_MARGIN_Y:
+                    start_y = BORDER_MARGIN_Y
                 current_y = start_y
-                current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-                current_y = type_text(stdscr, current_y, "ERROR: PYPERCLIP NOT INSTALLED.", color_pair)
-                type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+                for text, bold in message_lines:
+                    attr = color_pair | (curses.A_BOLD if bold else 0)
+                    current_y = type_text(stdscr, current_y, text, attr, animate=False)
+                type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
                 stdscr.refresh()
                 stdscr.getch()
         else:
@@ -392,17 +461,22 @@ def run_commands(stdscr):
     max_y, max_x = stdscr.getmaxyx()
     if not os.path.exists(COMMANDS_FILE):
         stdscr.clear()
-        lines = [
-            "=== MU/TH/UR INTERFACE ===",
-            "NO COMMANDS AVAILABLE. PRESS ANY KEY TO RETURN."
+        message_lines = [
+            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+            ("NO COMMANDS AVAILABLE. PRESS ANY KEY TO RETURN.", 0)
         ]
-        start_y = (max_y - len(lines) - 1) // 2
-        if start_y < 0:
-            start_y = 0
+        effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+        effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+        max_width = effective_max_x - 4
+        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
         current_y = start_y
-        current_y = type_text(stdscr, current_y, lines[0], color_pair | curses.A_BOLD)
-        current_y = type_text(stdscr, current_y, lines[1], color_pair)
-        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        for text, bold in message_lines:
+            attr = color_pair | (curses.A_BOLD if bold else 0)
+            current_y = type_text(stdscr, current_y, text, attr, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
         stdscr.refresh()
         stdscr.getch()
         return
@@ -417,25 +491,21 @@ def run_commands(stdscr):
         groups[cmd['Category']].append(cmd)
 
     category_ids = sorted(groups.keys())
-    first_draw = True
 
     while True:
-        selected_cat, first_draw = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids, lambda cid: categories[cid], is_first=first_draw)
+        selected_cat = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids, lambda cid: categories[cid])
         if selected_cat is None:
             return
         category_commands = sorted(groups[selected_cat], key=lambda c: c['Name'])
-        selected_cmd, _ = list_menu(
+        selected_cmd = list_menu(
             stdscr,
             categories[selected_cat],
             category_commands,
-            lambda cmd: f"{cmd['Name']}: {cmd['Description']}",
-            is_first=False
+            lambda cmd: f"{cmd['Name']} ({cmd['OS']})",  # Include OS in display
         )
         if selected_cmd is None:
-            first_draw = False
             continue
         show_details(stdscr, selected_cmd)
-        first_draw = False
 
 def run_search(stdscr):
     """Handle the Search menu with query and results."""
@@ -443,14 +513,17 @@ def run_search(stdscr):
     max_y, max_x = stdscr.getmaxyx()
     stdscr.clear()
     prompt = "ENTER SEARCH QUERY: "
-    lines = ["=== MU/TH/UR INTERFACE ===", prompt + "__________"]
-    start_y = (max_y - len(lines) - 1) // 2
-    if start_y < 0:
-        start_y = 0
-    current_y = start_y
-    current_y = type_text(stdscr, current_y, lines[0], color_pair | curses.A_BOLD)
-    type_text(stdscr, max_y - 1, prompt + "__________", color_pair)
-    stdscr.move(max_y - 1, (max_x - len(prompt + "__________")) // 2 + len(prompt))
+    header_text = "=== MU/TH/UR INTERFACE ==="
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    start_y = BORDER_MARGIN_Y + (effective_max_y - 1) // 2
+    if start_y < BORDER_MARGIN_Y:
+        start_y = BORDER_MARGIN_Y
+    type_text(stdscr, start_y, header_text, color_pair | curses.A_BOLD, animate=False)
+    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, prompt + "__________", color_pair, animate=False)
+    # Adjust move position with margins
+    effective_prompt_x = BORDER_MARGIN_X + (effective_max_x - len(prompt + "__________")) // 2 + len(prompt)
+    stdscr.move(max_y - BORDER_MARGIN_Y - 1, effective_prompt_x)
     stdscr.refresh()
     curses.echo()
     try:
@@ -461,34 +534,40 @@ def run_search(stdscr):
     curses.noecho()
     if not query:
         stdscr.clear()
-        lines = [
-            "=== MU/TH/UR INTERFACE ===",
-            "NO QUERY ENTERED. PRESS ANY KEY TO RETURN."
+        message_lines = [
+            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+            ("NO QUERY ENTERED. PRESS ANY KEY TO RETURN.", 0)
         ]
-        start_y = (max_y - len(lines) - 1) // 2
-        if start_y < 0:
-            start_y = 0
+        max_width = effective_max_x - 4
+        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
         current_y = start_y
-        current_y = type_text(stdscr, current_y, lines[0], color_pair | curses.A_BOLD)
-        current_y = type_text(stdscr, current_y, lines[1], color_pair)
-        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        for text, bold in message_lines:
+            attr = color_pair | (curses.A_BOLD if bold else 0)
+            current_y = type_text(stdscr, current_y, text, attr, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
         stdscr.refresh()
         stdscr.getch()
         return
 
     if not os.path.exists(COMMANDS_FILE):
         stdscr.clear()
-        lines = [
-            "=== MU/TH/UR INTERFACE ===",
-            "NO COMMANDS AVAILABLE FOR SEARCH. PRESS ANY KEY TO RETURN."
+        message_lines = [
+            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+            ("NO COMMANDS AVAILABLE FOR SEARCH. PRESS ANY KEY TO RETURN.", 0)
         ]
-        start_y = (max_y - len(lines) - 1) // 2
-        if start_y < 0:
-            start_y = 0
+        max_width = effective_max_x - 4
+        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
         current_y = start_y
-        current_y = type_text(stdscr, current_y, lines[0], color_pair | curses.A_BOLD)
-        current_y = type_text(stdscr, current_y, lines[1], color_pair)
-        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        for text, bold in message_lines:
+            attr = color_pair | (curses.A_BOLD if bold else 0)
+            current_y = type_text(stdscr, current_y, text, attr, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
         stdscr.refresh()
         stdscr.getch()
         return
@@ -500,34 +579,36 @@ def run_search(stdscr):
     filtered = [cmd for cmd in commands if query in cmd['Name'].lower() or query in cmd['Description'].lower()]
     if not filtered:
         stdscr.clear()
-        lines = [
-            "=== MU/TH/UR INTERFACE ===",
-            "NO RESULTS FOUND. PRESS ANY KEY TO RETURN."
+        message_lines = [
+            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+            ("NO RESULTS FOUND. PRESS ANY KEY TO RETURN.", 0)
         ]
-        start_y = (max_y - len(lines) - 1) // 2
-        if start_y < 0:
-            start_y = 0
+        max_width = effective_max_x - 4
+        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
         current_y = start_y
-        current_y = type_text(stdscr, current_y, lines[0], color_pair | curses.A_BOLD)
-        current_y = type_text(stdscr, current_y, lines[1], color_pair)
-        type_text(stdscr, max_y - 1, "PRESS ANY KEY TO RETURN.", color_pair)
+        for text, bold in message_lines:
+            attr = color_pair | (curses.A_BOLD if bold else 0)
+            current_y = type_text(stdscr, current_y, text, attr, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
         stdscr.refresh()
         stdscr.getch()
         return
 
     sorted_filtered = sorted(filtered, key=lambda c: c['Name'])
-    selected_cmd, _ = list_menu(
+    selected_cmd = list_menu(
         stdscr,
         "SEARCH RESULTS",
         sorted_filtered,
-        lambda cmd: f"{cmd['Name']}: {cmd['Description']}",
-        is_first=True
+        lambda cmd: f"{cmd['Name']} ({cmd['OS']})",  # Include OS in display
     )
     if selected_cmd is not None:
         show_details(stdscr, selected_cmd)
 
 def run_settings(stdscr, color_pair):
-    """Handle the Settings menu with scrolling support."""
+    """Handle the Settings menu with scrolling support and margins."""
     global settings
     max_y, max_x = stdscr.getmaxyx()
     color_options = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
@@ -537,24 +618,26 @@ def run_settings(stdscr, color_pair):
     selected_section = 0
     max_color_row = len(color_options) - 1
     max_anim_row = len(animation_options) - 1
-    first_draw = True
     color_scroll_offset = 0
     anim_scroll_offset = 0
 
-    max_item_width = max(len(option) for option in color_options + animation_options) + 2
-    x_offset = (max_x - max_item_width) // 2
-    if x_offset < 0:
-        x_offset = 0
-    padded_color_options = [option.ljust(max_item_width - 2) for option in color_options]
-    padded_animation_options = [option.ljust(max_item_width - 2) for option in animation_options]
+    # Apply margins
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_item_width = max(len(option) + 2 for option in color_options + animation_options)
+    if max_item_width > effective_max_x:
+        max_item_width = effective_max_x
+    x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
+    if x_offset < BORDER_MARGIN_X:
+        x_offset = BORDER_MARGIN_X
 
-    # Calculate max visible items per section (split available space)
-    max_visible_items = (max_y - 6) // 2  # Header, title, color label, animation label, instruction, spacing
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    max_visible_items = (effective_max_y - 6) // 2  # Header, title, color label, animation label, instruction, spacing
     if max_visible_items < 1:
         max_visible_items = 1
 
+    max_width = effective_max_x - 4
+
     while True:
-        stdscr.clear()
         # Adjust scroll offsets
         if selected_section == 0:
             if current_color_row < color_scroll_offset:
@@ -567,71 +650,49 @@ def run_settings(stdscr, color_pair):
             elif current_anim_row >= anim_scroll_offset + max_visible_items:
                 anim_scroll_offset = current_anim_row - max_visible_items + 1
 
-        visible_color_items = padded_color_options[color_scroll_offset:color_scroll_offset + max_visible_items]
-        visible_anim_items = padded_animation_options[anim_scroll_offset:anim_scroll_offset + max_visible_items]
+        color_item_texts = ["  " + color_options[idx] for idx in range(color_scroll_offset, min(color_scroll_offset + max_visible_items, len(color_options)))]
+        anim_item_texts = ["  " + animation_options[idx] for idx in range(anim_scroll_offset, min(anim_scroll_offset + max_visible_items, len(animation_options)))]
 
-        total_lines = len(visible_color_items) + len(visible_anim_items) + 5
-        start_y = (max_y - total_lines) // 2
-        if start_y < 0:
-            start_y = 0
+        # Precompute total content lines
+        header_text = "=== MU/TH/UR INTERFACE ==="
+        settings_text = "== SETTINGS =="
+        color_label = "TEXT COLOR:"
+        anim_label = "ANIMATION:"
+        header_lines = get_wrapped_line_count(header_text, max_width)
+        settings_lines = get_wrapped_line_count(settings_text, max_width)
+        color_label_lines = get_wrapped_line_count(color_label, max_width)
+        anim_label_lines = get_wrapped_line_count(anim_label, max_width)
+        color_item_lines = sum(get_wrapped_line_count(text, max_width) for text in color_item_texts)
+        anim_item_lines = sum(get_wrapped_line_count(text, max_width) for text in anim_item_texts)
+        total_content_lines = header_lines + settings_lines + 1 + color_label_lines + color_item_lines + 1 + anim_label_lines + anim_item_lines
 
-        if first_draw:
-            current_y = start_y
-            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y = type_text(stdscr, current_y, "== SETTINGS ==", color_pair)
-            current_y += 1
-            current_y = type_text(stdscr, current_y, "TEXT COLOR:", color_pair)
-            for idx, option in enumerate(visible_color_items):
-                global_idx = idx + color_scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
-                    break
-                if global_idx == current_color_row and selected_section == 0:
-                    current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
-                else:
-                    current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
-            current_y += 1
-            current_y = type_text(stdscr, current_y, "ANIMATION:", color_pair)
-            for idx, option in enumerate(visible_anim_items):
-                global_idx = idx + anim_scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
-                    break
-                if global_idx == current_anim_row and selected_section == 1:
-                    current_y = type_text(stdscr, current_y, f"█ {option}", color_pair | curses.A_REVERSE, x_offset=x_offset)
-                else:
-                    current_y = type_text(stdscr, current_y, f"  {option}", color_pair, x_offset=x_offset)
-            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair)
-            first_draw = False
-        else:
-            current_y = start_y
-            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y += 1
-            stdscr.addstr(current_y, (max_x - len("== SETTINGS ==")) // 2, "== SETTINGS ==", color_pair)
-            current_y += 1
-            stdscr.addstr(current_y, (max_x - len("TEXT COLOR:")) // 2, "TEXT COLOR:", color_pair)
-            current_y += 1
-            for idx, option in enumerate(visible_color_items):
-                global_idx = idx + color_scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
-                    break
-                stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_color_row and selected_section == 0 else f"  {option}", 
-                             color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0))
-                current_y += 1
-            current_y += 1
-            stdscr.addstr(current_y, (max_x - len("ANIMATION:")) // 2, "ANIMATION:", color_pair)
-            current_y += 1
-            for idx, option in enumerate(visible_anim_items):
-                global_idx = idx + anim_scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
-                    break
-                stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_anim_row and selected_section == 1 else f"  {option}", 
-                             color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0))
-                current_y += 1
-            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN")) // 2, 
-                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair)
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
+
+        stdscr.clear()
+        current_y = start_y
+        current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
+        current_y = type_text(stdscr, current_y, settings_text, color_pair, x_offset=None, animate=False)
+        current_y += 1
+        current_y = type_text(stdscr, current_y, color_label, color_pair, x_offset=x_offset, animate=False)
+        for idx in range(len(color_item_texts)):
+            global_idx = color_scroll_offset + idx
+            if current_y >= max_y - BORDER_MARGIN_Y - 1:
+                log_error(f"Settings color option exceeded terminal height at y={current_y}")
+                break
+            attr = color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0)
+            current_y = type_text(stdscr, current_y, color_item_texts[idx], attr, x_offset=x_offset, animate=False)
+        current_y += 1
+        current_y = type_text(stdscr, current_y, anim_label, color_pair, x_offset=x_offset, animate=False)
+        for idx in range(len(anim_item_texts)):
+            global_idx = anim_scroll_offset + idx
+            if current_y >= max_y - BORDER_MARGIN_Y - 1:
+                log_error(f"Settings animation option exceeded terminal height at y={current_y}")
+                break
+            attr = color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0)
+            current_y = type_text(stdscr, current_y, anim_item_texts[idx], attr, x_offset=x_offset, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair, x_offset=None, animate=False)
         stdscr.refresh()
 
         key = stdscr.getch()
@@ -647,31 +708,10 @@ def run_settings(stdscr, color_pair):
                 current_anim_row += 1
         elif key == curses.KEY_LEFT or key == curses.KEY_RIGHT:
             selected_section = 1 - selected_section
-            current_y = start_y + 3
-            if selected_section == 0:
-                for idx, option in enumerate(visible_color_items):
-                    global_idx = idx + color_scroll_offset
-                    if current_y >= max_y - 1:
-                        log_error(f"Settings color option exceeded terminal height at y={current_y}: {option}")
-                        break
-                    stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_color_row else f"  {option}", 
-                                 color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0))
-                    current_y += 1
-            else:
-                current_y += len(visible_color_items) + 1
-                for idx, option in enumerate(visible_anim_items):
-                    global_idx = idx + anim_scroll_offset
-                    if current_y >= max_y - 1:
-                        log_error(f"Settings animation option exceeded terminal height at y={current_y}: {option}")
-                        break
-                    stdscr.addstr(current_y, x_offset, f"█ {option}" if global_idx == current_anim_row else f"  {option}", 
-                                 color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0))
-                    current_y += 1
         elif key == 10:
             if selected_section == 0:
                 settings['text_color'] = color_options[current_color_row].lower()
                 color_pair = get_color_pair()
-                first_draw = True
             else:
                 settings['animation_enabled'] = current_anim_row == 0
             save_settings(settings)
@@ -679,7 +719,7 @@ def run_settings(stdscr, color_pair):
             return color_pair
 
 def menu(stdscr):
-    """Display and handle the interactive menu with scrolling support."""
+    """Display and handle the interactive menu with scrolling support and margins."""
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -690,64 +730,62 @@ def menu(stdscr):
     menu_items = ["COMMANDS", "SEARCH", "SETTINGS", "SHUTDOWN"]
     current_row = 0
     max_row = len(menu_items) - 1
-    first_draw = True
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
 
-    max_item_width = max(len(item) for item in menu_items) + 2
-    x_offset = (max_x - max_item_width) // 2
-    if x_offset < 0:
-        x_offset = 0
-    padded_items = [item.ljust(max_item_width - 2) for item in menu_items]
+    # Apply margins
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_item_width = max(len(item) + 2 for item in menu_items)
+    if max_item_width > effective_max_x:
+        max_item_width = effective_max_x
+    x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
+    if x_offset < BORDER_MARGIN_X:
+        x_offset = BORDER_MARGIN_X
 
-    max_visible_items = max_y - 4  # Header, subtitle, spacing, instruction
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    max_visible_items = effective_max_y - 4  # Header, subtitle, spacing, instruction
     if max_visible_items < 1:
         max_visible_items = 1
 
+    max_width = effective_max_x - 4
+
+    original_anim = settings['animation_enabled']
+
     while True:
+        # Precompute total content lines
+        header_text = "=== MU/TH/UR INTERFACE ==="
+        subtitle_text = "== WEYLAND-YUTANI CORP =="
+        item_texts = []
+        for idx in range(scroll_offset, min(scroll_offset + max_visible_items, len(menu_items))):
+            text = "  " + menu_items[idx]
+            item_texts.append(text)
+        
+        header_lines = get_wrapped_line_count(header_text, max_width)
+        subtitle_lines = get_wrapped_line_count(subtitle_text, max_width)
+        item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
+        total_content_lines = header_lines + subtitle_lines + 1 + sum(item_line_counts)  # +1 for spacing after subtitle
+
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
+
         stdscr.clear()
-        if current_row < scroll_offset:
-            scroll_offset = current_row
-        elif current_row >= scroll_offset + max_visible_items:
-            scroll_offset = current_row - max_visible_items + 1
-
-        visible_items = padded_items[scroll_offset:scroll_offset + max_visible_items]
-        total_lines = len(visible_items) + 4
-        start_y = (max_y - total_lines) // 2
-        if start_y < 0:
-            start_y = 0
-
-        if first_draw:
-            current_y = start_y
-            current_y = type_text(stdscr, current_y, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y = type_text(stdscr, current_y, "== WEYLAND-YUTANI CORP ==", color_pair)
-            current_y += 1
-            for idx, item in enumerate(visible_items):
-                global_idx = idx + scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
-                    break
-                text = f"█ {item}" if global_idx == current_row else f"  {item}"
-                current_y = type_text(stdscr, current_y, text, color_pair | (curses.A_REVERSE if global_idx == current_row else 0), x_offset=x_offset)
-            type_text(stdscr, max_y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)
-            first_draw = False
-        else:
-            current_y = start_y
-            stdscr.addstr(current_y, (max_x - len("=== MU/TH/UR INTERFACE ===")) // 2, "=== MU/TH/UR INTERFACE ===", color_pair | curses.A_BOLD)
-            current_y += 1
-            stdscr.addstr(current_y, (max_x - len("== WEYLAND-YUTANI CORP ==")) // 2, "== WEYLAND-YUTANI CORP ==", color_pair)
-            current_y += 1
-            for idx, item in enumerate(visible_items):
-                global_idx = idx + scroll_offset
-                if current_y >= max_y - 1:
-                    log_error(f"Menu item exceeded terminal height at y={current_y}: {item}")
-                    break
-                stdscr.addstr(current_y, x_offset, f"█ {item}" if global_idx == current_row else f"  {item}", 
-                             color_pair | (curses.A_REVERSE if global_idx == current_row else 0))
-                current_y += 1
-            stdscr.addstr(max_y - 1, (max_x - len("USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY")) // 2, 
-                         "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair)
+        current_y = start_y
+        current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
+        current_y = type_text(stdscr, current_y, subtitle_text, color_pair, x_offset=None, animate=False)
+        current_y += 1
+        for idx in range(max_visible_items):
+            if scroll_offset + idx >= len(menu_items):
+                break
+            global_idx = scroll_offset + idx
+            if current_y >= max_y - BORDER_MARGIN_Y - 1:
+                log_error(f"Menu item exceeded terminal height at y={current_y}")
+                break
+            attr = color_pair | (curses.A_REVERSE if global_idx == current_row else 0)
+            text = "  " + menu_items[global_idx]
+            current_y = type_text(stdscr, current_y, text, attr, x_offset=x_offset, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair, x_offset=None, animate=False)
         stdscr.refresh()
 
         key = stdscr.getch()
@@ -758,14 +796,12 @@ def menu(stdscr):
         elif key == 10:
             if current_row == 0:
                 run_commands(stdscr)
-                first_draw = False
             elif current_row == 1:
                 run_search(stdscr)
-                first_draw = False
             elif current_row == 2:
                 color_pair = run_settings(stdscr, color_pair)
-                first_draw = False
             elif current_row == 3:
+                settings['animation_enabled'] = original_anim
                 shutdown_sequence(stdscr)
                 return
         elif key == 27:
