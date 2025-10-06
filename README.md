@@ -1,5 +1,7 @@
 # CyberDeck
 
+[Latest Release](https://github.com/DotNetRussell/CyberDeck/releases/latest)
+
 [![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
 [![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
 [![Command Detail View](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)
