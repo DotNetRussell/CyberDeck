@@ -370,8 +370,13 @@ def show_details(stdscr, cmd):
     lines = [
         ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
         (f"{cmd['Name']}:", curses.A_BOLD),
+        ("", 0),
+        ("", 0),
         (cmd['Description'], 0),
+        ("", 0),
+        ("", 0),
         (f"OS: {cmd['OS']}", 0),
+        ("", 0),
         ("", 0),
         (f"COMMAND: {cmd['Command']}", curses.A_BOLD)
     ]
@@ -490,7 +495,7 @@ def run_commands(stdscr):
     for cmd in commands:
         groups[cmd['Category']].append(cmd)
 
-    category_ids = sorted(groups.keys())
+    category_ids = sorted(groups.keys(), key=lambda cid: categories[cid].lower())
 
     while True:
         selected_cat = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids, lambda cid: categories[cid])
@@ -576,7 +581,12 @@ def run_search(stdscr):
         data = json.load(f)
 
     commands = data['commands']
-    filtered = [cmd for cmd in commands if query in cmd['Name'].lower() or query in cmd['Description'].lower() or query in cmd['Command'].lower() or query in cmd['OS'].lower()]
+    words = query.split()
+    filtered = []
+    for cmd in commands:
+        text = (cmd['Name'] + " " + cmd['Description'] + " " + cmd['Command'] + " " + cmd['OS']).lower()
+        if all(word in text for word in words):
+            filtered.append(cmd)
     if not filtered:
         stdscr.clear()
         message_lines = [
@@ -611,10 +621,10 @@ def run_settings(stdscr, color_pair):
     """Handle the Settings menu with scrolling support and margins."""
     global settings
     max_y, max_x = stdscr.getmaxyx()
-    color_options = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
-    animation_options = ["ENABLED", "DISABLED"]
+    color_options = sorted(["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"])
+    animation_options = sorted(["DISABLED", "ENABLED"])
     current_color_row = color_options.index(settings['text_color'].upper())
-    current_anim_row = 0 if settings['animation_enabled'] else 1
+    current_anim_row = animation_options.index("ENABLED" if settings['animation_enabled'] else "DISABLED")
     selected_section = 0
     max_color_row = len(color_options) - 1
     max_anim_row = len(animation_options) - 1
@@ -713,7 +723,7 @@ def run_settings(stdscr, color_pair):
                 settings['text_color'] = color_options[current_color_row].lower()
                 color_pair = get_color_pair()
             else:
-                settings['animation_enabled'] = current_anim_row == 0
+                settings['animation_enabled'] = animation_options[current_anim_row] == "ENABLED"
             save_settings(settings)
         elif key == 27:
             return color_pair
