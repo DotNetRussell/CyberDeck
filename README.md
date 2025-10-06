@@ -1,61 +1,19 @@
 # CyberDeck
 
-CyberDeck is a Python application designed as a portable, searchable reference tool for cybersecurity professionals. It organizes common hacking commands into intuitive categories, making it easy to browse, view details, and copy snippets to your clipboard. The goal is to create the ultimate "pocketbook" companion for red teamers, pentesters, and bug bounty hunters—always ready for on-the-go reference.
-
-A retro-styled terminal-based "pocketbook" for hackers, featuring a curated collection of 136+ useful penetration testing and security research commands. Built with a teletype-inspired Text User Interface (TUI) for quick reference during engagements.
-
-Key highlights:
-- **Retro Aesthetic**: Green-on-black teletype UI for that cyberpunk vibe.
-- **Offline-First**: No internet required; all commands are local.
-- **Expandable Design**: Simple structure for adding new commands and categories.
-
-[Latest Release](https://github.com/DotNetRussell/CyberDeck/releases/latest)
-
-[![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
-[![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
-[![Command Detail View](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)
-
-
-
-## Overview
-
-
-Watch a quick demo of the interface in action: [Video Demo](https://x.com/DotNetRussell/status/1972385080904761732).
+CyberDeck is a terminal-based tool inspired by sci-fi interfaces (like those from *Alien* and hacker movies) for managing and executing penetration testing commands. It provides an interactive menu system to browse categorized commands, search for specific ones, and copy them to the clipboard. Built with Python and curses for a retro CRT feel, it's designed for penetration testers to quickly access common commands during engagements.
 
 ## Features
 
-- **Categorized Navigation**: Commands grouped into practical sections, including:
-  - Passive Mapping
-  - Web App Testing Mapping
-  - Vuln Scanning
-  - Subdomain Scanning
-  - Initial Access Scanning
-  - Post Exploitation
-  - Reverse Shells
-  - LDAP TTY Shell
-  - Cracking
-  - Misc Linux
-  - PowerShell
-  - Mimikatz
-  - Misc Windows
-
-- **Search Functionality**: Quickly find commands across all categories using keywords.
-
-- **Command Details**: View full syntax, descriptions, and examples for each entry.
-
-- **Clipboard Integration**: Press `C` to copy the selected command directly to your clipboard.
-
-- **Keyboard-Driven**: 
-  - Arrow keys: Navigate menus and lists.
-  - Enter: Select category or command.
-  - Esc: Go back to previous menu.
-  - `C`: Copy command (in detail view).
-
-- **Cross-Platform**: Runs on Linux, macOS, and Windows (with appropriate Python setup).
+- **Sci-Fi Themed Interface**: Boot and shutdown sequences with animations for an immersive experience.
+- **Command Database**: Categorized commands for passive mapping, vulnerability scanning, reverse shells, and more. Commands are fetched and updated from a remote JSON source.
+- **Search Functionality**: Quickly search commands by name or description.
+- **Clipboard Integration**: Copy commands directly to the clipboard (requires `pyperclip`).
+- **Customizable Settings**: Change text color and toggle animations.
+- **Fallback Mode**: If curses is unavailable, falls back to a command-line tool for converting file line endings (Unix, Windows, Mac).
+- **Cross-Platform Support**: Commands tagged for Windows, Linux, or both (Win/Lin).
+- **Error Logging**: Logs issues to `~/.cyberdeck/error.log`.
 
 ## Installation
-
-CyberDeck is a lightweight Python app. Ensure you have Python 3.8+ installed.
 
 1. Clone the repository:
    ```
@@ -63,70 +21,51 @@ CyberDeck is a lightweight Python app. Ensure you have Python 3.8+ installed.
    cd CyberDeck
    ```
 
-2. Install dependencies (uses standard libraries like `rich` for the TUI):
+2. Install dependencies (optional for clipboard and full functionality):
    ```
-   pip install -r requirements.txt
+   pip install pyperclip requests
    ```
-   *Note: If no `requirements.txt` exists yet, manually install `rich` via `pip install rich`.*
+   - Note: The tool requires `curses` (built-in on Unix-like systems; on Windows, use Windows Subsystem for Linux or install via `pip install windows-curses`).
 
-3. Launch the app:
+3. Run the tool:
    ```
-   python cyberdeck.py  # Replace with the main script name if different
+   python3 cyberdeck.py
    ```
 
 ## Usage
 
-1. Run the app to open the main menu.
-2. Use arrow keys to highlight a category (e.g., "PowerShell") and press Enter.
-3. Browse the list of commands in that category.
-4. Select a command with Enter to view its details, including syntax and description.
-5. Press `C` to copy the command to your clipboard, or any other key to return.
-6. Use the search feature (accessible via a dedicated menu or hotkey) to query across all commands.
+- **Interactive Mode** (with curses):
+  - Boot sequence initializes the interface.
+  - Navigate menus using arrow keys, Enter to select, Esc to go back.
+  - **Commands**: Browse categories and view command details (name, description, OS, and command string).
+  - **Search**: Enter a query to filter commands.
+  - **Settings**: Change text color or toggle animations.
+  - **Shutdown**: Exit with a themed shutdown sequence.
 
-Example workflow:
-- Navigate to "PowerShell" category.
-- Select "Get Local Users on Windows".
-- View: `Get-LocalUser | Select Name, Enabled, Description`.
-- Copy and paste into your terminal.
+- **Fallback Command-Line Mode** (without curses):
+  - Converts line endings in files:
+    ```
+    python3 cyberdeck.py input_file output_file -f unix
+    ```
+    - Options: `unix`, `windows`, `mac`.
 
-For adding commands: Edit the underlying data file (likely a JSON or YAML structure) and submit a pull request.
+Commands are stored in `~/.cyberdeck/commands.json` and updated automatically from the remote source on startup if a newer version is available.
 
-## Roadmap
+## Screenshots
 
-- Full-text search improvements.
-- Export to PDF/Markdown.
-- Mobile-friendly export or companion app.
-- Integration with common tools (e.g., auto-execute in a sandbox).
-
-This is still in early development—feedback welcome!
+[![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
+[![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
+[![Command Detail View](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)
 
 ## Contributing
 
-Contributions are encouraged! Here's how to get started:
+Feel free to submit pull requests for new commands, bug fixes, or features. Update the `commands.json` with new entries following the format:
+- Name, Category (ID), Description, Command, OS ("Windows", "Linux", "Win/Lin").
 
-1. Fork the repo and create a feature branch (`git checkout -b feature/amazing-feature`).
-2. Commit your changes (`git commit -m 'Add amazing feature'`).
-3. Push to the branch (`git push origin feature/amazing-feature`).
-4. Open a Pull Request.
+## Latest Release
 
-To add new commands:
-- Locate the commands data file (e.g., `commands.json`).
-- Follow the schema: `{ "category": "PowerShell", "name": "Get Local Users", "command": "Get-LocalUser", "description": "..." }`.
-- Test in the app and submit.
-
-Please discuss major changes via issues first.
+[Latest Release](https://github.com/DotNetRussell/CyberDeck/releases/latest)
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more details (or add one if missing).
-
-## Acknowledgments
-
-- Built with love by [@DotNetRussell](https://x.com/DotNetRussell).
-- Inspired by classic cyberpunk tools and the need for a hacker's quick-reference deck.
-
----
-
-⭐ Star the repo if you find it useful! Questions? Open an issue.
-=======
->>>>>>> Stashed changes
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
