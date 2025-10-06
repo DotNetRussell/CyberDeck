@@ -2,6 +2,8 @@
 
 CyberDeck is a Python application designed as a portable, searchable reference tool for cybersecurity professionals. It organizes common hacking commands into intuitive categories, making it easy to browse, view details, and copy snippets to your clipboard. The goal is to create the ultimate "pocketbook" companion for red teamers, pentesters, and bug bounty hunters—always ready for on-the-go reference.
 
+A retro-styled terminal-based "pocketbook" for hackers, featuring a curated collection of 136+ useful penetration testing and security research commands. Built with a teletype-inspired Text User Interface (TUI) for quick reference during engagements.
+
 Key highlights:
 - **Retro Aesthetic**: Green-on-black teletype UI for that cyberpunk vibe.
 - **Offline-First**: No internet required; all commands are local.
@@ -13,10 +15,9 @@ Key highlights:
 [![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
 [![Command Detail View](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)](https://pbs.twimg.com/media/G178iGPWUAAyuZs.png)
 
-A retro-styled terminal-based "pocketbook" for hackers, featuring a curated collection of 136+ useful penetration testing and security research commands. Built with a teletype-inspired Text User Interface (TUI) for quick reference during engagements.
+
 
 ## Overview
-
 
 
 Watch a quick demo of the interface in action: [Video Demo](https://x.com/DotNetRussell/status/1972385080904761732).
