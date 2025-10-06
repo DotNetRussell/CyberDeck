@@ -1,5 +1,4 @@
 # CyberDeck
-<<<<<<< Updated upstream
 
 [![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
 [![PowerShell Commands](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)](https://pbs.twimg.com/media/G178bjIXIAAVZBe.png)
