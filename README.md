@@ -1,5 +1,12 @@
 # CyberDeck
 
+CyberDeck is a Python application designed as a portable, searchable reference tool for cybersecurity professionals. It organizes common hacking commands into intuitive categories, making it easy to browse, view details, and copy snippets to your clipboard. The goal is to create the ultimate "pocketbook" companion for red teamers, pentesters, and bug bounty hunters—always ready for on-the-go reference.
+
+Key highlights:
+- **Retro Aesthetic**: Green-on-black teletype UI for that cyberpunk vibe.
+- **Offline-First**: No internet required; all commands are local.
+- **Expandable Design**: Simple structure for adding new commands and categories.
+
 [Latest Release](https://github.com/DotNetRussell/CyberDeck/releases/latest)
 
 [![Categories Menu](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)](https://pbs.twimg.com/media/G178ZDLWAAAhGlW.png)
@@ -10,12 +17,7 @@ A retro-styled terminal-based "pocketbook" for hackers, featuring a curated coll
 
 ## Overview
 
-CyberDeck is an early-stage Python application designed as a portable, searchable reference tool for cybersecurity professionals. It organizes common hacking commands into intuitive categories, making it easy to browse, view details, and copy snippets to your clipboard. The goal is to create the ultimate "pocketbook" companion for red teamers, pentesters, and bug bounty hunters—always ready for on-the-go reference.
 
-Key highlights:
-- **Retro Aesthetic**: Green-on-black teletype UI for that cyberpunk vibe.
-- **Offline-First**: No internet required; all commands are local.
-- **Expandable Design**: Simple structure for adding new commands and categories.
 
 Watch a quick demo of the interface in action: [Video Demo](https://x.com/DotNetRussell/status/1972385080904761732).
 
