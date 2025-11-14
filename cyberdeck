@@ -149,12 +149,21 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
         do_animate = settings['animation_enabled']
     else:
         do_animate = animate
-    safe_text = ''.join(c if 32 <= ord(c) <= 126 else '' for c in text)
+
+    # Special case: empty string = blank line
+    if text == "":
+        max_y, _ = stdscr.getmaxyx()
+        current_y = y
+        if current_y < max_y:
+            # Just advance the cursor by one line
+            return current_y + 1
+        return current_y
+
+    safe_text = ''.join(c if 32 <= ord(c) <= 126 else ' ' for c in text)  # Keep spaces!
     max_y, max_x = stdscr.getmaxyx()
-    # Apply horizontal margins to effective width
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-    max_width = effective_max_x - 4  # Additional padding inside margins
-    
+    max_width = effective_max_x - 4
+
     lines = []
     current_line = ""
     for word in safe_text.split():
@@ -167,22 +176,22 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
             current_line = word
     if current_line:
         lines.append(current_line)
-    
+
     if center_vertically:
         total_lines = len(lines)
         y = (max_y - total_lines) // 2
         if y < 0:
             y = 0
-    
+
     current_y = y
     for line in lines:
         if current_y >= max_y:
             log_error(f"Text wrapping exceeded terminal height at y={current_y}: {line}")
             break
-        # Apply horizontal centering with margins
         x = x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X
         if x < BORDER_MARGIN_X:
             x = BORDER_MARGIN_X
+
         if not do_animate:
             try:
                 stdscr.addstr(current_y, x, line, color_pair)
@@ -190,7 +199,7 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
                 log_error(f"Failed to display text (non-animated) at y={current_y}, x={x}: {str(e)}")
             current_y += 1
             continue
-        
+
         try:
             for char in line:
                 if current_y >= max_y:
@@ -206,9 +215,9 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
                 stdscr.addstr(current_y, x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X, line, color_pair)
                 current_y += 1
             except Exception as e2:
-                log_error(f"Failed to display text at y={current_y}, x={x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X}: {str(e)} / {str(e2)}")
+                log_error(f"Failed to display text at y={current_y}: {str(e)} / {str(e2)}")
                 current_y += 1
-    
+
     return current_y
 
 def boot_sequence(stdscr):
@@ -362,13 +371,114 @@ def list_menu(stdscr, title, items, get_text):
         elif key == 27:
             return None
 
-def show_details(stdscr, cmd):
-    """Show command details screen with copy to clipboard option, updated format."""
-    color_pair = get_color_pair()
+def get_command_by_id(commands, cmd_id):
+    """Return the command dict with matching id or None."""
+    for cmd in commands:
+        if cmd.get("id") == cmd_id:
+            return cmd
+    return None
+
+def _show_msg(stdscr, message):
+    """Display a centered message and wait for any key."""
     max_y, max_x = stdscr.getmaxyx()
-    # Build lines with new format: Name:\nDescription (wrapped by type_text)\n\nCOMMAND: ...
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_width = effective_max_x - 4
     lines = [
         ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+        ("", 0),
+        ("", 0),
+        (message, 0)
+    ]
+    total = sum(get_wrapped_line_count(t, max_width) for t, _ in lines)
+    start_y = BORDER_MARGIN_Y + (max_y - (2 * BORDER_MARGIN_Y) - total) // 2
+    stdscr.clear()
+    y = start_y
+    color_pair = get_color_pair()
+    for txt, bold in lines:
+        y = type_text(stdscr, y, txt, color_pair | (curses.A_BOLD if bold else 0), animate=False)
+    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1,
+              "PRESS ANY KEY TO CONTINUE.", color_pair, animate=False)
+    stdscr.refresh()
+    stdscr.getch()
+
+def _related_menu(stdscr, names, commands):
+    """
+    Very small list_menu (max 6 visible items) that returns the selected command dict
+    or None if the user backs out.
+    """
+    if not names:
+        return None
+
+    current = 0
+    max_row = len(names) - 1
+    scroll = 0
+    max_visible = 6
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_width = effective_max_x - 4
+
+    while True:
+        # ----- compute vertical centering -----
+        header = "=== RELATED COMMANDS ==="
+        header_h = get_wrapped_line_count(header, max_width)
+        visible_h = min(max_visible, len(names))
+        total_h = header_h + 1 + visible_h + 1   # +1 spacing, +1 instruction
+        start_y = BORDER_MARGIN_Y + (max_y - (2 * BORDER_MARGIN_Y) - total_h) // 2
+        if start_y < BORDER_MARGIN_Y:
+            start_y = BORDER_MARGIN_Y
+
+        stdscr.clear()
+        y = start_y
+        y = type_text(stdscr, y, header, color_pair | curses.A_BOLD, animate=False)
+        y += 1
+
+        # ----- draw visible items -----
+        for i in range(max_visible):
+            idx = scroll + i
+            if idx > max_row:
+                break
+            attr = color_pair | (curses.A_REVERSE if idx == current else 0)
+            y = type_text(stdscr, y, f"  {names[idx]}", attr, animate=False)
+
+        # ----- instruction -----
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1,
+                  "UP/DOWN NAVIGATE • ENTER SELECT • ESC BACK",
+                  color_pair, animate=False)
+        stdscr.refresh()
+
+        k = stdscr.getch()
+        if k == curses.KEY_UP and current > 0:
+            current -= 1
+        elif k == curses.KEY_DOWN and current < max_row:
+            current += 1
+        elif k == 10:                     # ENTER
+            return commands[current]
+        elif k == 27:                     # ESC
+            return None
+
+        # keep current row visible
+        if current < scroll:
+            scroll = current
+        elif current >= scroll + max_visible:
+            scroll = current - max_visible + 1
+
+def show_details(stdscr, cmd, all_commands):
+    """
+    Show command details + optional “Related Commands” list.
+    all_commands – the full list of commands loaded from commands.json
+    """
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    max_width = effective_max_x - 4
+
+    # Build static part of the screen (same layout as before)
+    static_lines = [
+        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
+        ("", 0),
+        ("", 0),
         (f"{cmd['Name']}:", curses.A_BOLD),
         ("", 0),
         ("", 0),
@@ -380,85 +490,86 @@ def show_details(stdscr, cmd):
         ("", 0),
         (f"COMMAND: {cmd['Command']}", curses.A_BOLD)
     ]
-    # Vertical centering with margins
-    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
-    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-    max_width = effective_max_x - 4
-    
+
+    # ------------------------------------------------------------------
+    # 2-a. Build the “Related Commands” menu (only if there are any)
+    # ------------------------------------------------------------------
+    related_ids = cmd.get("related", [])
+    related_cmds = [get_command_by_id(all_commands, rid) for rid in related_ids]
+    related_cmds = [rc for rc in related_cmds if rc]               # drop missing
+
+    related_menu_items = [rc['Name'] for rc in related_cmds]
+
+    # ------------------------------------------------------------------
+    # 2-b. Main loop – redraw screen, handle keys
+    # ------------------------------------------------------------------
     while True:
-        # Precompute total content lines
-        total_content_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in lines)
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
+        # ----- compute total height for vertical centering -----
+        total_lines = sum(get_wrapped_line_count(txt, max_width) for txt, _ in static_lines)
+
+        if related_cmds:
+            # reserve space: 6 blank lines + header + up to 5 related items
+            total_lines += 6 + 1 + min(len(related_menu_items), 5)
+
+        start_y = BORDER_MARGIN_Y + (effective_max_y - total_lines) // 2
         if start_y < BORDER_MARGIN_Y:
             start_y = BORDER_MARGIN_Y
-        
+
         stdscr.clear()
-        current_y = start_y
-        for text, bold in lines:
-            if current_y >= max_y - BORDER_MARGIN_Y - 1:
-                log_error(f"Details screen exceeded terminal height at y={current_y}: {text}")
+        cur_y = start_y
+
+        # ----- draw static part -----
+        for txt, bold in static_lines:
+            if cur_y >= max_y - BORDER_MARGIN_Y - 1:
                 break
             attr = color_pair | (curses.A_BOLD if bold else 0)
-            current_y = type_text(stdscr, current_y, text, attr, animate=False)
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS C TO COPY, ANY OTHER KEY TO RETURN.", color_pair, animate=False)
+            cur_y = type_text(stdscr, cur_y, txt, attr, animate=False)
+
+        # ----- draw related-commands block (if any) -----
+        if related_cmds:
+            # Add 6 blank lines of padding
+            cur_y += 6
+            cur_y = type_text(stdscr, cur_y,
+                              "RELATED COMMANDS (press R to browse):",
+                              color_pair | curses.A_BOLD,
+                              animate=False)
+
+            # simple static list – max 5 lines
+            visible = related_menu_items[:5]
+            for name in visible:
+                cur_y = type_text(stdscr, cur_y, f"  • {name}", color_pair, animate=False)
+
+        # ----- bottom instruction line -----
+        instr = "PRESS C TO COPY, R FOR RELATED, ANY OTHER KEY TO RETURN."
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr,
+                  color_pair, animate=False)
         stdscr.refresh()
+
+        # ----- input handling -----
         key = stdscr.getch()
-        if key == ord('c') or key == ord('C'):
+
+        # C – copy command
+        if key in (ord('c'), ord('C')):
             if pyperclip:
                 try:
                     pyperclip.copy(cmd['Command'])
-                    stdscr.clear()
-                    message_lines = [
-                        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-                        ("COMMAND COPIED TO CLIPBOARD.", 0)
-                    ]
-                    total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-                    start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-                    if start_y < BORDER_MARGIN_Y:
-                        start_y = BORDER_MARGIN_Y
-                    current_y = start_y
-                    for text, bold in message_lines:
-                        attr = color_pair | (curses.A_BOLD if bold else 0)
-                        current_y = type_text(stdscr, current_y, text, attr, animate=False)
-                    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-                    stdscr.refresh()
-                    stdscr.getch()
+                    _show_msg(stdscr, "COMMAND COPIED TO CLIPBOARD.")
                 except Exception as e:
-                    stdscr.clear()
-                    message_lines = [
-                        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-                        (f"ERROR: FAILED TO COPY: {str(e).upper()}", 0)
-                    ]
-                    total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-                    start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-                    if start_y < BORDER_MARGIN_Y:
-                        start_y = BORDER_MARGIN_Y
-                    current_y = start_y
-                    for text, bold in message_lines:
-                        attr = color_pair | (curses.A_BOLD if bold else 0)
-                        current_y = type_text(stdscr, current_y, text, attr, animate=False)
-                    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-                    stdscr.refresh()
-                    stdscr.getch()
+                    _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
             else:
-                stdscr.clear()
-                message_lines = [
-                    ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-                    ("ERROR: PYPERCLIP NOT INSTALLED.", 0)
-                ]
-                total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-                start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-                if start_y < BORDER_MARGIN_Y:
-                    start_y = BORDER_MARGIN_Y
-                current_y = start_y
-                for text, bold in message_lines:
-                    attr = color_pair | (curses.A_BOLD if bold else 0)
-                    current_y = type_text(stdscr, current_y, text, attr, animate=False)
-                type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-                stdscr.refresh()
-                stdscr.getch()
-        else:
-            break
+                _show_msg(stdscr, "ERROR: PYPERCLIP NOT INSTALLED.")
+            continue
+
+        # R – open related-commands menu
+        if related_cmds and key in (ord('r'), ord('R')):
+            selected = _related_menu(stdscr, related_menu_items, related_cmds)
+            if selected is not None:
+                # recurse into the selected command’s details
+                show_details(stdscr, selected, all_commands)
+            continue
+
+        # any other key – exit details screen
+        break
 
 def run_commands(stdscr):
     """Handle the Commands menu with categories and commands."""
@@ -489,6 +600,9 @@ def run_commands(stdscr):
     with open(COMMANDS_FILE, 'r') as f:
         data = json.load(f)
 
+    # keep the full list for the related-lookup
+    all_commands = data['commands']
+
     categories = {cat['id']: cat['Name'] for cat in data['Categories']}
     commands = data['commands']
     groups = defaultdict(list)
@@ -498,19 +612,23 @@ def run_commands(stdscr):
     category_ids = sorted(groups.keys(), key=lambda cid: categories[cid].lower())
 
     while True:
-        selected_cat = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids, lambda cid: categories[cid])
+        selected_cat = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids,
+                                 lambda cid: categories[cid])
         if selected_cat is None:
             return
+
         category_commands = sorted(groups[selected_cat], key=lambda c: c['Name'])
         selected_cmd = list_menu(
             stdscr,
             categories[selected_cat],
             category_commands,
-            lambda cmd: f"{cmd['Name']} ({cmd['OS']})",  # Include OS in display
+            lambda cmd: f"{cmd['Name']} ({cmd['OS']})",
         )
         if selected_cmd is None:
             continue
-        show_details(stdscr, selected_cmd)
+
+        # *** NEW *** pass the full command list so related can be resolved
+        show_details(stdscr, selected_cmd, all_commands)
 
 def run_search(stdscr):
     """Handle the Search menu with query and results."""
@@ -615,7 +733,7 @@ def run_search(stdscr):
         lambda cmd: f"{cmd['Name']} ({cmd['OS']})",  # Include OS in display
     )
     if selected_cmd is not None:
-        show_details(stdscr, selected_cmd)
+        show_details(stdscr, selected_cmd, data['commands'])
 
 def run_settings(stdscr, color_pair):
     """Handle the Settings menu with scrolling support and margins."""
