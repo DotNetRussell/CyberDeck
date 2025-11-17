@@ -230,8 +230,7 @@ def boot_sequence(stdscr):
         "CPU: 8086 PROCESSOR DETECTED",
         "STORAGE: 512KB AVAILABLE",
         "INTERFACE: CRT TERMINAL v1.0",
-        "BOOTING MU/TH/UR OS v2.1.7",
-        "INITIALIZATION COMPLETE"
+        "BOOTING MU/TH/UR OS v2.1.7"        
     ]
     color_pair = get_color_pair()
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
@@ -244,6 +243,13 @@ def boot_sequence(stdscr):
             log_error(f"Boot sequence exceeded terminal height at y={current_y}: {line}")
             break
         current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
+
+        # Auto-update on startup if enabled
+    if settings.get('auto_update_on_startup', True):
+        type_text(stdscr, current_y, "CHECKING FOR UPDATES...", color_pair | curses.A_BOLD)
+        force_update_all()
+    type_text(stdscr, current_y, "SYSTEM READY", color_pair)
+    type_text(stdscr, current_y, "INITIALIZATION COMPLETE", color_pair)
     type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO CONTINUE", color_pair)
     stdscr.refresh()
     stdscr.getch()
@@ -1356,7 +1362,7 @@ def menu(stdscr):
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    menu_items = ["COMMANDS", "SEARCH", "COOKBOOK", "SETTINGS", "SHUTDOWN"]  # COOKBOOK ADDED
+    menu_items = ["COOKBOOK","COMMANDS", "SEARCH", "SETTINGS", "SHUTDOWN"]  
     current_row = 0
     max_row = len(menu_items) - 1
     color_pair = get_color_pair()
@@ -1421,11 +1427,11 @@ def menu(stdscr):
         elif key == curses.KEY_DOWN and current_row < max_row:
             current_row += 1
         elif key == 10:
-            if current_row == 0:
+            if current_row == 1:
                 run_commands(stdscr)
-            elif current_row == 1:
-                run_search(stdscr)
             elif current_row == 2:
+                run_search(stdscr)
+            elif current_row == 0:
                 run_cookbook(stdscr)  # NEW
             elif current_row == 3:
                 color_pair = run_settings(stdscr, color_pair)
@@ -1437,9 +1443,6 @@ def menu(stdscr):
             pass
 
 def main():
-    # Auto-update on startup if enabled
-    if settings.get('auto_update_on_startup', True):
-        force_update_all()
     if curses is None:
         print("ERROR: 'CURSES' LIBRARY NOT AVAILABLE. FALLING BACK TO COMMAND-LINE MODE.")
         parser = argparse.ArgumentParser(
