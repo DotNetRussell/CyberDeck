@@ -1154,8 +1154,21 @@ def run_search(stdscr):
             elif recipe_row >= recipe_scroll + list_height:
                 recipe_scroll = recipe_row - list_height + 1
 
+import hashlib
+
+def get_local_sha(file_path):
+    """Get SHA1 hash of a local file for comparison."""
+    try:
+        sha1 = hashlib.sha1()
+        with open(file_path, 'rb') as f:
+            while chunk := f.read(4096):
+                sha1.update(chunk)
+        return sha1.hexdigest()
+    except:
+        return None
+
 def force_update_all():
-    """Force update commands.json and copy recipes from ./recipes/ if exists."""
+    """Force update commands.json and all recipes from GitHub."""
     updated = False
 
     # --- Update commands.json ---
@@ -1177,19 +1190,33 @@ def force_update_all():
     except Exception as e:
         log_error(f"Failed to update commands.json: {e}")
 
-    # --- Copy recipes from ./recipes/ ---
-    local_recipes_dir = os.path.join(os.getcwd(), "recipes")
-    if os.path.exists(local_recipes_dir) and os.path.isdir(local_recipes_dir):
-        try:
-            os.makedirs(RECIPES_DIR, exist_ok=True)
-            for item in os.listdir(local_recipes_dir):
-                src = os.path.join(local_recipes_dir, item)
-                dst = os.path.join(RECIPES_DIR, item)
-                if os.path.isfile(src) and item.endswith(".json") and (not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst)):
-                    shutil.copy2(src, dst)
+    # --- Update recipes from GitHub ---
+    os.makedirs(RECIPES_DIR, exist_ok=True)
+    try:
+        # Fetch list of files from GitHub API
+        api_url = "https://api.github.com/repos/DotNetRussell/CyberDeck/contents/recipes?ref=main"
+        response = requests.get(api_url, timeout=5)
+        response.raise_for_status()
+        files = response.json()
+
+        for item in files:
+            if item['type'] == 'file' and item['name'].endswith('.json'):
+                filename = item['name']
+                raw_url = item['download_url']  # Direct raw URL
+                local_path = os.path.join(RECIPES_DIR, filename)
+
+                # Download and check if newer (by SHA or manual date check)
+                resp = requests.get(raw_url, timeout=5)
+                resp.raise_for_status()
+                remote_data = resp.json()
+
+                # If local doesn't exist or remote SHA differs, update
+                if not os.path.exists(local_path) or item['sha'] != get_local_sha(local_path):
+                    with open(local_path, 'w') as f:
+                        json.dump(remote_data, f, indent=4)
                     updated = True
-        except Exception as e:
-            log_error(f"Failed to copy recipes: {e}")
+    except Exception as e:
+        log_error(f"Failed to update recipes from GitHub: {e}")
 
     return updated
 
