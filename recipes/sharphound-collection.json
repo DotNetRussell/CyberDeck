@@ -1,0 +1,31 @@
+{
+	"name": "Data Harvesting with SharpHound",
+	"description": "Collect structured AD data for graph-based attack path analysis.",
+	"tools": [
+		{
+			"name": "SharpHound",
+			"description": "C# data collector for BloodHound",
+			"url": "https://github.com/BloodHoundAD/SharpHound/releases"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Full Collection",
+			"command": "SharpHound.exe -c All --zipfilename domain_data.zip --domain corp.local --encryptzip",
+			"description": "Gather all object types and compress."
+		},
+		{
+			"index": 2,
+			"name": "Low-Noise Mode",
+			"command": "SharpHound.exe -c Session,LocalGroup --stealth --throttle 5000",
+			"description": "Reduce detection risk."
+		},
+		{
+			"index": 3,
+			"name": "Exfiltration Prep",
+			"command": "certutil -encode domain_data.zip data.b64",
+			"description": "Encode for transfer."
+		}
+	]
+}

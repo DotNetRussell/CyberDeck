@@ -1,0 +1,25 @@
+{
+	"name": "Excessive Permission Discovery",
+	"description": "Uncover misconfigured ACLs granting unintended control over AD objects.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "PowerView ACL Sweep",
+			"command": "Find-InterestingDomainAcl -ResolveGUIDs | Where {$_.ActiveDirectoryRights -match 'GenericAll|WriteDacl'} | Select ObjectDN,IdentityReference,ActiveDirectoryRights",
+			"description": "Find full control or DACL modification rights."
+		},
+		{
+			"index": 2,
+			"name": "Specific Object ACL",
+			"command": "dsacls \"CN=Users,DC=corp,DC=local\" | findstr /i \"Allow.*Everyone\"",
+			"description": "Inspect permissions on a target container."
+		},
+		{
+			"index": 3,
+			"name": "Current User Opportunities",
+			"command": "Get-Acl \"AD:\\$((Get-ADUser $env:USERNAME).DistinguishedName)\" | Select -Expand Access | Where {$_.IdentityReference -match $env:USERNAME}",
+			"description": "Check self-modification rights."
+		}
+	]
+}

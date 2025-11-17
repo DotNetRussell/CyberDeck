@@ -1,0 +1,25 @@
+{
+	"name": "Kerberos Ticket Lifecycle",
+	"description": "Map the Kerberos authentication process and inspect cached tickets.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Request TGT (Linux)",
+			"command": "kinit user@CORP.LOCAL",
+			"description": "Obtain initial ticket-granting ticket."
+		},
+		{
+			"index": 2,
+			"name": "View Cache",
+			"command": "klist",
+			"description": "List current Kerberos tickets."
+		},
+		{
+			"index": 3,
+			"name": "Windows Inspection",
+			"command": "Rubeus.exe triage",
+			"description": "Enumerate in-memory tickets."
+		}
+	]
+}

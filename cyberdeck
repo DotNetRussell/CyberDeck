@@ -18,13 +18,15 @@ except ImportError:
 # Default settings
 default_settings = {
     'text_color': 'yellow',
-    'animation_enabled': True
+    'animation_enabled': True,
+    'auto_update_on_startup': True   
 }
 
-# Cyberdeck directory in user's home
+# Cyberdeck directories
 CYBERDECK_DIR = os.path.join(os.path.expanduser("~"), ".cyberdeck")
 SETTINGS_FILE = os.path.join(CYBERDECK_DIR, "settings.json")
 COMMANDS_FILE = os.path.join(CYBERDECK_DIR, "commands.json")
+RECIPES_DIR = os.path.join(CYBERDECK_DIR, "recipes")  
 ERROR_LOG = os.path.join(CYBERDECK_DIR, "error.log")
 
 # Margin settings for borders
@@ -150,16 +152,14 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
     else:
         do_animate = animate
 
-    # Special case: empty string = blank line
     if text == "":
         max_y, _ = stdscr.getmaxyx()
         current_y = y
         if current_y < max_y:
-            # Just advance the cursor by one line
             return current_y + 1
         return current_y
 
-    safe_text = ''.join(c if 32 <= ord(c) <= 126 else ' ' for c in text)  # Keep spaces!
+    safe_text = ''.join(c if 32 <= ord(c) <= 126 else ' ' for c in text)
     max_y, max_x = stdscr.getmaxyx()
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_width = effective_max_x - 4
@@ -234,7 +234,6 @@ def boot_sequence(stdscr):
         "INITIALIZATION COMPLETE"
     ]
     color_pair = get_color_pair()
-    # Vertical centering with top/bottom margins
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     start_y = BORDER_MARGIN_Y + (effective_max_y - len(lines) - 1) // 2
     if start_y < BORDER_MARGIN_Y:
@@ -264,7 +263,6 @@ def shutdown_sequence(stdscr):
         "SHUTDOWN COMPLETE"
     ]
     color_pair = get_color_pair()
-    # Vertical centering with margins
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     start_y = BORDER_MARGIN_Y + (effective_max_y - len(lines) - 1) // 2
     if start_y < BORDER_MARGIN_Y:
@@ -279,6 +277,7 @@ def shutdown_sequence(stdscr):
     type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "SHUTDOWN COMPLETE", color_pair)
     stdscr.refresh()
     time.sleep(1)
+
 
 def get_color_pair():
     """Return the color pair based on settings."""
@@ -301,7 +300,6 @@ def list_menu(stdscr, title, items, get_text):
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
     
-    # Apply horizontal margins to effective width
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_item_width = max(len(get_text(item)) + 2 for item in items)
     if max_item_width > effective_max_x:
@@ -310,16 +308,14 @@ def list_menu(stdscr, title, items, get_text):
     if x_offset < BORDER_MARGIN_X:
         x_offset = BORDER_MARGIN_X
     
-    # Calculate max visible items (reserve lines for header, title, instruction + margins)
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
-    max_visible_items = effective_max_y - 4  # Header, title, spacing, instruction
+    max_visible_items = effective_max_y - 4
     if max_visible_items < 1:
         max_visible_items = 1
     
     max_width = effective_max_x - 4
     
     while True:
-        # Precompute total content lines for accurate centering
         header_text = "=== MU/TH/UR INTERFACE ==="
         title_text = f"== {title.upper()} =="
         item_texts = []
@@ -330,7 +326,7 @@ def list_menu(stdscr, title, items, get_text):
         header_lines = get_wrapped_line_count(header_text, max_width)
         title_lines = get_wrapped_line_count(title_text, max_width)
         item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
-        total_content_lines = header_lines + title_lines + 1 + sum(item_line_counts)  # +1 for spacing after title
+        total_content_lines = header_lines + title_lines + 1 + sum(item_line_counts)
         
         start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
         if start_y < BORDER_MARGIN_Y:
@@ -339,7 +335,6 @@ def list_menu(stdscr, title, items, get_text):
         stdscr.clear()
         color_pair = get_color_pair()
         
-        # Adjust scroll_offset to keep current_row visible
         if current_row < scroll_offset:
             scroll_offset = current_row
         elif current_row >= scroll_offset + max_visible_items:
@@ -402,10 +397,6 @@ def _show_msg(stdscr, message):
     stdscr.getch()
 
 def _related_menu(stdscr, names, commands):
-    """
-    Very small list_menu (max 6 visible items) that returns the selected command dict
-    or None if the user backs out.
-    """
     if not names:
         return None
 
@@ -419,11 +410,10 @@ def _related_menu(stdscr, names, commands):
     max_width = effective_max_x - 4
 
     while True:
-        # ----- compute vertical centering -----
         header = "=== RELATED COMMANDS ==="
         header_h = get_wrapped_line_count(header, max_width)
         visible_h = min(max_visible, len(names))
-        total_h = header_h + 1 + visible_h + 1   # +1 spacing, +1 instruction
+        total_h = header_h + 1 + visible_h + 1
         start_y = BORDER_MARGIN_Y + (max_y - (2 * BORDER_MARGIN_Y) - total_h) // 2
         if start_y < BORDER_MARGIN_Y:
             start_y = BORDER_MARGIN_Y
@@ -433,7 +423,6 @@ def _related_menu(stdscr, names, commands):
         y = type_text(stdscr, y, header, color_pair | curses.A_BOLD, animate=False)
         y += 1
 
-        # ----- draw visible items -----
         for i in range(max_visible):
             idx = scroll + i
             if idx > max_row:
@@ -441,7 +430,6 @@ def _related_menu(stdscr, names, commands):
             attr = color_pair | (curses.A_REVERSE if idx == current else 0)
             y = type_text(stdscr, y, f"  {names[idx]}", attr, animate=False)
 
-        # ----- instruction -----
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1,
                   "UP/DOWN NAVIGATE • ENTER SELECT • ESC BACK",
                   color_pair, animate=False)
@@ -452,124 +440,445 @@ def _related_menu(stdscr, names, commands):
             current -= 1
         elif k == curses.KEY_DOWN and current < max_row:
             current += 1
-        elif k == 10:                     # ENTER
+        elif k == 10:
             return commands[current]
-        elif k == 27:                     # ESC
+        elif k == 27:
             return None
 
-        # keep current row visible
         if current < scroll:
             scroll = current
         elif current >= scroll + max_visible:
             scroll = current - max_visible + 1
 
 def show_details(stdscr, cmd, all_commands):
-    """
-    Show command details + optional “Related Commands” list.
-    all_commands – the full list of commands loaded from commands.json
-    """
+    """Command detail view – left: related commands (scrollable), right: details."""
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-    max_width = effective_max_x - 4
 
-    # Build static part of the screen (same layout as before)
-    static_lines = [
-        ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-        ("", 0),
-        ("", 0),
-        (f"{cmd['Name']}:", curses.A_BOLD),
-        ("", 0),
-        ("", 0),
-        (cmd['Description'], 0),
-        ("", 0),
-        ("", 0),
-        (f"OS: {cmd['OS']}", 0),
-        ("", 0),
-        ("", 0),
-        (f"COMMAND: {cmd['Command']}", curses.A_BOLD)
+    # ------------------------------------------------------------------ #
+    # 1. Header (left-aligned)
+    # ------------------------------------------------------------------ #
+    header_lines = [
+        "=== MU/TH/UR INTERFACE ===",
+        "",
+        cmd['Name'].upper(),
+        cmd['Description'],
+        "",
+        f"OS: {cmd['OS']}",   # <-- "OS:" is now bold
+        "",
+        "COMMAND:",
+        cmd['Command'],
+        "",                   # ← extra blank line
+        "",                   # ← second blank line
+        "RELATED COMMANDS",   # ← bold header
     ]
 
-    # ------------------------------------------------------------------
-    # 2-a. Build the “Related Commands” menu (only if there are any)
-    # ------------------------------------------------------------------
+    # ------------------------------------------------------------------ #
+    # 2. Related commands
+    # ------------------------------------------------------------------ #
     related_ids = cmd.get("related", [])
     related_cmds = [get_command_by_id(all_commands, rid) for rid in related_ids]
-    related_cmds = [rc for rc in related_cmds if rc]               # drop missing
+    related_cmds = [rc for rc in related_cmds if rc]
+    related_names = [rc['Name'] for rc in related_cmds]
 
-    related_menu_items = [rc['Name'] for rc in related_cmds]
+    # ------------------------------------------------------------------ #
+    # 3. Layout
+    # ------------------------------------------------------------------ #
+    list_width     = 40
+    detail_start_x = BORDER_MARGIN_X + list_width + 3
+    detail_width   = effective_max_x - list_width - 3
+    if detail_width < 30:
+        detail_width = 30
+        list_width   = effective_max_x - detail_width - 3
 
-    # ------------------------------------------------------------------
-    # 2-b. Main loop – redraw screen, handle keys
-    # ------------------------------------------------------------------
+    header_height  = len(header_lines)
+    list_max_y     = effective_max_y - header_height - 3
+    if list_max_y < 3:
+        list_max_y = 3
+
+    current_row    = 0
+    scroll_offset  = 0
+    max_row        = len(related_cmds) - 1 if related_cmds else -1
+
+    # ------------------------------------------------------------------ #
+    # 4. Main loop
+    # ------------------------------------------------------------------ #
     while True:
-        # ----- compute total height for vertical centering -----
-        total_lines = sum(get_wrapped_line_count(txt, max_width) for txt, _ in static_lines)
-
-        if related_cmds:
-            # reserve space: 6 blank lines + header + up to 5 related items
-            total_lines += 6 + 1 + min(len(related_menu_items), 5)
-
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_lines) // 2
-        if start_y < BORDER_MARGIN_Y:
-            start_y = BORDER_MARGIN_Y
-
         stdscr.clear()
-        cur_y = start_y
 
-        # ----- draw static part -----
-        for txt, bold in static_lines:
-            if cur_y >= max_y - BORDER_MARGIN_Y - 1:
+        # ---- Header ----
+        y = BORDER_MARGIN_Y
+        for line in header_lines:
+            if y >= BORDER_MARGIN_Y + header_height:
                 break
-            attr = color_pair | (curses.A_BOLD if bold else 0)
-            cur_y = type_text(stdscr, cur_y, txt, attr, animate=False)
+            is_bold = line in (
+                "=== MU/TH/UR INTERFACE ===",
+                cmd['Name'].upper(),
+                "OS:",                     # ← bold
+                "COMMAND:",
+                "RELATED COMMANDS"         # ← bold
+            )
+            attr = color_pair | (curses.A_BOLD if is_bold else 0)
+            try:
+                stdscr.addstr(y, BORDER_MARGIN_X, line, attr)
+            except:
+                pass
+            y += 1
 
-        # ----- draw related-commands block (if any) -----
+        list_start_y = y
+
+        # ---- Separator ----
+        sep_x = BORDER_MARGIN_X + list_width + 1
+        for row in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
+            try:
+                stdscr.addch(row, sep_x, '│', color_pair)
+            except:
+                pass
+
+        # ---- Left: Related Commands (scrollable) ----
         if related_cmds:
-            # Add 6 blank lines of padding
-            cur_y += 6
-            cur_y = type_text(stdscr, cur_y,
-                              "RELATED COMMANDS (press R to browse):",
-                              color_pair | curses.A_BOLD,
-                              animate=False)
+            visible = 0
+            for idx in range(scroll_offset, min(scroll_offset + list_max_y, len(related_cmds))):
+                name = related_names[idx]
+                if len(name) > list_width - 2:
+                    name = name[:list_width-5] + "..."
+                attr = color_pair | (curses.A_REVERSE if idx == current_row else 0)
+                try:
+                    stdscr.addstr(list_start_y + visible, BORDER_MARGIN_X + 2, name, attr)
+                except:
+                    pass
+                visible += 1
 
-            # simple static list – max 5 lines
-            visible = related_menu_items[:5]
-            for name in visible:
-                cur_y = type_text(stdscr, cur_y, f"  • {name}", color_pair, animate=False)
+            # Scrollbar
+            if len(related_cmds) > list_max_y:
+                bar_y = list_start_y + int((current_row / max_row) * list_max_y)
+                try:
+                    stdscr.addch(bar_y, BORDER_MARGIN_X + list_width - 1, '█', color_pair | curses.A_BOLD)
+                except:
+                    pass
+        else:
+            msg = "NO RELATED COMMANDS"
+            try:
+                stdscr.addstr(list_start_y, BORDER_MARGIN_X + 2, msg, color_pair)
+            except:
+                pass
 
-        # ----- bottom instruction line -----
-        instr = "PRESS C TO COPY, R FOR RELATED, ANY OTHER KEY TO RETURN."
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr,
-                  color_pair, animate=False)
+        # ---- Right: Hint (only if related exist) ----
+        if related_cmds:
+            hint = "PRESS ENTER TO VIEW"
+            try:
+                stdscr.addstr(list_start_y, detail_start_x, hint, color_pair | curses.A_BOLD)
+            except:
+                pass
+
+        # ---- Bottom instruction ----
+        instr = "UP/DOWN NAVIGATE • C TO COPY • ENTER TO VIEW • ANY KEY TO EXIT"
+        instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair,
+                  x_offset=instr_x, animate=False)
+
         stdscr.refresh()
 
-        # ----- input handling -----
+        # ------------------------------------------------------------------ #
+        # 5. Input handling
+        # ------------------------------------------------------------------ #
         key = stdscr.getch()
 
-        # C – copy command
-        if key in (ord('c'), ord('C')):
-            if pyperclip:
-                try:
-                    pyperclip.copy(cmd['Command'])
-                    _show_msg(stdscr, "COMMAND COPIED TO CLIPBOARD.")
-                except Exception as e:
-                    _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
+        # --- Arrow keys: scroll related list ---
+        if related_cmds:
+            if key == curses.KEY_UP and current_row > 0:
+                current_row -= 1
+            elif key == curses.KEY_DOWN and current_row < max_row:
+                current_row += 1
             else:
-                _show_msg(stdscr, "ERROR: PYPERCLIP NOT INSTALLED.")
-            continue
+                if key in (ord('c'), ord('C')):
+                    if pyperclip:
+                        try:
+                            pyperclip.copy(cmd['Command'])
+                            _show_msg(stdscr, "COMMAND COPIED TO CLIPBOARD.")
+                        except Exception as e:
+                            _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
+                    else:
+                        _show_msg(stdscr, "ERROR: PYPERCLIP NOT INSTALLED.")
+                    continue
+                elif key == 10:  # Enter
+                    selected = related_cmds[current_row]
+                    show_details(stdscr, selected, all_commands)
+                    continue
+                elif key != 27:
+                    continue
+                break
+        else:
+            if key in (ord('c'), ord('C')):
+                if pyperclip:
+                    try:
+                        pyperclip.copy(cmd['Command'])
+                        _show_msg(stdscr, "COMMAND COPIED TO CLIPBOARD.")
+                    except Exception as e:
+                        _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
+                else:
+                    _show_msg(stdscr, "ERROR: PYPERCLIP NOT INSTALLED.")
+                continue
+            break
 
-        # R – open related-commands menu
-        if related_cmds and key in (ord('r'), ord('R')):
-            selected = _related_menu(stdscr, related_menu_items, related_cmds)
-            if selected is not None:
-                # recurse into the selected command’s details
-                show_details(stdscr, selected, all_commands)
-            continue
+        # --- Scrolling logic ---
+        if current_row < scroll_offset:
+            scroll_offset = current_row
+        elif current_row >= scroll_offset + list_max_y:
+            scroll_offset = current_row - list_max_y + 1
 
-        # any other key – exit details screen
-        break
+# === NEW: COOKBOOK FUNCTIONALITY ===
+
+def load_recipes():
+    """Copy local ./recipes/* to ~/.cyberdeck/recipes/ if target is empty, then load all JSON recipes."""
+    local_recipes_dir = os.path.join(os.getcwd(), "recipes")
+    target_dir = RECIPES_DIR
+
+    os.makedirs(target_dir, exist_ok=True)
+
+    # Only copy if target directory is empty
+    if not os.listdir(target_dir) and os.path.exists(local_recipes_dir) and os.path.isdir(local_recipes_dir):
+        try:
+            import shutil
+            for item in os.listdir(local_recipes_dir):
+                src = os.path.join(local_recipes_dir, item)
+                dst = os.path.join(target_dir, item)
+                if os.path.isfile(src) and item.endswith(".json"):
+                    shutil.copy2(src, dst)
+        except Exception as e:
+            log_error(f"Failed to copy recipes from ./recipes/: {e}")
+
+    # Now load all JSON files from target dir
+    recipes = []
+    for filename in os.listdir(target_dir):
+        if filename.endswith(".json"):
+            filepath = os.path.join(target_dir, filename)
+            try:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                    if isinstance(data, dict) and "name" in data and "description" in data:
+                        data["__filename"] = filename
+                        recipes.append(data)
+            except Exception as e:
+                log_error(f"Failed to load recipe {filename}: {e}")
+    return sorted(recipes, key=lambda x: x["name"].lower())
+
+def show_recipe_details(stdscr, recipe):
+    """Split-screen: left = step list, right = selected step details.
+       Header (including STEPS) is left-aligned inside the centered block."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+
+    tools = recipe.get("tools", [])
+    steps = sorted(recipe.get("steps", []), key=lambda x: x.get("index", 0))
+    if not steps:
+        _show_msg(stdscr, "NO STEPS IN THIS RECIPE.")
+        return
+
+    # ------------------------------------------------------------------ #
+    # 1. Build the **left-aligned** header lines
+    # ------------------------------------------------------------------ #
+    header_lines = [
+        "=== MU/TH/UR INTERFACE ===",
+        "",
+        recipe['name'].upper(),
+        recipe['description'],
+        "",
+        "TOOLS REQUIRED:",
+    ]
+
+    for tool in tools:
+        header_lines.append(f"• {tool.get('name', 'Unnamed Tool')}")
+        url = tool.get("url", "").strip()
+        if url:
+            prefix = "→ "
+            remaining = url
+            first = True
+            while remaining:
+                chunk = remaining[:effective_max_x - len(prefix)]
+                if first:
+                    header_lines.append(prefix + chunk)
+                    first = False
+                else:
+                    header_lines.append("  " + chunk)
+                remaining = remaining[len(chunk):]
+        desc = tool.get("description", "").strip()
+        if desc:
+            prefix = "↳ "
+            remaining = desc
+            first = True
+            while remaining:
+                chunk = remaining[:effective_max_x - len(prefix)]
+                if first:
+                    header_lines.append(prefix + chunk)
+                    first = False
+                else:
+                    header_lines.append("  " + chunk)
+                remaining = remaining[len(chunk):]
+        header_lines.append("")
+
+    header_lines.append("STEPS:")
+    header_lines.append("")          # blank line before the scrollable list
+
+    # ------------------------------------------------------------------ #
+    # 2. Layout constants
+    # ------------------------------------------------------------------ #
+    list_width      = 40
+    detail_start_x  = BORDER_MARGIN_X + list_width + 3
+    detail_width    = effective_max_x - list_width - 3
+    if detail_width < 30:
+        detail_width = 30
+        list_width   = effective_max_x - detail_width - 3
+
+    header_height   = len(header_lines)
+    list_max_y      = effective_max_y - header_height - 3   # 3 = spacing + instruction
+    if list_max_y < 3:
+        list_max_y = 3
+
+    current_row     = 0
+    scroll_offset   = 0
+    max_row         = len(steps) - 1
+
+    # ------------------------------------------------------------------ #
+    # 3. Main loop
+    # ------------------------------------------------------------------ #
+    while True:
+        stdscr.clear()
+
+        # ---- Header (left-aligned, block-centered) ----
+        block_start_x = BORDER_MARGIN_X
+        y = BORDER_MARGIN_Y
+        for line in header_lines:
+            if y >= BORDER_MARGIN_Y + header_height:
+                break
+            is_bold = line.strip() in [
+                "=== MU/TH/UR INTERFACE ===",
+                recipe['name'].upper(),
+                "TOOLS REQUIRED:",
+                "STEPS:"
+            ]
+            attr = color_pair | (curses.A_BOLD if is_bold else 0)
+            try:
+                stdscr.addstr(y, block_start_x, line, attr)
+            except:
+                pass
+            y += 1
+
+        list_start_y = y
+
+        # ---- Vertical separator ----
+        sep_x = BORDER_MARGIN_X + list_width + 1
+        for row in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
+            try:
+                stdscr.addch(row, sep_x, '│', color_pair)
+            except:
+                pass
+
+        # ---- Left: Step list (scrollable) ----
+        visible = 0
+        for idx in range(scroll_offset, min(scroll_offset + list_max_y, len(steps))):
+            step = steps[idx]
+            txt  = f"[{step.get('index', '?')}] {step.get('name', 'Unnamed')}"
+            if len(txt) > list_width - 2:
+                txt = txt[:list_width-5] + "..."
+            attr = color_pair | (curses.A_REVERSE if idx == current_row else 0)
+            try:
+                stdscr.addstr(list_start_y + visible, BORDER_MARGIN_X + 2, txt, attr)
+            except:
+                pass
+            visible += 1
+
+        # ---- Right: Selected step details ----
+        sel = steps[current_row]
+        dy  = list_start_y
+        dlines = []
+
+        dlines.append(f"STEP [{sel.get('index', '?')}]")
+        dlines.append(sel.get("name", "Unnamed Step"))
+        dlines.append("")
+
+        cmd = sel.get("command", "").strip()
+        if cmd:
+            dlines.append("COMMAND:")
+            remaining = cmd
+            while remaining:
+                dlines.append(remaining[:detail_width])
+                remaining = remaining[detail_width:]
+            dlines.append("")
+
+        desc = sel.get("description", "").strip()
+        if desc:
+            dlines.append("DESCRIPTION:")
+            for part in desc.split('\n'):
+                remaining = part.strip()
+                while remaining:
+                    dlines.append(remaining[:detail_width])
+                    remaining = remaining[detail_width:]
+
+        for line in dlines:
+            if dy >= max_y - BORDER_MARGIN_Y - 1:
+                break
+            attr = color_pair
+            if line in ("COMMAND:", "DESCRIPTION:"):
+                attr |= curses.A_BOLD
+            elif line.startswith("STEP [") or line == sel.get("name", ""):
+                attr |= curses.A_BOLD
+            try:
+                stdscr.addstr(dy, detail_start_x, line, attr)
+            except:
+                pass
+            dy += 1
+
+        # ---- Scrollbar (left panel) ----
+        if len(steps) > list_max_y:
+            bar_y = list_start_y + int((current_row / max_row) * list_max_y)
+            try:
+                stdscr.addch(bar_y, BORDER_MARGIN_X + list_width - 1, '█', color_pair | curses.A_BOLD)
+            except:
+                pass
+
+        # ---- Bottom instruction ----
+        instr = "UP/DOWN NAVIGATE • C TO COPY • ESC TO EXIT"
+        instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair,
+                  x_offset=instr_x, animate=False)
+
+        stdscr.refresh()
+
+        # ------------------------------------------------------------------ #
+        # 4. Input handling
+        # ------------------------------------------------------------------ #
+        key = stdscr.getch()
+        if key == curses.KEY_UP and current_row > 0:
+            current_row -= 1
+        elif key == curses.KEY_DOWN and current_row < max_row:
+            current_row += 1
+        elif key in (ord('c'), ord('C')):
+            cmd = sel.get("command", "").strip()
+            if cmd and pyperclip:
+                try:
+                    pyperclip.copy(cmd)
+                    _show_msg(stdscr,
+                              f"COPIED: {cmd[:50]}{'...' if len(cmd)>50 else ''}")
+                except:
+                    _show_msg(stdscr, "COPY FAILED.")
+            elif not cmd:
+                _show_msg(stdscr, "NO COMMAND.")
+            else:
+                _show_msg(stdscr, "PYPERCLIP MISSING.")
+            continue
+        elif key in (10, 27):          # ENTER / ESC
+            break
+
+        # ---- Scrolling ----
+        if current_row < scroll_offset:
+            scroll_offset = current_row
+        elif current_row >= scroll_offset + list_max_y:
+            scroll_offset = current_row - list_max_y + 1
 
 def run_commands(stdscr):
     """Handle the Commands menu with categories and commands."""
@@ -630,8 +939,45 @@ def run_commands(stdscr):
         # *** NEW *** pass the full command list so related can be resolved
         show_details(stdscr, selected_cmd, all_commands)
 
+
+
+def run_cookbook(stdscr):
+    """Scrollable cookbook menu – shows *all* recipes, wraps long titles."""
+    recipes = load_recipes()
+    if not recipes:
+        _show_msg(stdscr, "NO RECIPES FOUND IN ~/.cyberdeck/recipes/")
+        return
+
+    # --------------------------------------------------------------- #
+    # 1. Compute the exact width we have for the list items
+    # --------------------------------------------------------------- #
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)      # respect side margins
+    item_max_width  = effective_max_x - 4                 # 2 spaces + 2 for selection arrow
+
+    # --------------------------------------------------------------- #
+    # 2. Helper that returns a *wrapped* display string
+    # --------------------------------------------------------------- #
+    def wrap_name(name):
+        if len(name) <= item_max_width:
+            return name
+        # truncate with ellipsis
+        return name[:item_max_width - 3] + "..."
+
+    # --------------------------------------------------------------- #
+    # 3. Use the generic list_menu (already handles scrolling, centering, etc.)
+    # --------------------------------------------------------------- #
+    selected = list_menu(
+        stdscr,
+        "COOKBOOK",
+        recipes,
+        lambda r: wrap_name(r.get("name", "Unnamed Recipe"))
+    )
+    if selected:
+        show_recipe_details(stdscr, selected)
+
 def run_search(stdscr):
-    """Handle the Search menu with query and results."""
+    """Dual-panel search: [COMMAND] left, [RECIPE] right. Arrow keys navigate."""
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     stdscr.clear()
@@ -644,7 +990,6 @@ def run_search(stdscr):
         start_y = BORDER_MARGIN_Y
     type_text(stdscr, start_y, header_text, color_pair | curses.A_BOLD, animate=False)
     type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, prompt + "__________", color_pair, animate=False)
-    # Adjust move position with margins
     effective_prompt_x = BORDER_MARGIN_X + (effective_max_x - len(prompt + "__________")) // 2 + len(prompt)
     stdscr.move(max_y - BORDER_MARGIN_Y - 1, effective_prompt_x)
     stdscr.refresh()
@@ -656,198 +1001,327 @@ def run_search(stdscr):
         query = ""
     curses.noecho()
     if not query:
-        stdscr.clear()
-        message_lines = [
-            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-            ("NO QUERY ENTERED. PRESS ANY KEY TO RETURN.", 0)
-        ]
-        max_width = effective_max_x - 4
-        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-        if start_y < BORDER_MARGIN_Y:
-            start_y = BORDER_MARGIN_Y
-        current_y = start_y
-        for text, bold in message_lines:
-            attr = color_pair | (curses.A_BOLD if bold else 0)
-            current_y = type_text(stdscr, current_y, text, attr, animate=False)
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-        stdscr.refresh()
-        stdscr.getch()
+        _show_msg(stdscr, "NO QUERY ENTERED.")
         return
 
-    if not os.path.exists(COMMANDS_FILE):
-        stdscr.clear()
-        message_lines = [
-            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-            ("NO COMMANDS AVAILABLE FOR SEARCH. PRESS ANY KEY TO RETURN.", 0)
-        ]
-        max_width = effective_max_x - 4
-        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-        if start_y < BORDER_MARGIN_Y:
-            start_y = BORDER_MARGIN_Y
-        current_y = start_y
-        for text, bold in message_lines:
-            attr = color_pair | (curses.A_BOLD if bold else 0)
-            current_y = type_text(stdscr, current_y, text, attr, animate=False)
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-        stdscr.refresh()
-        stdscr.getch()
-        return
-
-    with open(COMMANDS_FILE, 'r') as f:
-        data = json.load(f)
-
-    commands = data['commands']
     words = query.split()
-    filtered = []
-    for cmd in commands:
-        text = (cmd['Name'] + " " + cmd['Description'] + " " + cmd['Command'] + " " + cmd['OS']).lower()
+
+    # --- Load and filter COMMANDS ---
+    commands = []
+    if os.path.exists(COMMANDS_FILE):
+        try:
+            with open(COMMANDS_FILE, 'r') as f:
+                data = json.load(f)
+            for cmd in data['commands']:
+                text = (cmd['Name'] + " " + cmd['Description'] + " " + cmd['Command'] + " " + cmd['OS']).lower()
+                if all(word in text for word in words):
+                    commands.append(cmd)
+        except Exception as e:
+            log_error(f"Failed to load commands: {e}")
+    commands.sort(key=lambda c: c['Name'].lower())
+
+    # --- Load and filter RECIPES ---
+    recipes = []
+    all_recipes = load_recipes()
+    for recipe in all_recipes:
+        text = (recipe.get('name', '') + " " + recipe.get('description', '')).lower()
         if all(word in text for word in words):
-            filtered.append(cmd)
-    if not filtered:
-        stdscr.clear()
-        message_lines = [
-            ("=== MU/TH/UR INTERFACE ===", curses.A_BOLD),
-            ("NO RESULTS FOUND. PRESS ANY KEY TO RETURN.", 0)
-        ]
-        max_width = effective_max_x - 4
-        total_message_lines = sum(get_wrapped_line_count(text, max_width) for text, _ in message_lines)
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_message_lines) // 2
-        if start_y < BORDER_MARGIN_Y:
-            start_y = BORDER_MARGIN_Y
-        current_y = start_y
-        for text, bold in message_lines:
-            attr = color_pair | (curses.A_BOLD if bold else 0)
-            current_y = type_text(stdscr, current_y, text, attr, animate=False)
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
-        stdscr.refresh()
-        stdscr.getch()
+            recipes.append(recipe)
+    recipes.sort(key=lambda r: r.get('name', '').lower())
+
+    if not commands and not recipes:
+        _show_msg(stdscr, "NO RESULTS FOUND.")
         return
 
-    sorted_filtered = sorted(filtered, key=lambda c: c['Name'])
-    selected_cmd = list_menu(
-        stdscr,
-        "SEARCH RESULTS",
-        sorted_filtered,
-        lambda cmd: f"{cmd['Name']} ({cmd['OS']})",  # Include OS in display
-    )
-    if selected_cmd is not None:
-        show_details(stdscr, selected_cmd, data['commands'])
+    # --- Layout ---
+    left_width = 40
+    right_start_x = BORDER_MARGIN_X + left_width + 3
+    right_width = effective_max_x - left_width - 3
+    if right_width < 30:
+        right_width = 30
+        left_width = effective_max_x - right_width - 3
 
-def run_settings(stdscr, color_pair):
-    """Handle the Settings menu with scrolling support and margins."""
-    global settings
-    max_y, max_x = stdscr.getmaxyx()
-    color_options = sorted(["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"])
-    animation_options = sorted(["DISABLED", "ENABLED"])
-    current_color_row = color_options.index(settings['text_color'].upper())
-    current_anim_row = animation_options.index("ENABLED" if settings['animation_enabled'] else "DISABLED")
-    selected_section = 0
-    max_color_row = len(color_options) - 1
-    max_anim_row = len(animation_options) - 1
-    color_scroll_offset = 0
-    anim_scroll_offset = 0
+    header_y = BORDER_MARGIN_Y
+    list_start_y = header_y + 3
+    list_height = effective_max_y - 6  # header + spacing + instruction
 
-    # Apply margins
-    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-    max_item_width = max(len(option) + 2 for option in color_options + animation_options)
-    if max_item_width > effective_max_x:
-        max_item_width = effective_max_x
-    x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
-    if x_offset < BORDER_MARGIN_X:
-        x_offset = BORDER_MARGIN_X
-
-    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
-    max_visible_items = (effective_max_y - 6) // 2  # Header, title, color label, animation label, instruction, spacing
-    if max_visible_items < 1:
-        max_visible_items = 1
-
-    max_width = effective_max_x - 4
+    # Panel state
+    active_panel = 0  # 0 = left (commands), 1 = right (recipes)
+    cmd_row = 0
+    cmd_scroll = 0
+    recipe_row = 0
+    recipe_scroll = 0
 
     while True:
-        # Adjust scroll offsets
-        if selected_section == 0:
-            if current_color_row < color_scroll_offset:
-                color_scroll_offset = current_color_row
-            elif current_color_row >= color_scroll_offset + max_visible_items:
-                color_scroll_offset = current_color_row - max_visible_items + 1
-        else:
-            if current_anim_row < anim_scroll_offset:
-                anim_scroll_offset = current_anim_row
-            elif current_anim_row >= anim_scroll_offset + max_visible_items:
-                anim_scroll_offset = current_anim_row - max_visible_items + 1
-
-        color_item_texts = ["  " + color_options[idx] for idx in range(color_scroll_offset, min(color_scroll_offset + max_visible_items, len(color_options)))]
-        anim_item_texts = ["  " + animation_options[idx] for idx in range(anim_scroll_offset, min(anim_scroll_offset + max_visible_items, len(animation_options)))]
-
-        # Precompute total content lines
-        header_text = "=== MU/TH/UR INTERFACE ==="
-        settings_text = "== SETTINGS =="
-        color_label = "TEXT COLOR:"
-        anim_label = "ANIMATION:"
-        header_lines = get_wrapped_line_count(header_text, max_width)
-        settings_lines = get_wrapped_line_count(settings_text, max_width)
-        color_label_lines = get_wrapped_line_count(color_label, max_width)
-        anim_label_lines = get_wrapped_line_count(anim_label, max_width)
-        color_item_lines = sum(get_wrapped_line_count(text, max_width) for text in color_item_texts)
-        anim_item_lines = sum(get_wrapped_line_count(text, max_width) for text in anim_item_texts)
-        total_content_lines = header_lines + settings_lines + 1 + color_label_lines + color_item_lines + 1 + anim_label_lines + anim_item_lines
-
-        start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
-        if start_y < BORDER_MARGIN_Y:
-            start_y = BORDER_MARGIN_Y
-
         stdscr.clear()
-        current_y = start_y
-        current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
-        current_y = type_text(stdscr, current_y, settings_text, color_pair, x_offset=None, animate=False)
-        current_y += 1
-        current_y = type_text(stdscr, current_y, color_label, color_pair, x_offset=x_offset, animate=False)
-        for idx in range(len(color_item_texts)):
-            global_idx = color_scroll_offset + idx
-            if current_y >= max_y - BORDER_MARGIN_Y - 1:
-                log_error(f"Settings color option exceeded terminal height at y={current_y}")
-                break
-            attr = color_pair | (curses.A_REVERSE if global_idx == current_color_row and selected_section == 0 else 0)
-            current_y = type_text(stdscr, current_y, color_item_texts[idx], attr, x_offset=x_offset, animate=False)
-        current_y += 1
-        current_y = type_text(stdscr, current_y, anim_label, color_pair, x_offset=x_offset, animate=False)
-        for idx in range(len(anim_item_texts)):
-            global_idx = anim_scroll_offset + idx
-            if current_y >= max_y - BORDER_MARGIN_Y - 1:
-                log_error(f"Settings animation option exceeded terminal height at y={current_y}")
-                break
-            attr = color_pair | (curses.A_REVERSE if global_idx == current_anim_row and selected_section == 1 else 0)
-            current_y = type_text(stdscr, current_y, anim_item_texts[idx], attr, x_offset=x_offset, animate=False)
-        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO RETURN", color_pair, x_offset=None, animate=False)
+
+        # --- Headers ---
+        type_text(stdscr, header_y, "[COMMAND]", color_pair | curses.A_BOLD, x_offset=BORDER_MARGIN_X, animate=False)
+        type_text(stdscr, header_y, "[RECIPE]", color_pair | curses.A_BOLD, x_offset=right_start_x, animate=False)
+
+        # --- Separator ---
+        sep_x = BORDER_MARGIN_X + left_width + 1
+        for y in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
+            try:
+                stdscr.addch(y, sep_x, '│', color_pair)
+            except:
+                pass
+
+        # --- Left: Commands ---
+        cmd_max_row = len(commands) - 1
+        visible = 0
+        for idx in range(cmd_scroll, min(cmd_scroll + list_height, len(commands))):
+            name = commands[idx]['Name']
+            if len(name) > left_width - 2:
+                name = name[:left_width-5] + "..."
+            attr = color_pair | (curses.A_REVERSE if active_panel == 0 and idx == cmd_row else 0)
+            try:
+                stdscr.addstr(list_start_y + visible, BORDER_MARGIN_X + 2, name, attr)
+            except:
+                pass
+            visible += 1
+
+        # --- Right: Recipes ---
+        rec_max_row = len(recipes) - 1
+        visible = 0
+        for idx in range(recipe_scroll, min(recipe_scroll + list_height, len(recipes))):
+            name = recipes[idx].get('name', 'Unnamed')
+            if len(name) > right_width - 2:
+                name = name[:right_width-5] + "..."
+            attr = color_pair | (curses.A_REVERSE if active_panel == 1 and idx == recipe_row else 0)
+            try:
+                stdscr.addstr(list_start_y + visible, right_start_x + 2, name, attr)
+            except:
+                pass
+            visible += 1
+
+        # --- Scrollbars ---
+        if len(commands) > list_height and active_panel == 0:
+            bar_y = list_start_y + int((cmd_row / cmd_max_row) * list_height)
+            try:
+                stdscr.addch(bar_y, BORDER_MARGIN_X + left_width - 1, '█', color_pair | curses.A_BOLD)
+            except:
+                pass
+        if len(recipes) > list_height and active_panel == 1:
+            bar_y = list_start_y + int((recipe_row / rec_max_row) * list_height)
+            try:
+                stdscr.addch(bar_y, right_start_x + right_width - 1, '█', color_pair | curses.A_BOLD)
+            except:
+                pass
+
+        # --- Bottom instruction ---
+        instr = "←→ SWITCH PANEL • ↑↓ NAVIGATE • ENTER SELECT • ESC BACK"
+        instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair, x_offset=instr_x, animate=False)
+
+        stdscr.refresh()
+
+        # --- Input ---
+        key = stdscr.getch()
+
+        if key in (curses.KEY_LEFT, curses.KEY_RIGHT):
+            active_panel = 1 - active_panel
+        elif key == curses.KEY_UP:
+            if active_panel == 0 and cmd_row > 0:
+                cmd_row -= 1
+            elif active_panel == 1 and recipe_row > 0:
+                recipe_row -= 1
+        elif key == curses.KEY_DOWN:
+            if active_panel == 0 and cmd_row < cmd_max_row:
+                cmd_row += 1
+            elif active_panel == 1 and recipe_row < rec_max_row:
+                recipe_row += 1
+        elif key == 10:  # Enter
+            if active_panel == 0 and commands:
+                show_details(stdscr, commands[cmd_row], data['commands'])
+            elif active_panel == 1 and recipes:
+                show_recipe_details(stdscr, recipes[recipe_row])
+            continue
+        elif key == 27:  # ESC
+            break
+        else:
+            continue
+
+        # --- Scrolling ---
+        if active_panel == 0:
+            if cmd_row < cmd_scroll:
+                cmd_scroll = cmd_row
+            elif cmd_row >= cmd_scroll + list_height:
+                cmd_scroll = cmd_row - list_height + 1
+        else:
+            if recipe_row < recipe_scroll:
+                recipe_scroll = recipe_row
+            elif recipe_row >= recipe_scroll + list_height:
+                recipe_scroll = recipe_row - list_height + 1
+
+def force_update_all():
+    """Force update commands.json and copy recipes from ./recipes/ if exists."""
+    updated = False
+
+    # --- Update commands.json ---
+    url = "https://raw.githubusercontent.com/DotNetRussell/CyberDeck/refs/heads/main/commands.json"
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        remote_data = response.json()
+        remote_version = remote_data.get("Version", "0.0.0.0")
+        local_version = "0.0.0.0"
+        if os.path.exists(COMMANDS_FILE):
+            with open(COMMANDS_FILE, 'r') as f:
+                local_data = json.load(f)
+                local_version = local_data.get("Version", "0.0.0.0")
+        if version_tuple(remote_version) > version_tuple(local_version):
+            with open(COMMANDS_FILE, 'w') as f:
+                json.dump(remote_data, f, indent=4)
+            updated = True
+    except Exception as e:
+        log_error(f"Failed to update commands.json: {e}")
+
+    # --- Copy recipes from ./recipes/ ---
+    local_recipes_dir = os.path.join(os.getcwd(), "recipes")
+    if os.path.exists(local_recipes_dir) and os.path.isdir(local_recipes_dir):
+        try:
+            os.makedirs(RECIPES_DIR, exist_ok=True)
+            for item in os.listdir(local_recipes_dir):
+                src = os.path.join(local_recipes_dir, item)
+                dst = os.path.join(RECIPES_DIR, item)
+                if os.path.isfile(src) and item.endswith(".json") and (not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst)):
+                    shutil.copy2(src, dst)
+                    updated = True
+        except Exception as e:
+            log_error(f"Failed to copy recipes: {e}")
+
+    return updated
+
+def run_settings(stdscr, color_pair):
+    """Centered settings grid with live preview and perfect spacing."""
+    global settings
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+
+    # Options
+    colors = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
+    anim_options = ["DISABLED", "ENABLED"]
+    auto_options = ["DISABLED", "ENABLED"]
+
+    # Current values
+    cur_color = settings['text_color'].upper()
+    cur_anim = "ENABLED" if settings['animation_enabled'] else "DISABLED"
+    cur_auto = "ENABLED" if settings.get('auto_update_on_startup', True) else "DISABLED"
+
+    # Indices
+    color_idx = colors.index(cur_color)
+    anim_idx = anim_options.index(cur_anim)
+    auto_idx = auto_options.index(cur_auto)
+
+    selected_row = 0  # 0=color, 1=anim, 2=auto
+    max_row = 2
+
+    # Column widths (fixed for alignment)
+    label_width = 14
+    value_width = 12
+    status_width = 6
+    total_width = label_width + value_width + status_width + 6  # +6 for spacing
+
+    # Center the entire block
+    block_start_x = BORDER_MARGIN_X + (effective_max_x - total_width) // 2
+    if block_start_x < BORDER_MARGIN_X:
+        block_start_x = BORDER_MARGIN_X
+
+    label_col = block_start_x
+    value_col = label_col + label_width + 2
+    status_col = value_col + value_width + 2
+    row_height = 3
+    start_y = BORDER_MARGIN_Y + 4
+
+    while True:
+        stdscr.clear()
+
+        # --- Header (centered) ---
+        header1 = "=== MU/TH/UR INTERFACE ==="
+        header2 = "== SETTINGS =="
+        type_text(stdscr, BORDER_MARGIN_Y, header1, color_pair | curses.A_BOLD,
+                  x_offset=BORDER_MARGIN_X + (effective_max_x - len(header1)) // 2, animate=False)
+        type_text(stdscr, BORDER_MARGIN_Y + 1, header2, color_pair,
+                  x_offset=BORDER_MARGIN_X + (effective_max_x - len(header2)) // 2, animate=False)
+
+        # --- Grid Rows ---
+        rows = [
+            ("TEXT COLOR:", colors[color_idx], "check"),
+            ("ANIMATION:", anim_options[anim_idx], "check" if anim_idx else "cross"),
+            ("AUTO UPDATE:", auto_options[auto_idx], "check" if auto_idx else "cross"),
+        ]
+
+        for i, (label, value, status) in enumerate(rows):
+            y = start_y + i * row_height
+            is_selected = (i == selected_row)
+
+            # Label
+            attr = color_pair | (curses.A_REVERSE if is_selected else 0)
+            type_text(stdscr, y, label, attr, x_offset=label_col, animate=False)
+
+            # Value (live color preview for text color)
+            if i == 0:
+                preview_pair = get_color_pair()
+                type_text(stdscr, y, value, preview_pair | (curses.A_REVERSE if is_selected else 0),
+                          x_offset=value_col, animate=False)
+            else:
+                type_text(stdscr, y, value, color_pair | (curses.A_REVERSE if is_selected else 0),
+                          x_offset=value_col, animate=False)
+
+            # Status icon
+            #icon = "check" if status == "check" else "cross"
+            #type_text(stdscr, y, icon, color_pair, x_offset=status_col, animate=False)
+
+        # --- Force Update Button ---
+        btn_y = start_y + 4 * row_height
+        btn_text = "[ F ] FORCE UPDATE ALL DATA"
+        btn_x = BORDER_MARGIN_X + (effective_max_x - len(btn_text)) // 2
+        type_text(stdscr, btn_y, btn_text, color_pair | curses.A_BOLD, x_offset=btn_x, animate=False)
+
+        # --- Instructions ---
+        instr = "↑↓ NAVIGATE • ←→ CHANGE • ENTER SELECT • F UPDATE • ESC EXIT"
+        instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair, x_offset=instr_x, animate=False)
+
         stdscr.refresh()
 
         key = stdscr.getch()
-        if key == curses.KEY_UP:
-            if selected_section == 0 and current_color_row > 0:
-                current_color_row -= 1
-            elif selected_section == 1 and current_anim_row > 0:
-                current_anim_row -= 1
-        elif key == curses.KEY_DOWN:
-            if selected_section == 0 and current_color_row < max_color_row:
-                current_color_row += 1
-            elif selected_section == 1 and current_anim_row < max_anim_row:
-                current_anim_row += 1
-        elif key == curses.KEY_LEFT or key == curses.KEY_RIGHT:
-            selected_section = 1 - selected_section
-        elif key == 10:
-            if selected_section == 0:
-                settings['text_color'] = color_options[current_color_row].lower()
+
+        # --- Navigation ---
+        if key == curses.KEY_UP and selected_row > 0:
+            selected_row -= 1
+        elif key == curses.KEY_DOWN and selected_row < max_row:
+            selected_row += 1
+        elif key in (curses.KEY_LEFT, curses.KEY_RIGHT):
+            direction = 1 if key == curses.KEY_RIGHT else -1
+            if selected_row == 0:
+                color_idx = (color_idx + direction) % len(colors)
+                settings['text_color'] = colors[color_idx].lower()
                 color_pair = get_color_pair()
-            else:
-                settings['animation_enabled'] = animation_options[current_anim_row] == "ENABLED"
+            elif selected_row == 1:
+                anim_idx = (anim_idx + direction) % len(anim_options)
+                settings['animation_enabled'] = anim_options[anim_idx] == "ENABLED"
+            elif selected_row == 2:
+                auto_idx = (auto_idx + direction) % len(auto_options)
+                settings['auto_update_on_startup'] = auto_options[auto_idx] == "ENABLED"
             save_settings(settings)
+        elif key == 10:  # Enter
+            save_settings(settings)
+        elif key in (ord('f'), ord('F')):
+            stdscr.clear()
+            type_text(stdscr, max_y//2 - 1, "UPDATING ALL DATA...", color_pair | curses.A_BOLD, animate=False)
+            type_text(stdscr, max_y//2 + 1, "PLEASE WAIT...", color_pair, animate=False)
+            stdscr.refresh()
+            was_updated = force_update_all()
+            msg = "UPDATE COMPLETE!" if was_updated else "NO UPDATES AVAILABLE."
+            _show_msg(stdscr, msg)
+            continue
         elif key == 27:
             return color_pair
 
 def menu(stdscr):
-    """Display and handle the interactive menu with scrolling support and margins."""
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -855,14 +1329,13 @@ def menu(stdscr):
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    menu_items = ["COMMANDS", "SEARCH", "SETTINGS", "SHUTDOWN"]
+    menu_items = ["COMMANDS", "SEARCH", "COOKBOOK", "SETTINGS", "SHUTDOWN"]  # COOKBOOK ADDED
     current_row = 0
     max_row = len(menu_items) - 1
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
 
-    # Apply margins
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_item_width = max(len(item) + 2 for item in menu_items)
     if max_item_width > effective_max_x:
@@ -872,7 +1345,7 @@ def menu(stdscr):
         x_offset = BORDER_MARGIN_X
 
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
-    max_visible_items = effective_max_y - 4  # Header, subtitle, spacing, instruction
+    max_visible_items = effective_max_y - 4
     if max_visible_items < 1:
         max_visible_items = 1
 
@@ -881,7 +1354,6 @@ def menu(stdscr):
     original_anim = settings['animation_enabled']
 
     while True:
-        # Precompute total content lines
         header_text = "=== MU/TH/UR INTERFACE ==="
         subtitle_text = "== WEYLAND-YUTANI CORP =="
         item_texts = []
@@ -892,7 +1364,7 @@ def menu(stdscr):
         header_lines = get_wrapped_line_count(header_text, max_width)
         subtitle_lines = get_wrapped_line_count(subtitle_text, max_width)
         item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
-        total_content_lines = header_lines + subtitle_lines + 1 + sum(item_line_counts)  # +1 for spacing after subtitle
+        total_content_lines = header_lines + subtitle_lines + 1 + sum(item_line_counts)
 
         start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
         if start_y < BORDER_MARGIN_Y:
@@ -927,8 +1399,10 @@ def menu(stdscr):
             elif current_row == 1:
                 run_search(stdscr)
             elif current_row == 2:
-                color_pair = run_settings(stdscr, color_pair)
+                run_cookbook(stdscr)  # NEW
             elif current_row == 3:
+                color_pair = run_settings(stdscr, color_pair)
+            elif current_row == 4:
                 settings['animation_enabled'] = original_anim
                 shutdown_sequence(stdscr)
                 return
@@ -936,8 +1410,9 @@ def menu(stdscr):
             pass
 
 def main():
-    """Main function to check for curses and run the appropriate interface."""
-    update_commands()
+    # Auto-update on startup if enabled
+    if settings.get('auto_update_on_startup', True):
+        force_update_all()
     if curses is None:
         print("ERROR: 'CURSES' LIBRARY NOT AVAILABLE. FALLING BACK TO COMMAND-LINE MODE.")
         parser = argparse.ArgumentParser(

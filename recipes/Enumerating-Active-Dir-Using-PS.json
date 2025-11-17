@@ -1,0 +1,37 @@
+{
+  "name": "Enumerating Active Directory using PowerShell and .NET Classes",
+  "description": "Leverage native PowerShell AD module and .NET DirectoryServices for fast, AV-friendly enumeration.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Import AD Module",
+      "command": "Import-Module ActiveDirectory",
+      "description": "Load the RSAT AD PowerShell module."
+    },
+    {
+      "index": 2,
+      "name": "Domain Info",
+      "command": "Get-ADDomain | Select Name,DomainMode,Forest,PDCEmulator",
+      "description": "Basic domain properties."
+    },
+    {
+      "index": 3,
+      "name": "All Users",
+      "command": "Get-ADUser -Filter * -Properties sAMAccountName,Enabled | Select sAMAccountName,Enabled",
+      "description": "List all user accounts with enabled status."
+    },
+    {
+      "index": 4,
+      "name": "All Computers",
+      "command": "Get-ADComputer -Filter * -Properties Name,OperatingSystem | Select Name,OperatingSystem",
+      "description": "List computers and OS."
+    },
+    {
+      "index": 5,
+      "name": ".NET LDAP Query",
+      "command": "$searcher = New-Object System.DirectoryServices.DirectorySearcher; $searcher.Filter = '(objectClass=user)'; $searcher.FindAll() | %{$_.Properties.samaccountname}",
+      "description": "Fallback LDAP enumeration without AD module."
+    }
+  ]
+}

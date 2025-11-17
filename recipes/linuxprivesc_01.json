@@ -1,0 +1,25 @@
+{
+  "name": "Linux Privilege Escalation",
+  "description": "Step-by-step guide to escalate from user to root.",
+  "tools": [
+    {
+      "name": "LinPEAS",
+      "description": "Linux privilege escalation enumeration script",
+      "url": "https://github.com/carlospolop/PEASS-ng/releases/latest"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Download LinPEAS",
+      "command": "curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh -o linpeas.sh",
+      "description": "Download the latest LinPEAS script"
+    },
+    {
+      "index": 2,
+      "name": "Execute",
+      "command": "chmod +x linpeas.sh && ./linpeas.sh",
+      "description": "Run the script to find escalation vectors"
+    }
+  ]
+}

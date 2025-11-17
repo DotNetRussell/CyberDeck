@@ -1,0 +1,25 @@
+{
+  "name": "Domain-Wide OS Fingerprinting",
+  "description": "Catalog operating system versions across all domain-joined systems.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "AD Module Query",
+      "command": "Get-ADComputer -Filter * -Properties OperatingSystem,OperatingSystemVersion,OperatingSystemServicePack | Select Name,OperatingSystem,OperatingSystemVersion",
+      "description": "Extract OS build and patch level."
+    },
+    {
+      "index": 2,
+      "name": "Remote WMI Pull",
+      "command": "Get-CimInstance -ComputerName (Get-ADComputer -Filter * | Select -First 50 -Expand Name) -Class Win32_OperatingSystem | Select PSComputerName,Caption,Version,OSArchitecture",
+      "description": "Sample remote systems via WMI."
+    },
+    {
+      "index": 3,
+      "name": "PowerView Alternative",
+      "command": "Get-NetComputer -FullData | Select dnshostname,operatingsystem,operatingsystemversion,operatingsystemservicepack",
+      "description": "Cross-reference with PowerView data."
+    }
+  ]
+}

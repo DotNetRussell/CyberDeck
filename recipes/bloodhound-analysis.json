@@ -1,0 +1,31 @@
+{
+	"name": "Attack Path Visualization with BloodHound",
+	"description": "Load collected data into BloodHound to reveal privilege escalation routes.",
+	"tools": [
+		{
+			"name": "BloodHound",
+			"description": "AD relationship graphing tool",
+			"url": "https://github.com/BloodHoundAD/BloodHound"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Start Services",
+			"command": "neo4j start; bloodhound",
+			"description": "Launch database and GUI."
+		},
+		{
+			"index": 2,
+			"name": "Import Dataset",
+			"command": "Drag domain_data.zip into BloodHound interface",
+			"description": "Load harvested JSON files."
+		},
+		{
+			"index": 3,
+			"name": "Pathfinding Queries",
+			"command": "Run: Shortest Paths from Owned to Domain Admins",
+			"description": "Identify viable attack chains."
+		}
+	]
+}

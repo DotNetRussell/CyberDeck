@@ -1,0 +1,37 @@
+{
+  "name": "Active Directory - Enumeration Using Legacy Windows Tools",
+  "description": "Use built-in Windows command-line utilities (net, nltest, dsquery, etc.) to enumerate AD without third-party scripts.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Domain Information",
+      "command": "nltest /dsgetdc:%USERDOMAIN%; echo %USERDOMAIN%; echo %USERDNSDOMAIN%",
+      "description": "Retrieve PDC emulator, domain name, and DNS domain."
+    },
+    {
+      "index": 2,
+      "name": "Domain Controllers",
+      "command": "nltest /dclist:%USERDOMAIN%",
+      "description": "List all domain controllers."
+    },
+    {
+      "index": 3,
+      "name": "Domain Admins",
+      "command": "net group \"Domain Admins\" /domain",
+      "description": "Show members of Domain Admins group."
+    },
+    {
+      "index": 4,
+      "name": "All Users",
+      "command": "dsquery * -limit 0 -attr sAMAccountName",
+      "description": "Export every user account name."
+    },
+    {
+      "index": 5,
+      "name": "All Computers",
+      "command": "dsquery computer -limit 0 -attr name",
+      "description": "List every computer object."
+    }
+  ]
+}

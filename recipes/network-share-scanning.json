@@ -1,0 +1,25 @@
+{
+	"name": "Domain File Share Enumeration",
+	"description": "Identify accessible file shares across the environment.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "PowerView Share Hunt",
+			"command": "Find-DomainShare -CheckAccess | Select ComputerName,ShareName,Remark",
+			"description": "List readable shares."
+		},
+		{
+			"index": 2,
+			"name": "Manual Host Scan",
+			"command": "net view \\\\TARGET | findstr /i \"Disk\"",
+			"description": "Check shares on a specific system."
+		},
+		{
+			"index": 3,
+			"name": "SMB Enumeration",
+			"command": "Get-SmbShare -Server (Get-ADComputer -Filter {OperatingSystem -like \"*Server*\"} | Select -First 10 -Expand Name)",
+			"description": "Query server-class systems."
+		}
+	]
+}

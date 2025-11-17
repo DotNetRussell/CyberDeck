@@ -1,0 +1,31 @@
+{
+  "name": "Session Mapping and Rights Assessment",
+  "description": "Identify active user sessions and evaluate current token privileges.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Local Session Check",
+      "command": "qwinsta || query session",
+      "description": "List console and RDP sessions on local host."
+    },
+    {
+      "index": 2,
+      "name": "Remote Session Hunt",
+      "command": "Get-CimInstance -ComputerName TARGET -Class Win32_LoggedOnUser | Group Antecedent | Select Name",
+      "description": "Enumerate logged-on users remotely."
+    },
+    {
+      "index": 3,
+      "name": "Domain-Wide Session Sweep",
+      "command": "Invoke-UserHunter -ShowAll -Stealth",
+      "description": "PowerView session enumeration across domain."
+    },
+    {
+      "index": 4,
+      "name": "Token Inspection",
+      "command": "whoami /all",
+      "description": "Display privileges, groups, and capabilities."
+    }
+  ]
+}

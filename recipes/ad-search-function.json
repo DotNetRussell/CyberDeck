@@ -1,0 +1,25 @@
+{
+  "name": "Flexible AD Object Search Wrapper",
+  "description": "Build a reusable PowerShell function to query any AD object type with wildcard filters.",
+  "tools": [],
+  "steps": [
+    {
+      "index": 1,
+      "name": "Create Search Utility",
+      "command": "function Find-ADObject { param([string]$Pattern='*',[string]$ObjectType='user'); Get-ADObject -Filter \"objectClass -eq '$ObjectType' -and name -like '$Pattern'\" -Properties Name,sAMAccountName,DistinguishedName | Select Name,sAMAccountName,DistinguishedName }",
+      "description": "Define parameterized search function."
+    },
+    {
+      "index": 2,
+      "name": "Locate Admin-Like Accounts",
+      "command": "Find-ADObject -Pattern '*admin*' -ObjectType 'user'",
+      "description": "Search for privileged-sounding user accounts."
+    },
+    {
+      "index": 3,
+      "name": "Discover Server Systems",
+      "command": "Find-ADObject -Pattern '*-SRV*' -ObjectType 'computer'",
+      "description": "Identify server-class machines."
+    }
+  ]
+}

