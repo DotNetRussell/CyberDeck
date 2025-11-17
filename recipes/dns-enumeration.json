@@ -1,0 +1,25 @@
+{
+	"name": "DNS Reconnaissance",
+	"description": "Enumerate DNS records for targets and subdomains.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Zone Transfer",
+			"command": "dig @ns.target.com target.com AXFR",
+			"description": "Attempt full zone dump."
+		},
+		{
+			"index": 2,
+			"name": "Brute Force Subdomains",
+			"command": "for sub in $(cat subdomains.txt); do host $sub.target.com; done",
+			"description": "Dictionary attack."
+		},
+		{
+			"index": 3,
+			"name": "Reverse Lookup",
+			"command": "for ip in $(seq 1 254); do host 192.168.1.$ip; done | grep target.com",
+			"description": "Map IP range to names."
+		}
+	]
+}

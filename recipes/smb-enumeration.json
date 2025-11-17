@@ -1,0 +1,25 @@
+{
+	"name": "SMB Share and Null Session Enumeration",
+	"description": "Discover shares, users, and policies via SMB.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Null Session",
+			"command": "smbclient -L //target.com -N",
+			"description": "List shares anonymously."
+		},
+		{
+			"index": 2,
+			"name": "Enum Users",
+			"command": "rpcclient -U \"\" -N target.com -c \"enumdomusers\"",
+			"description": "Dump domain users."
+		},
+		{
+			"index": 3,
+			"name": "CrackMapExec",
+			"command": "crackmapexec smb target.com -u '' -p '' --shares",
+			"description": "Fast share and session enum."
+		}
+	]
+}

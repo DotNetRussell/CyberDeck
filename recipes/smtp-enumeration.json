@@ -1,0 +1,25 @@
+{
+	"name": "SMTP User and Relay Enumeration",
+	"description": "Fingerprint mail server and test open relay.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "VRFY Enum",
+			"command": "nc -nv target.com 25 < vrfy.txt",
+			"description": "Verify usernames."
+		},
+		{
+			"index": 2,
+			"name": "EXPN Test",
+			"command": "telnet target.com 25 -> EXPN all",
+			"description": "Expand mailing lists."
+		},
+		{
+			"index": 3,
+			"name": "Open Relay",
+			"command": "swaks --to relaytest@attacker.com --server target.com",
+			"description": "Test unauthorized relay."
+		}
+	]
+}

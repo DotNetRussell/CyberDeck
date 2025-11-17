@@ -1,0 +1,25 @@
+{
+	"name": "Manual System Enumeration (Windows)",
+	"description": "Hand-crafted commands to gather intel without automation.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "System Info",
+			"command": "systeminfo; hostname; whoami /all",
+			"description": "OS, patches, user context."
+		},
+		{
+			"index": 2,
+			"name": "Network Config",
+			"command": "ipconfig /all; netstat -ano; route print",
+			"description": "Interfaces, connections, routing."
+		},
+		{
+			"index": 3,
+			"name": "Patch Level",
+			"command": "wmic qfe list",
+			"description": "Installed hotfixes."
+		}
+	]
+}

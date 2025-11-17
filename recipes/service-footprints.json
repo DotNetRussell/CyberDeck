@@ -1,0 +1,25 @@
+{
+	"name": "Service Configuration Analysis",
+	"description": "Inspect running services and startup scripts.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Systemd Services",
+			"command": "systemctl list-units --type=service --state=running",
+			"description": "Active services."
+		},
+		{
+			"index": 2,
+			"name": "Service Files",
+			"command": "find /etc/systemd/system -name '*.service' -exec cat {} \\;",
+			"description": "Inspect unit files."
+		},
+		{
+			"index": 3,
+			"name": "Init Scripts",
+			"command": "ls /etc/init.d/; cat /etc/rc.local 2>/dev/null",
+			"description": "Legacy boot scripts."
+		}
+	]
+}

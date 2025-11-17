@@ -1,0 +1,25 @@
+{
+	"name": "TCP/UDP Port Scanning Fundamentals",
+	"description": "Understand scan types and evasion techniques.",
+	"tools": [],
+	"steps": [
+		{
+			"index": 1,
+			"name": "TCP SYN Scan",
+			"command": "nmap -sS target.com",
+			"description": "Stealth half-open scan."
+		},
+		{
+			"index": 2,
+			"name": "UDP Scan",
+			"command": "nmap -sU target.com",
+			"description": "Probe UDP services."
+		},
+		{
+			"index": 3,
+			"name": "Evasion: Fragmentation",
+			"command": "nmap -f -D RND:10 target.com",
+			"description": "Split packets and decoy scans."
+		}
+	]
+}
