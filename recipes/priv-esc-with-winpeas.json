@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation Enumeration with WinPEAS",
+    "description": "Run WinPEAS to scan a Windows system for misconfigurations and vulnerabilities that enable privilege escalation.",
+    "tools": [
+        {
+            "name": "WinPEAS",
+            "description": "Automated enumeration script for Windows privilege escalation vectors",
+            "url": "https://github.com/carlospolop/PEASS-ng/tree/master/winPEAS"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download and Prepare WinPEAS",
+            "command": "git clone https://github.com/carlospolop/PEASS-ng.git; cd PEASS-ng/winPEASx64; ./winPEASx64.exe",
+            "description": "Clone the repository and execute the appropriate WinPEAS binary (x64 or x86) on the target system."
+        },
+        {
+            "index": 2,
+            "name": "Run Full Enumeration",
+            "command": "./winPEASx64.exe -t everything",
+            "description": "Execute WinPEAS with full checks to identify services, scheduled tasks, file permissions, and other potential priv esc opportunities."
+        },
+        {
+            "index": 3,
+            "name": "Analyze Output",
+            "command": "Review winPEASlooter.sh output files (e.g., allChecks.txt)",
+            "description": "Examine highlighted sections for exploitable issues like unquoted service paths, writable service binaries, or weak ACLs, then exploit accordingly."
+        }
+    ]
+}

