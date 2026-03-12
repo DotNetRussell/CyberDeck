@@ -29,16 +29,15 @@ Whether you're on a red team engagement, CTF, or just need quick access to commo
 
 ## Screenshots
 
-
-[![Categories Menu](https://i.imgur.com/8YNGYKD.png)
-[![Categories Menu](https://i.imgur.com/gfCzgfs.png)
-[![Categories Menu](https://i.imgur.com/tzEbcmk.png)
-[![Categories Menu](https://i.imgur.com/kj1IoQU.png)
-[![Categories Menu](https://i.imgur.com/pBM6LDY.png)
-[![Categories Menu](https://i.imgur.com/WfQWeAI.png)
-[![Categories Menu](https://i.imgur.com/LD8FTz6.png)
-[![Categories Menu](https://i.imgur.com/DH5PMjM.png)
-[![Categories Menu](https://i.imgur.com/HbImOcc.png)
+![Categories Menu](https://i.imgur.com/8YNGYKD.png)
+![Categories Menu](https://i.imgur.com/gfCzgfs.png)
+![Categories Menu](https://i.imgur.com/tzEbcmk.png)
+![Categories Menu](https://i.imgur.com/kj1IoQU.png)
+![Categories Menu](https://i.imgur.com/pBM6LDY.png)
+![Categories Menu](https://i.imgur.com/WfQWeAI.png)
+![Categories Menu](https://i.imgur.com/LD8FTz6.png)
+![Categories Menu](https://i.imgur.com/DH5PMjM.png)
+![Categories Menu](https://i.imgur.com/HbImOcc.png)
 
 ---
 
