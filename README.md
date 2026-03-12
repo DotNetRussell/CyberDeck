@@ -1,3 +1,5 @@
+![BloodBash verbose output example](https://i.imgur.com/m5RVnJZ.png)
+
 # CyberDeck
 
 **CyberDeck** is a **terminal-based penetration testing command dictionary and cookbook** with a **sci-fi CRT aesthetic** inspired by *Alien*, *Blade Runner*, and classic hacker films. Built in Python using `curses`, it delivers an immersive, retro-futuristic interface for browsing, searching, and copying commands for execution 
